@@ -1,0 +1,28 @@
+{
+  "name": "js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jafri",
+  "license": "ISC",
+  "dependencies": {
+    "@bloks/utils": "^4.0.153",
+    "@jafri/eosjs2": "^21.0.0-rc.8",
+    "@warren-bank/ethereumjs-tx-sign": "^2.0.0",
+    "eosjs": "^20.0.3",
+    "ethereum-input-data-decoder": "^0.3.0",
+    "ethereum-tx-decoder": "^3.0.0",
+    "ethereumjs-testing": "git+https://github.com/ethereumjs/ethereumjs-testing.git#v1.3.0",
+    "ethereumjs-tx": "^2.1.2",
+    "ethers": "^4.0.44",
+    "node-fetch": "^2.6.0",
+    "rlp": "^2.2.4",
+    "web3": "^1.2.6"
+  },
+  "devDependencies": {
+    "tslib": "^1.10.0"
+  }
+}

@@ -48,10 +48,10 @@ RM = /usr/local/Cellar/cmake/3.16.4/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jafri/eosio_contracts/contracts
+CMAKE_SOURCE_DIR = /Users/jafri/eosio.evm/eosio.evm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jafri/eosio_contracts/contracts
+CMAKE_BINARY_DIR = /Users/jafri/eosio.evm/eosio.evm
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,16 +78,27 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/local/Cellar/cmake/3.16.4/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/jafri/eosio_contracts/contracts && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jafri/eosio_contracts/contracts/CMakeFiles /Users/jafri/eosio_contracts/contracts/eosio.evm/tests/CMakeFiles/progress.marks
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f CMakeFiles/Makefile2 eosio.evm/tests/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jafri/eosio_contracts/contracts/CMakeFiles 0
+	cd /Users/jafri/eosio.evm/eosio.evm && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jafri/eosio.evm/eosio.evm/CMakeFiles /Users/jafri/eosio.evm/eosio.evm/tests/CMakeFiles/progress.marks
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f CMakeFiles/Makefile2 tests/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jafri/eosio.evm/eosio.evm/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f CMakeFiles/Makefile2 eosio.evm/tests/clean
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f CMakeFiles/Makefile2 tests/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,32 +108,32 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f CMakeFiles/Makefile2 eosio.evm/tests/preinstall
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f CMakeFiles/Makefile2 eosio.evm/tests/preinstall
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/jafri/eosio_contracts/contracts && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/jafri/eosio.evm/eosio.evm && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
-eosio.evm/tests/CMakeFiles/evm_test.dir/rule:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f CMakeFiles/Makefile2 eosio.evm/tests/CMakeFiles/evm_test.dir/rule
-.PHONY : eosio.evm/tests/CMakeFiles/evm_test.dir/rule
+tests/CMakeFiles/evm_test.dir/rule:
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f CMakeFiles/Makefile2 tests/CMakeFiles/evm_test.dir/rule
+.PHONY : tests/CMakeFiles/evm_test.dir/rule
 
 # Convenience name for target.
-evm_test: eosio.evm/tests/CMakeFiles/evm_test.dir/rule
+evm_test: tests/CMakeFiles/evm_test.dir/rule
 
 .PHONY : evm_test
 
 # fast build rule for target.
 evm_test/fast:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/build
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/build
 .PHONY : evm_test/fast
 
 __/src/eosio.evm.obj: __/src/eosio.evm.cpp.obj
@@ -131,7 +142,7 @@ __/src/eosio.evm.obj: __/src/eosio.evm.cpp.obj
 
 # target to build an object file
 __/src/eosio.evm.cpp.obj:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.obj
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.obj
 .PHONY : __/src/eosio.evm.cpp.obj
 
 __/src/eosio.evm.i: __/src/eosio.evm.cpp.i
@@ -140,7 +151,7 @@ __/src/eosio.evm.i: __/src/eosio.evm.cpp.i
 
 # target to preprocess a source file
 __/src/eosio.evm.cpp.i:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.i
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.i
 .PHONY : __/src/eosio.evm.cpp.i
 
 __/src/eosio.evm.s: __/src/eosio.evm.cpp.s
@@ -149,7 +160,7 @@ __/src/eosio.evm.s: __/src/eosio.evm.cpp.s
 
 # target to generate assembly for a file
 __/src/eosio.evm.cpp.s:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.s
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.s
 .PHONY : __/src/eosio.evm.cpp.s
 
 __/src/processor.obj: __/src/processor.cpp.obj
@@ -158,7 +169,7 @@ __/src/processor.obj: __/src/processor.cpp.obj
 
 # target to build an object file
 __/src/processor.cpp.obj:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.obj
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.obj
 .PHONY : __/src/processor.cpp.obj
 
 __/src/processor.i: __/src/processor.cpp.i
@@ -167,7 +178,7 @@ __/src/processor.i: __/src/processor.cpp.i
 
 # target to preprocess a source file
 __/src/processor.cpp.i:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.i
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.i
 .PHONY : __/src/processor.cpp.i
 
 __/src/processor.s: __/src/processor.cpp.s
@@ -176,7 +187,7 @@ __/src/processor.s: __/src/processor.cpp.s
 
 # target to generate assembly for a file
 __/src/processor.cpp.s:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.s
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/processor.cpp.s
 .PHONY : __/src/processor.cpp.s
 
 __/src/state.obj: __/src/state.cpp.obj
@@ -185,7 +196,7 @@ __/src/state.obj: __/src/state.cpp.obj
 
 # target to build an object file
 __/src/state.cpp.obj:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/state.cpp.obj
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/state.cpp.obj
 .PHONY : __/src/state.cpp.obj
 
 __/src/state.i: __/src/state.cpp.i
@@ -194,7 +205,7 @@ __/src/state.i: __/src/state.cpp.i
 
 # target to preprocess a source file
 __/src/state.cpp.i:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/state.cpp.i
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/state.cpp.i
 .PHONY : __/src/state.cpp.i
 
 __/src/state.s: __/src/state.cpp.s
@@ -203,7 +214,7 @@ __/src/state.s: __/src/state.cpp.s
 
 # target to generate assembly for a file
 __/src/state.cpp.s:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/state.cpp.s
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/state.cpp.s
 .PHONY : __/src/state.cpp.s
 
 __/src/transfer.obj: __/src/transfer.cpp.obj
@@ -212,7 +223,7 @@ __/src/transfer.obj: __/src/transfer.cpp.obj
 
 # target to build an object file
 __/src/transfer.cpp.obj:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.obj
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.obj
 .PHONY : __/src/transfer.cpp.obj
 
 __/src/transfer.i: __/src/transfer.cpp.i
@@ -221,7 +232,7 @@ __/src/transfer.i: __/src/transfer.cpp.i
 
 # target to preprocess a source file
 __/src/transfer.cpp.i:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.i
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.i
 .PHONY : __/src/transfer.cpp.i
 
 __/src/transfer.s: __/src/transfer.cpp.s
@@ -230,7 +241,7 @@ __/src/transfer.s: __/src/transfer.cpp.s
 
 # target to generate assembly for a file
 __/src/transfer.cpp.s:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.s
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/__/src/transfer.cpp.s
 .PHONY : __/src/transfer.cpp.s
 
 evm_test.obj: evm_test.cpp.obj
@@ -239,7 +250,7 @@ evm_test.obj: evm_test.cpp.obj
 
 # target to build an object file
 evm_test.cpp.obj:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/evm_test.cpp.obj
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/evm_test.cpp.obj
 .PHONY : evm_test.cpp.obj
 
 evm_test.i: evm_test.cpp.i
@@ -248,7 +259,7 @@ evm_test.i: evm_test.cpp.i
 
 # target to preprocess a source file
 evm_test.cpp.i:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/evm_test.cpp.i
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/evm_test.cpp.i
 .PHONY : evm_test.cpp.i
 
 evm_test.s: evm_test.cpp.s
@@ -257,7 +268,7 @@ evm_test.s: evm_test.cpp.s
 
 # target to generate assembly for a file
 evm_test.cpp.s:
-	cd /Users/jafri/eosio_contracts/contracts && $(MAKE) -f eosio.evm/tests/CMakeFiles/evm_test.dir/build.make eosio.evm/tests/CMakeFiles/evm_test.dir/evm_test.cpp.s
+	cd /Users/jafri/eosio.evm/eosio.evm && $(MAKE) -f tests/CMakeFiles/evm_test.dir/build.make tests/CMakeFiles/evm_test.dir/evm_test.cpp.s
 .PHONY : evm_test.cpp.s
 
 # Help Target
@@ -268,6 +279,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... test"
 	@echo "... evm_test"
 	@echo "... __/src/eosio.evm.obj"
 	@echo "... __/src/eosio.evm.i"
@@ -295,6 +307,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/jafri/eosio_contracts/contracts && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/jafri/eosio.evm/eosio.evm && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

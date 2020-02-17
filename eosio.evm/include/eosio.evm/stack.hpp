@@ -92,5 +92,16 @@ namespace evm4eos
         eosio::print(intx::hex(elem), "\n");
       }
     }
+    inline std::string asArray() {
+      std::string base = "[";
+      for (const auto& elem : st) {
+        base += "\"0x" + intx::hex(elem) + "\",";
+      }
+      if (!st.empty()) {
+        base.pop_back();
+      }
+      base += "]";
+      return base;
+    }
   };
 } // namespace evm4eos

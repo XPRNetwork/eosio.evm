@@ -38,9 +38,10 @@ namespace evm4eos
 
   struct ProcessorConsts
   {
-    static constexpr auto MAX_CALL_DEPTH = 1024u;
-    static constexpr auto WORD_SIZE      = 32u;
-    static constexpr auto MAX_MEM_SIZE   = 1ull << 25;  // 32 MB
+    static constexpr auto MAX_CALL_DEPTH  = 1024u;
+    static constexpr auto WORD_SIZE       = 32u;
+    static constexpr auto MAX_MEM_SIZE    = 1ull << 25; // 32 MB
+    static constexpr auto MAX_BUFFER_SIZE = std::numeric_limits<uint32_t>::max();
   };
 
   // Signatures: Start depending on EIP 155
@@ -60,8 +61,12 @@ namespace evm4eos
   static constexpr uint256_t GP_CALL_STIPEND        = 2300;
   static constexpr uint256_t GP_SHA3_WORD           = 6;
   static constexpr uint256_t GP_EXP_BYTE            = 50;
+  static constexpr uint256_t GP_CREATE_DATA         = 200;
+  static constexpr uint256_t GP_LOG_DATA            = 8;
+  static constexpr uint256_t GP_SELFDESTRUCT_REFUND = 24000;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;
   static constexpr size_t MAX_TX_SIZE = 128 * 1024; // Currently 128KB, more after EIP-2464
+  static constexpr size_t MAX_CODE_SIZE = 24 * 1024; // Currently 24KB, unlimited after EIP 1538
 } // namespace evm4eos

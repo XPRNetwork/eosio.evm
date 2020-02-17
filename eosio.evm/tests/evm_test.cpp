@@ -5,7 +5,6 @@
 
 #include <eosio/tester.hpp>
 #include <eosio.evm/eosio.evm.hpp>
-#include "json.hpp"
 
 using std::fill;
 using std::move;

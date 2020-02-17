@@ -1,9 +1,9 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.6 )
 
-set(eosio_DIR "/Users/jafri/eosio/2.0/lib/cmake/eosio")
 set(EOSIO_VERSION_MIN "2.0")
 set(EOSIO_VERSION_SOFT_MAX "2.0")
 #set(EOSIO_VERSION_HARD_MAX "")
+set(eosio_DIR "/Users/jafri/eosio/2.0/lib/cmake/eosio")
 
 find_package(eosio)
 

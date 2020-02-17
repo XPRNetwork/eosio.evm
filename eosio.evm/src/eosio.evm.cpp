@@ -22,20 +22,6 @@ void evm::create (
   create_account(checksum160ToAddress(address), 0, {}, account);
 }
 
-// TODO remove in prod
-void evm::testtx(const std::vector<int8_t>& tx) {
-  std::vector<uint8_t> properTx( tx.begin(), tx.end() );
-  auto transaction = EthereumTransaction{ properTx };
-  eosio::print(R"({"hash":")", transaction.hash, R"(", "sender":")", transaction.get_sender(), R"("})");
-}
-// TODO remove in prod
-void evm::printtx(const std::vector<int8_t>& tx) {
-  std::vector<uint8_t> properTx( tx.begin(), tx.end() );
-  auto transaction = EthereumTransaction{ properTx };
-  transaction.get_sender();
-  transaction.printhex();
-}
-
 void evm::raw(
   const std::vector<int8_t>& tx,
   const std::optional<eosio::checksum160>& sender
@@ -80,13 +66,10 @@ void evm::raw(
   }
 
   // Check account nonce
-  eosio::check(from_account->get_nonce() == transaction.nonce, "Invalid Transaction: incorrect nonce.");
+  eosio::check(from_account->get_nonce() == transaction.nonce, "Invalid Transaction: incorrect nonce, received " + to_string(transaction.nonce) + " expected " + std::to_string(from_account->get_nonce()));
   accounts_byaddress.modify(from_account, eosio::same_payer, [&](auto& a) {
     a.nonce += 1;
   });
-
-  // Initialize base gas
-  transaction.initialize_base_gas();
 
   /**
    *
@@ -120,7 +103,17 @@ void evm::raw(
   {
     // New contract created, result is the code that should be deployed
     if (transaction.is_create()) {
-      set_code(to_address, std::move(exec_result.output));
+      // Validate size
+      const auto output_size = exec_result.output.size();
+      eosio::check(output_size < MAX_CODE_SIZE, "Out of Gas");
+
+      // Charge create data gas
+      transaction.gas_used += output_size * GP_CREATE_DATA;
+
+      // Set code if not empty
+      if (output_size > 0) {
+        set_code(to_address, std::move(exec_result.output));
+      }
     }
 
     // Print output (DEBUG).
@@ -132,5 +125,10 @@ void evm::raw(
     eosio::check(exec_result.er != ExitReason::threw, "EVM Execution Error: " + exec_result.exmsg);
     // eosio::check(false, "EVM Execution Error: " + exec_result.exmsg);
   }
+
+  // Debug final gas
+  eosio::print("\nFinal Gas Used: ", to_string(transaction.gas_used),
+               "\nGas Left: ", to_string(transaction.gas_left()),
+               "\nGas Limit: ", to_string(transaction.gas_limit));
 }
 }

@@ -4,8 +4,8 @@
 
 
 # Configuration directories and files
-SourceDirectory: /Users/jafri/eosio_contracts/tests
-BuildDirectory: /Users/jafri/eosio_contracts/tests
+SourceDirectory: /Users/jafri/eosio.evm/tests
+BuildDirectory: /Users/jafri/eosio.evm/tests
 
 # Where to place the cost data store
 CostDataFile: 
@@ -26,7 +26,7 @@ SubmitURL: http://
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/local/Cellar/cmake/3.16.4/bin/cmake" "/Users/jafri/eosio_contracts/tests"
+ConfigureCommand: "/usr/local/Cellar/cmake/3.16.4/bin/cmake" "/Users/jafri/eosio.evm/tests"
 MakeCommand: /usr/local/Cellar/cmake/3.16.4/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 

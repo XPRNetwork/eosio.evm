@@ -1,0 +1,1 @@
+cmd='/usr/local/Cellar/cmake/3.16.4/bin/cmake;-DCMAKE_BUILD_TYPE=;-DCMAKE_PREFIX_PATH=;-DCMAKE_FRAMEWORK_PATH=;-DCMAKE_MODULE_PATH=/Users/jafri/eosio.cdt/build/lib/cmake/eosio.cdt;-DEOSIO_ROOT=;-DLLVM_DIR=;-DBOOST_ROOT=;-GUnix Makefiles;<SOURCE_DIR><SOURCE_SUBDIR>'

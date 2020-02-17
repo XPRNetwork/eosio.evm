@@ -1,0 +1,14 @@
+# Target labels
+ contracts_unit_tests
+# Source files and their labels
+/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests
+/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests.rule
+/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests-complete.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-install.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-mkdir.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-download.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-update.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-patch.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-configure.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-build.rule
+/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-test.rule

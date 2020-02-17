@@ -6,5 +6,5 @@ CXX_FLAGS =   -Wall -Wno-deprecated-declarations -isysroot /Applications/Xcode.a
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/jafri/eosio_contracts/tests -I/usr/local/include -I/usr/local/opt/openssl@1.1/include -I/Users/jafri/eosio/2.0 -I/Users/jafri/eosio/2.0/include -I/Users/jafri/eosio/2.0/include/wasm-jit -I/Users/jafri/eosio/2.0/include/softfloat 
+CXX_INCLUDES = -I/Users/jafri/eosio.evm/tests -I/usr/local/include -I/usr/local/opt/openssl@1.1/include -I/Users/jafri/eosio/2.0 -I/Users/jafri/eosio/2.0/include -I/Users/jafri/eosio/2.0/include/wasm-jit -I/Users/jafri/eosio/2.0/include/softfloat 
 

@@ -1,4 +1,4 @@
-# Install script for directory: /Users/jafri/eosio_contracts/contracts/eosio.evm/tests
+# Install script for directory: /Users/jafri/eosio.evm/eosio.evm/tests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

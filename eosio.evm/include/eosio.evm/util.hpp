@@ -9,14 +9,6 @@
 namespace evm4eos
 {
   /**
-   * Processor
-   */
-  inline int get_sign(const uint256_t& v)
-  {
-    return (v >> 255) ? -1 : 1;
-  }
-
-  /**
    * Conversions
    */
   static inline std::string bin2hex(const std::vector<uint8_t>& input)

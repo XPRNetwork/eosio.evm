@@ -26,17 +26,20 @@ namespace evm4eos
     SIGNEXTEND = 0x0b, // Extend length of two’s complement signed integer.
 
     // 10s: Comparison & Bitwise Logic Operations
-    LT     = 0x10, // Less-than comparison
-    GT     = 0x11, // Greater-than comparison
-    SLT    = 0x12, // Signed less-than comparison
-    SGT    = 0x13, // Signed greater-than comparison
-    EQ     = 0x14, // Equality comparison
-    ISZERO = 0x15, // Simple not operator
-    AND    = 0x16, // Bitwise AND operation
-    OR     = 0x17, // Bitwise OR operation
-    XOR    = 0x18, // Bitwise XOR operation
-    NOT    = 0x19, // Bitwise NOT operation
-    BYTE   = 0x1a, // Retrieve single byte from word
+    LT     = 0x10,   // Less-than comparison
+    GT     = 0x11,   // Greater-than comparison
+    SLT    = 0x12,   // Signed less-than comparison
+    SGT    = 0x13,   // Signed greater-than comparison
+    EQ     = 0x14,   // Equality comparison
+    ISZERO = 0x15,   // Simple not operator
+    AND    = 0x16,   // Bitwise AND operation
+    OR     = 0x17,   // Bitwise OR operation
+    XOR    = 0x18,   // Bitwise XOR operation
+    NOT    = 0x19,   // Bitwise NOT operation
+    BYTE   = 0x1a,   // Retrieve single byte from word
+    SHL    = 0x1b,   // 256-bit shift left
+    SHR    = 0x1c,   // 256-bit shift right
+    SAR    = 0x1d,   // int256 shift right
 
     // 20s: SHA3
     SHA3   = 0x20, // Compute Keccak-256 hash.
@@ -174,220 +177,220 @@ namespace evm4eos
   };
 
   namespace OpFees {
-    static uint8_t by_code[256] = {
+    static uint16_t by_code[256] = {
       // 0s: Stop and Arithmetic Operations
-      /* STOP       */  (uint8_t) 0,  // Halts execution
-      /* ADD        */  (uint8_t) 3,  // Addition operation
-      /* MUL        */  (uint8_t) 5,  // Multiplication operation
-      /* SUB        */  (uint8_t) 3,  // Substraction operation
-      /* DIV        */  (uint8_t) 5,  // Integer division operation
-      /* SDIV       */  (uint8_t) 5,  // Signed integer division operation (truncated)
-      /* MOD        */  (uint8_t) 5,  // Modulo remainder operation
-      /* SMOD       */  (uint8_t) 5,  // Signed modulo remainder operation
-      /* ADDMOD     */  (uint8_t) 8,  // Modulo addition operation
-      /* MULMOD     */  (uint8_t) 8,  // Modulo multiplication operation
-      /* EXP        */  (uint8_t) 10, // Exponential operation
-      /* SIGNEXTEND */  (uint8_t) 5,  // Extend length of two’s complement signed integer.
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
+      /* STOP       */  0,  // Halts execution
+      /* ADD        */  3,  // Addition operation
+      /* MUL        */  5,  // Multiplication operation
+      /* SUB        */  3,  // Substraction operation
+      /* DIV        */  5,  // Integer division operation
+      /* SDIV       */  5,  // Signed integer division operation (truncated)
+      /* MOD        */  5,  // Modulo remainder operation
+      /* SMOD       */  5,  // Signed modulo remainder operation
+      /* ADDMOD     */  8,  // Modulo addition operation
+      /* MULMOD     */  8,  // Modulo multiplication operation
+      /* EXP        */  10, // Exponential operation
+      /* SIGNEXTEND */  5,  // Extend length of two’s complement signed integer.
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
 
       // 10s: Comparison & Bitwise Logic Operations
-      /* LT     */  (uint8_t) 3, // Less-than comparison
-      /* GT     */  (uint8_t) 3, // Greater-than comparison
-      /* SLT    */  (uint8_t) 3, // Signed less-than comparison
-      /* SGT    */  (uint8_t) 3, // Signed greater-than comparison
-      /* EQ     */  (uint8_t) 3, // Equality comparison
-      /* ISZERO */  (uint8_t) 3, // Simple not operator
-      /* AND    */  (uint8_t) 3, // Bitwise AND operation
-      /* OR     */  (uint8_t) 3, // Bitwise OR operation
-      /* XOR    */  (uint8_t) 3, // Bitwise XOR operation
-      /* NOT    */  (uint8_t) 3, // Bitwise NOT operation
-      /* BYTE   */  (uint8_t) 3, // Retrieve single byte from word
-      /* NULL   */  (uint8_t) 0,
-      /* NULL   */  (uint8_t) 0,
-      /* NULL   */  (uint8_t) 0,
-      /* NULL   */  (uint8_t) 0,
-      /* NULL   */  (uint8_t) 0,
+      /* LT     */  3, // Less-than comparison
+      /* GT     */  3, // Greater-than comparison
+      /* SLT    */  3, // Signed less-than comparison
+      /* SGT    */  3, // Signed greater-than comparison
+      /* EQ     */  3, // Equality comparison
+      /* ISZERO */  3, // Simple not operator
+      /* AND    */  3, // Bitwise AND operation
+      /* OR     */  3, // Bitwise OR operation
+      /* XOR    */  3, // Bitwise XOR operation
+      /* NOT    */  3, // Bitwise NOT operation
+      /* BYTE   */  3, // Retrieve single byte from word
+      /* SHL    */  3, // Shift left
+      /* SHR    */  3, // Shift right
+      /* SAR    */  3, // int256 shift right
+      /* NULL   */  0,
+      /* NULL   */  0,
 
       // 20s: SHA3
-      /* SHA3       */  (uint8_t) 30, // Compute Keccak-256 hash.
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
+      /* SHA3       */  30, // Compute Keccak-256 hash.
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
 
       // 30s: Environmental Information
-      /* ADDRESS        */  (uint8_t) 2,   // Get address of currently executing account
-      /* BALANCE        */  (uint8_t) 700, // Get balance of the given account.
-      /* ORIGIN         */  (uint8_t) 2,   // Get execution origination address (This is the sender of original transaction; it is never an account with non-emptyassociated code.)
-      /* CALLER         */  (uint8_t) 2,   // Get caller address (This is the address of the account that is directly responsible for this execution.)
-      /* CALLVALUE      */  (uint8_t) 2,   // Get deposited value by the instruction/transaction responsible for this execution.
-      /* CALLDATALOAD   */  (uint8_t) 3,   // Get input data of current environment. (This pertains to the input data passed with the message call instruction or transaction.)
-      /* CALLDATASIZE   */  (uint8_t) 2,   // Get size of input data in current environment (This pertains to the input data passed with the message call instruction or transaction.)
-      /* CALLDATACOPY   */  (uint8_t) 3,   // Copy input data in current environment to memory. (This pertains to the input data passed with the message call instruction or transaction.)
-      /* CODESIZE       */  (uint8_t) 2,   // Get size of code running in current environment.
-      /* CODECOPY       */  (uint8_t) 3,   // Copy code running in current environment to memory
-      /* GASPRICE       */  (uint8_t) 2,   //  Get price of gas in current environment. (This is gas price specified by the originating transaction.)
-      /* EXTCODESIZE    */  (uint8_t) 700, // Get size of an account’s code.
-      /* EXTCODECOPY    */  (uint8_t) 700, // Copy an account’s code to memory
-      /* RETURNDATASIZE */  (uint8_t) 2,   // Get size of output data from the previous call from the current environment.
-      /* RETURNDATACOPY */  (uint8_t) 3,   // Copy output data from the previous call to memory.
-      /* EXTCODEHASH    */  (uint8_t) 700,
+      /* ADDRESS        */  2,   // Get address of currently executing account
+      /* BALANCE        */  700, // Get balance of the given account.
+      /* ORIGIN         */  2,   // Get execution origination address (This is the sender of original transaction; it is never an account with non-emptyassociated code.)
+      /* CALLER         */  2,   // Get caller address (This is the address of the account that is directly responsible for this execution.)
+      /* CALLVALUE      */  2,   // Get deposited value by the instruction/transaction responsible for this execution.
+      /* CALLDATALOAD   */  3,   // Get input data of current environment. (This pertains to the input data passed with the message call instruction or transaction.)
+      /* CALLDATASIZE   */  2,   // Get size of input data in current environment (This pertains to the input data passed with the message call instruction or transaction.)
+      /* CALLDATACOPY   */  3,   // Copy input data in current environment to memory. (This pertains to the input data passed with the message call instruction or transaction.)
+      /* CODESIZE       */  2,   // Get size of code running in current environment.
+      /* CODECOPY       */  3,   // Copy code running in current environment to memory
+      /* GASPRICE       */  2,   //  Get price of gas in current environment. (This is gas price specified by the originating transaction.)
+      /* EXTCODESIZE    */  700, // Get size of an account’s code.
+      /* EXTCODECOPY    */  700, // Copy an account’s code to memory
+      /* RETURNDATASIZE */  2,   // Get size of output data from the previous call from the current environment.
+      /* RETURNDATACOPY */  3,   // Copy output data from the previous call to memory.
+      /* EXTCODEHASH    */  700,
 
       // 40s: Block Information
-      /* BLOCKHASH  */  (uint8_t) 20, // Get the hash of one of the 256 most recent complete blocks.
-      /* COINBASE   */  (uint8_t) 2,  // Get the block’s beneficiary address
-      /* TIMESTAMP  */  (uint8_t) 2,  // Get the block’s timestamp.
-      /* NUMBER     */  (uint8_t) 2,  // Get the block’s number
-      /* DIFFICULTY */  (uint8_t) 2,  // Get the block’s difficulty.
-      /* GASLIMIT   */  (uint8_t) 2,  // Get the block’s gas limit
-      /* CHAINID    */  (uint8_t) 2,  // Get the block’s gas limit
-      /* SELFBALANCE*/  (uint8_t) 5,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
-      /* NULL       */  (uint8_t) 0,
+      /* BLOCKHASH  */  20, // Get the hash of one of the 256 most recent complete blocks.
+      /* COINBASE   */  2,  // Get the block’s beneficiary address
+      /* TIMESTAMP  */  2,  // Get the block’s timestamp.
+      /* NUMBER     */  2,  // Get the block’s number
+      /* DIFFICULTY */  2,  // Get the block’s difficulty.
+      /* GASLIMIT   */  2,  // Get the block’s gas limit
+      /* CHAINID    */  2,  // Get the block’s gas limit
+      /* SELFBALANCE*/  5,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
+      /* NULL       */  0,
 
       // 50s: Stack, Memory, Storage and Flow Operations
-      /* POP      */  (uint8_t) 2,   // Remove item from stack.
-      /* MLOAD    */  (uint8_t) 3,   // Load word from memory.
-      /* MSTORE   */  (uint8_t) 3,   // Save word to memory
-      /* MSTORE8  */  (uint8_t) 3,   // Save byte to memory
-      /* SLOAD    */  (uint8_t) 800, // Load word from storage.
-      /* SSTORE   */  (uint8_t) 0,   // Save word to storage
-      /* JUMP     */  (uint8_t) 8,   // Alter the program counter.
-      /* JUMPI    */  (uint8_t) 10,  // Conditionally alter the program counter.
-      /* PC       */  (uint8_t) 2,   // Get the value of the program counter prior to the increment corresponding to this instruction.
-      /* MSIZE    */  (uint8_t) 2,   // Get the size of active memory in bytes.
-      /* GAS      */  (uint8_t) 2,   // Get the amount of available gas, including the corresponding reduction for the cost of this instruction.
-      /* JUMPDEST */  (uint8_t) 1,   // Mark a valid destination for jumps. This operation has no effect on machine state during execution
-      /* NULL     */  (uint8_t) 0,
-      /* NULL     */  (uint8_t) 0,
-      /* NULL     */  (uint8_t) 0,
-      /* NULL     */  (uint8_t) 0,
+      /* POP      */  2,   // Remove item from stack.
+      /* MLOAD    */  3,   // Load word from memory.
+      /* MSTORE   */  3,   // Save word to memory
+      /* MSTORE8  */  3,   // Save byte to memory
+      /* SLOAD    */  800, // Load word from storage.
+      /* SSTORE   */  0,   // Save word to storage
+      /* JUMP     */  8,   // Alter the program counter.
+      /* JUMPI    */  10,  // Conditionally alter the program counter.
+      /* PC       */  2,   // Get the value of the program counter prior to the increment corresponding to this instruction.
+      /* MSIZE    */  2,   // Get the size of active memory in bytes.
+      /* GAS      */  2,   // Get the amount of available gas, including the corresponding reduction for the cost of this instruction.
+      /* JUMPDEST */  1,   // Mark a valid destination for jumps. This operation has no effect on machine state during execution
+      /* NULL     */  0,
+      /* NULL     */  0,
+      /* NULL     */  0,
+      /* NULL     */  0,
 
       // 60s & 70s: Push Operations
-      /* PUSH1  */  (uint8_t) 3, // Place 1 byte item on stack.
-      /* PUSH2  */  (uint8_t) 3, // Place 2 byte item on stack.
-      /* PUSH3  */  (uint8_t) 3, // Place 3 byte item on stack.
-      /* PUSH4  */  (uint8_t) 3, // Place 4 byte item on stack.
-      /* PUSH5  */  (uint8_t) 3, // Place 5 byte item on stack.
-      /* PUSH6  */  (uint8_t) 3, // Place 6 byte item on stack.
-      /* PUSH7  */  (uint8_t) 3, // Place 7 byte item on stack.
-      /* PUSH8  */  (uint8_t) 3, // Place 8 byte item on stack.
-      /* PUSH9  */  (uint8_t) 3, // Place 9 byte item on stack.
-      /* PUSH10 */  (uint8_t) 3, // Place 10 byte item on stack.
-      /* PUSH11 */  (uint8_t) 3, // Place 11 byte item on stack.
-      /* PUSH12 */  (uint8_t) 3, // Place 12 byte item on stack.
-      /* PUSH13 */  (uint8_t) 3, // Place 13 byte item on stack.
-      /* PUSH14 */  (uint8_t) 3, // Place 14 byte item on stack.
-      /* PUSH15 */  (uint8_t) 3, // Place 15 byte item on stack.
-      /* PUSH16 */  (uint8_t) 3, // Place 16 byte item on stack.
-      /* PUSH17 */  (uint8_t) 3, // Place 17 byte item on stack.
-      /* PUSH18 */  (uint8_t) 3, // Place 18 byte item on stack.
-      /* PUSH19 */  (uint8_t) 3, // Place 19 byte item on stack.
-      /* PUSH20 */  (uint8_t) 3, // Place 20 byte item on stack.
-      /* PUSH21 */  (uint8_t) 3, // Place 21 byte item on stack.
-      /* PUSH22 */  (uint8_t) 3, // Place 22 byte item on stack.
-      /* PUSH23 */  (uint8_t) 3, // Place 23 byte item on stack.
-      /* PUSH24 */  (uint8_t) 3, // Place 24 byte item on stack.
-      /* PUSH25 */  (uint8_t) 3, // Place 25 byte item on stack.
-      /* PUSH26 */  (uint8_t) 3, // Place 26 byte item on stack.
-      /* PUSH27 */  (uint8_t) 3, // Place 27 byte item on stack.
-      /* PUSH28 */  (uint8_t) 3, // Place 28 byte item on stack.
-      /* PUSH29 */  (uint8_t) 3, // Place 29 byte item on stack.
-      /* PUSH30 */  (uint8_t) 3, // Place 30 byte item on stack.
-      /* PUSH31 */  (uint8_t) 3, // Place 31 byte item on stack.
-      /* PUSH32 */  (uint8_t) 3, // Place 32 byte item on stack.
+      /* PUSH1  */  3, // Place 1 byte item on stack.
+      /* PUSH2  */  3, // Place 2 byte item on stack.
+      /* PUSH3  */  3, // Place 3 byte item on stack.
+      /* PUSH4  */  3, // Place 4 byte item on stack.
+      /* PUSH5  */  3, // Place 5 byte item on stack.
+      /* PUSH6  */  3, // Place 6 byte item on stack.
+      /* PUSH7  */  3, // Place 7 byte item on stack.
+      /* PUSH8  */  3, // Place 8 byte item on stack.
+      /* PUSH9  */  3, // Place 9 byte item on stack.
+      /* PUSH10 */  3, // Place 10 byte item on stack.
+      /* PUSH11 */  3, // Place 11 byte item on stack.
+      /* PUSH12 */  3, // Place 12 byte item on stack.
+      /* PUSH13 */  3, // Place 13 byte item on stack.
+      /* PUSH14 */  3, // Place 14 byte item on stack.
+      /* PUSH15 */  3, // Place 15 byte item on stack.
+      /* PUSH16 */  3, // Place 16 byte item on stack.
+      /* PUSH17 */  3, // Place 17 byte item on stack.
+      /* PUSH18 */  3, // Place 18 byte item on stack.
+      /* PUSH19 */  3, // Place 19 byte item on stack.
+      /* PUSH20 */  3, // Place 20 byte item on stack.
+      /* PUSH21 */  3, // Place 21 byte item on stack.
+      /* PUSH22 */  3, // Place 22 byte item on stack.
+      /* PUSH23 */  3, // Place 23 byte item on stack.
+      /* PUSH24 */  3, // Place 24 byte item on stack.
+      /* PUSH25 */  3, // Place 25 byte item on stack.
+      /* PUSH26 */  3, // Place 26 byte item on stack.
+      /* PUSH27 */  3, // Place 27 byte item on stack.
+      /* PUSH28 */  3, // Place 28 byte item on stack.
+      /* PUSH29 */  3, // Place 29 byte item on stack.
+      /* PUSH30 */  3, // Place 30 byte item on stack.
+      /* PUSH31 */  3, // Place 31 byte item on stack.
+      /* PUSH32 */  3, // Place 32 byte item on stack.
 
       // 80s: Duplication Operation
-      /* DUP1  */  (uint8_t) 3, // Duplicate 1st stack item
-      /* DUP2  */  (uint8_t) 3, // Duplicate 2nd stack item
-      /* DUP3  */  (uint8_t) 3, // Duplicate 3rd stack item
-      /* DUP4  */  (uint8_t) 3, // Duplicate 4th stack item
-      /* DUP5  */  (uint8_t) 3, // Duplicate 5th stack item
-      /* DUP6  */  (uint8_t) 3, // Duplicate 6th stack item
-      /* DUP7  */  (uint8_t) 3, // Duplicate 7th stack item
-      /* DUP8  */  (uint8_t) 3, // Duplicate 8th stack item
-      /* DUP9  */  (uint8_t) 3, // Duplicate 9th stack item
-      /* DUP10 */  (uint8_t) 3, // Duplicate 10th stack item
-      /* DUP11 */  (uint8_t) 3, // Duplicate 11th stack item
-      /* DUP12 */  (uint8_t) 3, // Duplicate 12th stack item
-      /* DUP13 */  (uint8_t) 3, // Duplicate 13th stack item
-      /* DUP14 */  (uint8_t) 3, // Duplicate 14th stack item
-      /* DUP15 */  (uint8_t) 3, // Duplicate 15th stack item
-      /* DUP16 */  (uint8_t) 3, // Duplicate 16th stack item
+      /* DUP1  */  3, // Duplicate 1st stack item
+      /* DUP2  */  3, // Duplicate 2nd stack item
+      /* DUP3  */  3, // Duplicate 3rd stack item
+      /* DUP4  */  3, // Duplicate 4th stack item
+      /* DUP5  */  3, // Duplicate 5th stack item
+      /* DUP6  */  3, // Duplicate 6th stack item
+      /* DUP7  */  3, // Duplicate 7th stack item
+      /* DUP8  */  3, // Duplicate 8th stack item
+      /* DUP9  */  3, // Duplicate 9th stack item
+      /* DUP10 */  3, // Duplicate 10th stack item
+      /* DUP11 */  3, // Duplicate 11th stack item
+      /* DUP12 */  3, // Duplicate 12th stack item
+      /* DUP13 */  3, // Duplicate 13th stack item
+      /* DUP14 */  3, // Duplicate 14th stack item
+      /* DUP15 */  3, // Duplicate 15th stack item
+      /* DUP16 */  3, // Duplicate 16th stack item
 
       // 90s: Exchange Operation
-      /* SWAP1  */  (uint8_t) 3, // Exchange 1st and 2nd stack item
-      /* SWAP2  */  (uint8_t) 3, // Exchange 1st and 3rd stack item
-      /* SWAP3  */  (uint8_t) 3, // Exchange 1st and 4th stack item
-      /* SWAP4  */  (uint8_t) 3, // Exchange 1st and 5th stack item
-      /* SWAP5  */  (uint8_t) 3, // Exchange 1st and 6th stack item
-      /* SWAP6  */  (uint8_t) 3, // Exchange 1st and 7th stack item
-      /* SWAP7  */  (uint8_t) 3, // Exchange 1st and 8th stack item
-      /* SWAP8  */  (uint8_t) 3, // Exchange 1st and 9th stack item
-      /* SWAP9  */  (uint8_t) 3, // Exchange 1st and 10th stack item
-      /* SWAP10 */  (uint8_t) 3, // Exchange 1st and 11th stack item
-      /* SWAP11 */  (uint8_t) 3, // Exchange 1st and 12th stack item
-      /* SWAP12 */  (uint8_t) 3, // Exchange 1st and 13th stack item
-      /* SWAP13 */  (uint8_t) 3, // Exchange 1st and 14th stack item
-      /* SWAP14 */  (uint8_t) 3, // Exchange 1st and 15th stack item
-      /* SWAP15 */  (uint8_t) 3, // Exchange 1st and 16th stack item
-      /* SWAP16 */  (uint8_t) 3, // Exchange 1st and 17th stack item
+      /* SWAP1  */  3, // Exchange 1st and 2nd stack item
+      /* SWAP2  */  3, // Exchange 1st and 3rd stack item
+      /* SWAP3  */  3, // Exchange 1st and 4th stack item
+      /* SWAP4  */  3, // Exchange 1st and 5th stack item
+      /* SWAP5  */  3, // Exchange 1st and 6th stack item
+      /* SWAP6  */  3, // Exchange 1st and 7th stack item
+      /* SWAP7  */  3, // Exchange 1st and 8th stack item
+      /* SWAP8  */  3, // Exchange 1st and 9th stack item
+      /* SWAP9  */  3, // Exchange 1st and 10th stack item
+      /* SWAP10 */  3, // Exchange 1st and 11th stack item
+      /* SWAP11 */  3, // Exchange 1st and 12th stack item
+      /* SWAP12 */  3, // Exchange 1st and 13th stack item
+      /* SWAP13 */  3, // Exchange 1st and 14th stack item
+      /* SWAP14 */  3, // Exchange 1st and 15th stack item
+      /* SWAP15 */  3, // Exchange 1st and 16th stack item
+      /* SWAP16 */  3, // Exchange 1st and 17th stack item
 
       // a0s: Logging Operations
-      /* LOG0 */  (uint8_t) (1 * 375), // Append log record with no topics
-      /* LOG1 */  (uint8_t) (2 * 375), // Append log record with 1 topic
-      /* LOG2 */  (uint8_t) (3 * 375), // Append log record with 2 topics
-      /* LOG3 */  (uint8_t) (4 * 375), // Append log record with 3 topics
-      /* LOG4 */  (uint8_t) (5 * 375), // Append log record with 4 topics
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
-      /* NULL */  (uint8_t) 0,
+      /* LOG0 */  (1 * 375), // Append log record with no topics
+      /* LOG1 */  (2 * 375), // Append log record with 1 topic
+      /* LOG2 */  (3 * 375), // Append log record with 2 topics
+      /* LOG3 */  (4 * 375), // Append log record with 3 topics
+      /* LOG4 */  (5 * 375), // Append log record with 4 topics
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
 
       // f0s: System operations
-      /* CREATE       */  (uint8_t) 32000, // Create a new account with associated code
-      /* CALL         */  (uint8_t) 700,   // Message-call into an account
-      /* CALLCODE     */  (uint8_t) 700,   // Message-call into this account with an alternative account’s code
-      /* RETURN       */  (uint8_t) 0,     // Halt execution returning output data
-      /* DELEGATECALL */  (uint8_t) 700,   // Message-call into this account with an alternative account’s code, but persisting the current values for sender and value.
-      /* CREATE2      */  (uint8_t) 32000,
-      /* NULL         */  (uint8_t) 0,
-      /* NULL         */  (uint8_t) 0,
-      /* NULL         */  (uint8_t) 0,
-      /* NULL         */  (uint8_t) 0,
-      /* STATICCALL   */  (uint8_t) 700,   // Static message-call into an account. Exactly equivalent to CALL except: The argument µs is replaced with 0.
-      /* NULL         */  (uint8_t) 0,
-      /* NULL         */  (uint8_t) 0,
-      /* REVERT       */  (uint8_t) 0,     // Halt execution reverting state changes but returning data and remaining gas
-      /* INVALID      */  (uint8_t) 0,     // Designated invalid instruction
-      /* SELFDESTRUCT */  (uint8_t) 5000
+      /* CREATE       */  32000, // Create a new account with associated code
+      /* CALL         */  700,   // Message-call into an account
+      /* CALLCODE     */  700,   // Message-call into this account with an alternative account’s code
+      /* RETURN       */  0,     // Halt execution returning output data
+      /* DELEGATECALL */  700,   // Message-call into this account with an alternative account’s code, but persisting the current values for sender and value.
+      /* CREATE2      */  32000,
+      /* NULL         */  0,
+      /* NULL         */  0,
+      /* NULL         */  0,
+      /* NULL         */  0,
+      /* STATICCALL   */  700,   // Static message-call into an account. Exactly equivalent to CALL except: The argument µs is replaced with 0.
+      /* NULL         */  0,
+      /* NULL         */  0,
+      /* REVERT       */  0,     // Halt execution reverting state changes but returning data and remaining gas
+      /* INVALID      */  0,     // Designated invalid instruction
+      /* SELFDESTRUCT */  5000
     };
   }
 
@@ -420,9 +423,12 @@ namespace evm4eos
       { 0x18, "XOR" }, // Bitwise XOR operation
       { 0x19, "NOT" }, // Bitwise NOT operation
       { 0x1a, "BYTE" }, // Retrieve single byte from word
+      { 0x1b, "SHL" }, // Shift left
+      { 0x1c, "SHR" }, // Shift right
+      { 0x1d, "SAR" }, // int256 shift right
 
       // 20s: SHA3
-      { 0x20, "SHA" }, // Compute Keccak-256 hash.
+      { 0x20, "SHA3" }, // Compute Keccak-256 hash.
 
       // 30s: Environmental Information
       { 0x30, "ADDRESS" }, // Get address of currently executing account

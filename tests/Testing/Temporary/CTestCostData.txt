@@ -1,5 +1,0 @@
-eosio_msig_unit_test 1 6.45459
-eosio_system_unit_test 1 172.04
-eosio_token_unit_test 1 4.27781
-eosio_wrap_unit_test 1 2.30127
----

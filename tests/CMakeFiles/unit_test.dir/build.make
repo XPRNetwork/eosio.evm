@@ -43,10 +43,10 @@ RM = /usr/local/Cellar/cmake/3.16.4/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jafri/eosio_contracts/tests
+CMAKE_SOURCE_DIR = /Users/jafri/eosio.evm/tests
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jafri/eosio_contracts/tests
+CMAKE_BINARY_DIR = /Users/jafri/eosio.evm/tests
 
 # Include any dependencies generated for this target.
 include CMakeFiles/unit_test.dir/depend.make
@@ -59,29 +59,29 @@ include CMakeFiles/unit_test.dir/flags.make
 
 CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o: CMakeFiles/unit_test.dir/flags.make
 CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o: eosio.evm_tests.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jafri/eosio_contracts/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o -c /Users/jafri/eosio_contracts/tests/eosio.evm_tests.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jafri/eosio.evm/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o"
+	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.o -c /Users/jafri/eosio.evm/tests/eosio.evm_tests.cpp
 
 CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jafri/eosio_contracts/tests/eosio.evm_tests.cpp > CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jafri/eosio.evm/tests/eosio.evm_tests.cpp > CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.i
 
 CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jafri/eosio_contracts/tests/eosio.evm_tests.cpp -o CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jafri/eosio.evm/tests/eosio.evm_tests.cpp -o CMakeFiles/unit_test.dir/eosio.evm_tests.cpp.s
 
 CMakeFiles/unit_test.dir/main.cpp.o: CMakeFiles/unit_test.dir/flags.make
 CMakeFiles/unit_test.dir/main.cpp.o: main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jafri/eosio_contracts/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/unit_test.dir/main.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/unit_test.dir/main.cpp.o -c /Users/jafri/eosio_contracts/tests/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jafri/eosio.evm/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/unit_test.dir/main.cpp.o"
+	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/unit_test.dir/main.cpp.o -c /Users/jafri/eosio.evm/tests/main.cpp
 
 CMakeFiles/unit_test.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/unit_test.dir/main.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jafri/eosio_contracts/tests/main.cpp > CMakeFiles/unit_test.dir/main.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/jafri/eosio.evm/tests/main.cpp > CMakeFiles/unit_test.dir/main.cpp.i
 
 CMakeFiles/unit_test.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/unit_test.dir/main.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jafri/eosio_contracts/tests/main.cpp -o CMakeFiles/unit_test.dir/main.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/jafri/eosio.evm/tests/main.cpp -o CMakeFiles/unit_test.dir/main.cpp.s
 
 # Object files for target unit_test
 unit_test_OBJECTS = \
@@ -117,7 +117,7 @@ unit_test: /usr/local/lib/libboost_chrono-mt.a
 unit_test: /usr/local/lib/libboost_iostreams-mt.a
 unit_test: /usr/local/lib/libboost_date_time-mt.a
 unit_test: CMakeFiles/unit_test.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jafri/eosio_contracts/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable unit_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jafri/eosio.evm/tests/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable unit_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/unit_test.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -130,6 +130,6 @@ CMakeFiles/unit_test.dir/clean:
 .PHONY : CMakeFiles/unit_test.dir/clean
 
 CMakeFiles/unit_test.dir/depend:
-	cd /Users/jafri/eosio_contracts/tests && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests/CMakeFiles/unit_test.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jafri/eosio.evm/tests && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests/CMakeFiles/unit_test.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/unit_test.dir/depend
 

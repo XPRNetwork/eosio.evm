@@ -1,6 +1,6 @@
 #pragma once
 
-#define CORE_SYM_NAME "TST"
+#define CORE_SYM_NAME "SYS"
 #define CORE_SYM_PRECISION 4
 
 #define _STRINGIZE1(x) #x

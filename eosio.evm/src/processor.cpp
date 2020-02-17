@@ -1,6 +1,12 @@
 // Copyright (c) 2020 Syed Jafri. All rights reserved.
+// Licensed under the MIT License..
+
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License..
+
+// evmone: Fast Ethereum Virtual Machine implementation
+// Copyright 2019 Pawel Bylica.
+// Licensed under the Apache License, Version 2.0.
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -37,12 +43,12 @@ namespace evm4eos
                     : callee.get_code();
 
       // Debug
-      eosio::print("\nProcessor:\n");
-      callee.print();
-      eosio::print("input: " + bin2hex(input) + "\n");
-      eosio::print("code: " + bin2hex(code) + "\n");
-      eosio::print("ISCREATE?: ", transaction.is_create(), "\n");
-      eosio::print("call_value: ", call_value, "\n");
+      // eosio::print("\nProcessor:\n");
+      // callee.print();
+      // eosio::print("input: " + bin2hex(input) + "\n");
+      // eosio::print("code: " + bin2hex(code) + "\n");
+      // eosio::print("ISCREATE?: ", transaction.is_create(), "\n");
+      // eosio::print("call_value: ", call_value, "\n");
 
       // create the first context
       ExecResult result;
@@ -70,16 +76,14 @@ namespace evm4eos
         error_cb
       );
 
-      eosio::print("\nPC: ", (uint8_t) ctxt->get_pc());
-      eosio::print("\nProg Size: ", (uint8_t) ctxt->prog.code.size());
+      // eosio::print("\nPC: ", (uint8_t) ctxt->get_pc());
+      // eosio::print("\nProg Size: ", (uint8_t) ctxt->prog.code.size());
 
       // run
       while (ctxt->get_pc() < ctxt->prog.code.size())
       {
         // TODO handle exception
         dispatch();
-
-        ctxt->s.print();
 
         if (!ctxt)
           break;
@@ -88,8 +92,8 @@ namespace evm4eos
       }
 
       // Result of run
-      eosio::print("\nRun result:\n");
-      result.print();
+      // eosio::print("\nRun result:\n");
+      // result.print();
 
       // halt outer context if it did not do so itself
       if (ctxt)
@@ -99,7 +103,6 @@ namespace evm4eos
       for (const auto& addr : transaction.selfdestruct_list) {
         contract->remove_code(addr);
       }
-      // TODO add touched account cleanup, look at JS
 
       return result;
     }
@@ -117,11 +120,6 @@ namespace evm4eos
       ExceptionHandler&& error_cb
     )
     {
-      // Check max depth
-      if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
-        eosio::check(false, "Reached max call depth (" + to_string(ProcessorConsts::MAX_CALL_DEPTH) + ") (outOfBounds)");
-      }
-
       // TODO Static if static opcode or context is already static
       // const auto is_static = get_op() == Opcode::STATICCALL || ctxt->is_static;
       const auto is_static = false;
@@ -140,6 +138,11 @@ namespace evm4eos
       );
       ctxts.emplace_back(move(c));
       ctxt = ctxts.back().get();
+    }
+
+    constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
+    {
+      return (static_cast<int64_t>(size_in_bytes) + (ProcessorConsts::WORD_SIZE - 1)) / ProcessorConsts::WORD_SIZE;
     }
 
     uint16_t get_call_depth() const
@@ -170,21 +173,20 @@ namespace evm4eos
     void use_gas(uint256_t amount) {
       transaction.gas_used += amount;
       ctxt->gas_left -= amount;
-      eosio::print(" OP Gas: ", to_string(amount), ", Used gas: ", to_string(transaction.gas_used), ", Gas Left: ", to_string(ctxt->gas_left));
       eosio::check(transaction.gas_used <= transaction.gas_limit && ctxt->gas_left >= 0, "Out of Gas");
     }
 
+    // TODO check gas refunds
     void refund_gas(uint256_t amount) {
       transaction.gas_used -= amount;
       ctxt->gas_left += amount;
-      eosio::print(" OP Gas: ", to_string(amount), ", Refunded gas: ", to_string(transaction.gas_used), " Gas Left: ", to_string(ctxt->gas_left));
       eosio::check(transaction.gas_used <= transaction.gas_limit && ctxt->gas_left >= 0, "Out of Gas");
     }
 
     // Complex calculation from EIP 2200
-    // Original value is the first value at sart
-    // Current value is what is currently stored in EOSIO
-    // New value is the value to be stored
+    // - Original value is the first value at start of TX
+    // - Current value is what is currently stored in EOSIO
+    // - New value is the value to be stored
     void process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
       eosio::check(ctxt->gas_left > 2300, "out of gas");
 
@@ -221,6 +223,7 @@ namespace evm4eos
       return use_gas(800);
     }
 
+    // TODO fix memory gas usage (evmone check_memory)
     static void copy_mem_raw(
       const uint64_t offDst,
       const uint64_t offSrc,
@@ -270,11 +273,25 @@ namespace evm4eos
 
     void prepare_mem_access(const uint64_t offset, const uint64_t size)
     {
-      const auto end = offset + size;
-      eosio::check(end > offset, "Integer overflow in memory access (" + to_string(end) + " < " + to_string(offset) + ") (outOfBounds)");
-      eosio::check(end < ProcessorConsts::MAX_MEM_SIZE, "Memory limit exceeded (" + to_string(end) + " > " + to_string(ProcessorConsts::MAX_MEM_SIZE) + ") (outOfBounds)");
+      eosio::check(offset < ProcessorConsts::MAX_BUFFER_SIZE, "Out of Gas");
 
-      if (end > ctxt->mem.size()) {
+      const auto new_size = offset + size;
+      const auto current_size = ctxt->mem.size();
+
+      if (new_size > current_size)
+      {
+        const auto new_words = num_words(new_size);
+        const auto current_words = static_cast<int64_t>(current_size / 32);
+        const auto new_cost = 3 * new_words + new_words * new_words / 512;
+        const auto current_cost = 3 * current_words + current_words * current_words / 512;
+        const auto cost = new_cost - current_cost;
+
+        // Gas
+        use_gas(cost);
+
+        // Resize
+        const auto end = static_cast<size_t>(new_words * ProcessorConsts::WORD_SIZE);
+        eosio::check(end < ProcessorConsts::MAX_MEM_SIZE, "Memory limit exceeded (" + to_string(end) + " > " + to_string(ProcessorConsts::MAX_MEM_SIZE) + ") (outOfBounds)");
         ctxt->mem.resize(end);
       }
     }
@@ -289,20 +306,6 @@ namespace evm4eos
     {
       eosio::check(ctxt->prog.jump_dests.find(newPc) != ctxt->prog.jump_dests.end(), to_string(newPc) + " is not a valid jump destination (illegalInstruction)");
       ctxt->set_pc(newPc);
-    }
-
-    template <
-      typename X,
-      typename Y,
-      typename = enable_if_t<is_unsigned<X>::value && is_unsigned<Y>::value>
-    >
-    static auto safeAdd(const X x, const Y y)
-    {
-      const auto r = x + y;
-      if (r < x) {
-        eosio::check(false, "integer overflow");
-      }
-      return r;
     }
 
     template <typename T>
@@ -320,9 +323,20 @@ namespace evm4eos
       last_return_data.shrink_to_fit();
 
       // Debug
-      eosio::print("\nOperation: ", opcodeToString(op));
+      eosio::print(
+        "\n",
+        "{",
+        "\"pc\":",      ctxt->get_pc(), ",",
+        "\"gasLeft\":", to_string(ctxt->gas_left), ",",
+        "\"gasCost\":", to_string(OpFees::by_code[op]), ",",
+        "\"stack\":",   ctxt->s.asArray(), ",",
+        "\"depth\":",   to_string(get_call_depth()), ",",
+        "\"opName\": \"",  opcodeToString(op), "\"",
+        "}",
+        ","
+      );
 
-      // Add gas
+      // Charge gas
       use_gas(OpFees::by_code[op]);
 
       switch (op)
@@ -408,6 +422,15 @@ namespace evm4eos
         case Opcode::BYTE:
           byte();
           break;
+        case Opcode::SHL:
+          shl();
+          break;
+        case Opcode::SHR:
+          shr();
+          break;
+        case Opcode::SAR:
+          sar();
+          break;
         case Opcode::JUMP:
           jump();
           break;
@@ -487,10 +510,10 @@ namespace evm4eos
           selfdestruct();
           break;
         case Opcode::CREATE:
-          create(false);
+          create();
           break;
         case Opcode::CREATE2:
-          create(true);
+          create2();
           break;
         case Opcode::CALL:
         case Opcode::STATICCALL:
@@ -544,14 +567,6 @@ namespace evm4eos
           revert();
           break;
         default:
-          // TODO fix
-          // std::string err;
-          // err += "Unknown/unsupported Opcode: 0x" + std::string(get_op());
-          // err += " in contract " + intx::hex(ctxt->callee.get_address().extract_as_byte_array());
-          // err += " called by " + intx::hex(ctxt->caller);
-          // err += " at position " + ctxt->get_pc();
-          // err += ", call-depth " + get_call_depth();
-          // eosio::check(false, err + " (illegalInstruction)");
           eosio::check(false, "(illegalInstruction)");
       };
     }
@@ -559,14 +574,16 @@ namespace evm4eos
     /**
      * OP Code Implementations
      */
-    void swap()
+    void stop()
     {
-      ctxt->s.swap(get_op() - SWAP1 + 1);
-    }
+      // (1) save halt handler
+      auto halt_cb = ctxt->halt_cb;
 
-    void dup()
-    {
-      ctxt->s.dup(get_op() - DUP1);
+      // (2) pop current context
+      pop_context();
+
+      // (3) invoke halt handler
+      halt_cb();
     }
 
     void add()
@@ -576,13 +593,6 @@ namespace evm4eos
       ctxt->s.push(x + y);
     }
 
-    void sub()
-    {
-      const auto x = ctxt->s.pop();
-      const auto y = ctxt->s.pop();
-      ctxt->s.push(x - y);
-    }
-
     void mul()
     {
       const auto x = ctxt->s.pop();
@@ -590,24 +600,29 @@ namespace evm4eos
       ctxt->s.push(x * y);
     }
 
+    void sub()
+    {
+      const auto x = ctxt->s.pop();
+      const auto y = ctxt->s.pop();
+      ctxt->s.push(x - y);
+    }
+
     void div()
     {
       const auto x = ctxt->s.pop();
       const auto y = ctxt->s.pop();
-      if (!y)
-      {
+
+      if (y == 0) {
         ctxt->s.push(0);
-      }
-      else
-      {
+      } else {
         ctxt->s.push(x / y);
       }
     }
 
     void sdiv()
     {
-      auto x = ctxt->s.pop();
-      auto y = ctxt->s.pop();
+      const auto x = ctxt->s.pop();
+      const auto y = ctxt->s.pop();
       const auto min = (numeric_limits<uint256_t>::max() / 2) + 1;
 
       if (y == 0)
@@ -616,89 +631,59 @@ namespace evm4eos
       else if (x == min && y == -1)
         ctxt->s.push(x);
       else
-      {
-        const auto signX = get_sign(x);
-        const auto signY = get_sign(y);
-        if (signX == -1)
-          x = 0 - x;
-        if (signY == -1)
-          y = 0 - y;
-
-        auto z = (x / y);
-        if (signX != signY)
-          z = 0 - z;
-        ctxt->s.push(z);
-      }
+        ctxt->s.push(intx::sdivrem(x, y).quot);
     }
 
     void mod()
     {
       const auto x = ctxt->s.pop();
       const auto m = ctxt->s.pop();
-      if (!m)
+
+      if (m == 0)
         ctxt->s.push(0);
       else
         ctxt->s.push(x % m);
     }
 
-    void smod()
+    void addmod()
     {
-      auto x = ctxt->s.pop();
-      auto m = ctxt->s.pop();
+      const auto x = ctxt->s.pop();
+      const auto y = ctxt->s.pop();
+      const auto m = ctxt->s.pop();
+
       if (m == 0)
         ctxt->s.push(0);
       else
-      {
-        const auto signX = get_sign(x);
-        const auto signM = get_sign(m);
-        if (signX == -1)
-          x = 0 - x;
-        if (signM == -1)
-          m = 0 - m;
-
-        auto z = (x % m);
-        if (signX == -1)
-          z = 0 - z;
-        ctxt->s.push(z);
-      }
+        ctxt->s.push(intx::addmod(x, y, m));
     }
 
-    void addmod()
+    void smod()
     {
-      const uint512_t x = ctxt->s.pop();
-      const uint512_t y = ctxt->s.pop();
+      const auto x = ctxt->s.pop();
       const auto m = ctxt->s.pop();
-      if (!m)
-      {
+
+      if (m == 0)
         ctxt->s.push(0);
-      }
       else
-      {
-        const uint512_t n = (x + y) % m;
-        ctxt->s.push(n.lo);
-      }
+        ctxt->s.push(intx::sdivrem(x, m).rem);
     }
 
     void mulmod()
     {
-      const uint512_t x = ctxt->s.pop();
-      const uint512_t y = ctxt->s.pop();
+      const auto x = ctxt->s.pop();
+      const auto y = ctxt->s.pop();
       const auto m = ctxt->s.pop();
-      if (!m)
-      {
-        ctxt->s.push(m);
-      }
+
+      if (m == 0)
+        ctxt->s.push(0);
       else
-      {
-        const uint512_t n = (x * y) % m;
-        ctxt->s.push(n.lo);
-      }
+        ctxt->s.push(intx::mulmod(x, y, m));
     }
 
     void exp()
     {
       const auto b = ctxt->s.pop();
-      const auto e = ctxt->s.popu64();
+      const auto e = ctxt->s.pop();
 
       // Optimize: X^0 = 1
       if (e == 0) {
@@ -711,64 +696,49 @@ namespace evm4eos
       use_gas(sig_bytes * GP_EXP_BYTE);
 
       // Push result
-      auto res = intx::exp(b, uint256_t(e));
+      const auto res = intx::exp(b, uint256_t(e));
       ctxt->s.push(res);
     }
 
     void signextend()
     {
+      const auto ext = ctxt->s.pop();
       const auto x = ctxt->s.pop();
-      const auto y = ctxt->s.pop();
-      if (x >= 32)
-      {
-        ctxt->s.push(y);
+
+      if (ext >= 32) {
+        ctxt->s.push(x);
         return;
       }
-      const auto idx = (8 * shrink<uint8_t>(x)) + 7;
-      const auto sign = static_cast<uint8_t>((y >> idx) & 1);
-      constexpr auto zero = uint256_t(0);
-      const auto mask = ~zero >> (256 - idx);
-      const auto yex = ((sign ? ~zero : zero) << idx) | (y & mask);
-      ctxt->s.push(yex);
+
+      const auto sign_bit = static_cast<int>(ext) * 8 + 7;
+      const auto sign_mask = uint256_t{1} << sign_bit;
+      const auto value_mask = sign_mask - 1;
+      const auto is_neg = (x & sign_mask) != 0;
+      ctxt->s.push(is_neg ? x | ~value_mask : x & value_mask);
     }
 
     void lt()
     {
       const auto x = ctxt->s.pop();
       const auto y = ctxt->s.pop();
-      ctxt->s.push((x < y) ? 1 : 0);
+      ctxt->s.push(x < y);
     }
 
     void gt()
     {
       const auto x = ctxt->s.pop();
       const auto y = ctxt->s.pop();
-      ctxt->s.push((x > y) ? 1 : 0);
+      ctxt->s.push(x > y);
     }
 
     void slt()
     {
       const auto x = ctxt->s.pop();
       const auto y = ctxt->s.pop();
-      if (x == y)
-      {
-        ctxt->s.push(0);
-        return;
-      }
 
-      const auto signX = get_sign(x);
-      const auto signY = get_sign(y);
-      if (signX != signY)
-      {
-        if (signX == -1)
-          ctxt->s.push(1);
-        else
-          ctxt->s.push(0);
-      }
-      else
-      {
-        ctxt->s.push((x < y) ? 1 : 0);
-      }
+      auto x_neg = static_cast<bool>(x >> 255);
+      auto y_neg = static_cast<bool>(y >> 255);
+      ctxt->s.push((x_neg ^ y_neg) ? x_neg : x < y);
     }
 
     void sgt()
@@ -781,13 +751,13 @@ namespace evm4eos
     {
       const auto x = ctxt->s.pop();
       const auto y = ctxt->s.pop();
-      ctxt->s.push((x == y) ? 1 : 0);
+      ctxt->s.push(x == y);
     }
 
     void isZero()
     {
       const auto x = ctxt->s.pop();
-      ctxt->s.push((x == 0) ? 1 : 0);
+      ctxt->s.push(x == 0);
     }
 
     void and_()
@@ -819,90 +789,156 @@ namespace evm4eos
 
     void byte()
     {
-      const auto idx = ctxt->s.pop();
-      if (idx >= 32) {
+      const auto n = ctxt->s.pop();
+      const auto x = ctxt->s.pop();
+
+      if (n > 31)
         ctxt->s.push(0);
+      else
+      {
+        auto sh = (31 - static_cast<unsigned>(n)) * 8;
+        auto y = x >> sh;
+        ctxt->s.push(y & 0xff);
+      }
+    }
+
+    void shl()
+    {
+      const auto shift = ctxt->s.pop();
+      const auto value = ctxt->s.pop();
+      ctxt->s.push(value << shift);
+    }
+
+    void shr()
+    {
+      const auto shift = ctxt->s.pop();
+      const auto value = ctxt->s.pop();
+      ctxt->s.push(value >> shift);
+    }
+
+    void sar()
+    {
+      const auto shift = ctxt->s.pop();
+      const auto value = ctxt->s.pop();
+
+      if ((value & (uint256_t{1} << 255)) == 0) {
+        ctxt->s.push(value >> shift);
         return;
       }
-      const auto shift = 256 - 8 - 8 * shrink<uint8_t>(idx);
-      const auto mask = uint256_t(255) << shift;
-      const auto val = ctxt->s.pop();
-      ctxt->s.push((val & mask) >> shift);
-    }
 
-    void jump()
-    {
-      const auto newPc = ctxt->s.popu64();
-      jump_to(newPc);
-    }
-
-    void jumpi()
-    {
-      const auto newPc = ctxt->s.popu64();
-      const auto cond = ctxt->s.pop();
-      eosio::print("JUMPI to ", newPc);
-      if (cond)
-        jump_to(newPc);
-    }
-
-    void jumpdest() {}
-
-    void pc()
-    {
-      ctxt->s.push(ctxt->get_pc());
-    }
-
-    void msize()
-    {
-      ctxt->s.push(ctxt->get_used_mem() * 32);
-    }
-
-    void mload()
-    {
-      const auto offset = ctxt->s.popu64();
-      prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-      const auto start = ctxt->mem.data() + offset;
-      auto res = intx::from_big_endian(start, ProcessorConsts::WORD_SIZE);
-      eosio::print("\nMLOAD: ", to_string(res));
-      ctxt->s.push(res);
-    }
-
-    void mstore()
-    {
-      const auto offset = ctxt->s.popu64();
-      const auto word = ctxt->s.pop();
-      prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-      eosio::print("\nMSTORE: ", to_string(word));
-      intx::to_big_endian(word, ctxt->mem.data() + offset);
-    }
-
-    void mstore8()
-    {
-      const auto offset = ctxt->s.popu64();
-      const auto b = shrink<uint8_t>(ctxt->s.pop());
-      prepare_mem_access(offset, sizeof(b));
-      ctxt->mem[offset] = b;
-    }
-
-    void sload()
-    {
-      const auto k = ctxt->s.pop();
-      auto loaded = contract->loadkv(ctxt->callee.get_address(), k);
-      ctxt->s.push(loaded);
-    }
-
-    void sstore()
-    {
-      eosio::check(!ctxt->is_static, "Invalid static state change");
-      const auto k = ctxt->s.pop();
-      const auto v = ctxt->s.pop();
-      eosio::print("\nSSTORE Key ", intx::hex(k), " Value: ", intx::hex(v));
-
-      if (!v) {
-        contract->removekv(ctxt->callee.get_address(), k);
+      constexpr auto ones = ~uint256_t{};
+      if (shift >= 256) {
+        ctxt->s.push(ones);
       } else {
-        contract->storekv(ctxt->callee.get_address(), k, v);
+        ctxt->s.push((value >> shift) | (ones << (256 - shift)));
       }
+    }
+
+    void sha3()
+    {
+      const auto offset = ctxt->s.popu64();
+      const auto size = ctxt->s.popu64();
+      prepare_mem_access(offset, size);
+
+      // Update gas (ceiling)
+      use_gas(((size + 31) / 32) * GP_SHA3_WORD);
+
+      uint8_t h[32];
+      keccak_256(ctxt->mem.data() + offset, static_cast<unsigned int>(size), h);
+      ctxt->s.push(intx::from_big_endian(h, sizeof(h)));
+    }
+
+    void address()
+    {
+      ctxt->s.push(ctxt->callee.get_address());
+    }
+
+    void balance()
+    {
+      const auto address = pop_addr(ctxt->s);
+      const Account& given_account = contract->get_account(address);
+      ctxt->s.push(given_account.get_balance_u64());
+    }
+
+    void origin()
+    {
+      const auto address = checksum160ToAddress(*transaction.sender);
+      ctxt->s.push(address);
+    }
+
+    void caller()
+    {
+      ctxt->s.push(ctxt->caller);
+    }
+
+    void callvalue()
+    {
+      ctxt->s.push(ctxt->call_value);
+    }
+
+    void calldataload()
+    {
+      const auto index = ctxt->s.pop();
+      const auto input_size = ctxt->input.size();
+
+      if (input_size < index)
+        ctxt->s.push(0);
+      else
+      {
+        const auto begin = static_cast<size_t>(index);
+        const auto end = std::min(begin + 32, input_size);
+
+        uint8_t data[32] = {};
+        for (size_t i = 0; i < (end - begin); ++i)
+            data[i] = ctxt->input[begin + i];
+
+        ctxt->s.push(intx::be::load<uint256_t>(data));
+      }
+    }
+
+    void calldatasize()
+    {
+      ctxt->s.push(ctxt->input.size());
+    }
+
+    void calldatacopy()
+    {
+      copy_mem(ctxt->mem, ctxt->input, 0);
+    }
+
+    void codesize()
+    {
+      ctxt->s.push(ctxt->prog.code.size());
+    }
+
+    void codecopy()
+    {
+      const auto mem_index = ctxt->s.popu64();
+      const auto input_index = ctxt->s.popu64();
+      const auto size = ctxt->s.popu64();
+
+      prepare_mem_access(mem_index, size);
+
+      const auto code_size = ctxt->prog.code.size();
+      auto dst = static_cast<size_t>(mem_index);
+      auto src = code_size < input_index ? code_size : static_cast<size_t>(input_index);
+      auto s = static_cast<size_t>(size);
+      auto copy_size = std::min(s, code_size - src);
+
+      // Gas cost
+      use_gas(num_words(s) * GP_COPY);
+
+      if (copy_size > 0)
+          std::memcpy(&ctxt->mem[dst], &ctxt->prog.code[src], copy_size);
+
+      if (s - copy_size > 0)
+          std::memset(&ctxt->mem[dst + copy_size], 0, s - copy_size);
+
+    }
+
+    void gasprice()
+    {
+      ctxt->s.push(GAS_PRICE);
     }
 
     void extcodesize()
@@ -917,50 +953,6 @@ namespace evm4eos
       auto address = pop_addr(ctxt->s);
       auto code = contract->get_account(address).get_code();
       copy_mem(ctxt->mem, code, Opcode::STOP);
-    }
-
-    void codecopy()
-    {
-      auto size = (ctxt->prog.code.size());
-      copy_mem(ctxt->mem, ctxt->prog.code, Opcode::STOP);
-    }
-
-    void codesize()
-    {
-      ctxt->s.push(ctxt->prog.code.size());
-    }
-
-    void calldataload()
-    {
-      const auto offset = ctxt->s.popu64();
-      safeAdd(offset, ProcessorConsts::WORD_SIZE);
-      const auto sizeInput = ctxt->input.size();
-
-      uint256_t v = 0;
-      for (uint8_t i = 0; i < ProcessorConsts::WORD_SIZE; i++)
-      {
-        const auto j = offset + i;
-        if (j < sizeInput)
-        {
-          v = (v << 8) + ctxt->input[j];
-        }
-        else
-        {
-          v <<= 8 * (ProcessorConsts::WORD_SIZE - i);
-          break;
-        }
-      }
-      ctxt->s.push(v);
-    }
-
-    void calldatasize()
-    {
-      ctxt->s.push(ctxt->input.size());
-    }
-
-    void calldatacopy()
-    {
-      copy_mem(ctxt->mem, ctxt->input, 0);
     }
 
     void returndatasize()
@@ -996,32 +988,132 @@ namespace evm4eos
       ctxt->s.push(intx::from_big_endian(h, sizeof(h)));
     }
 
-    void address()
+    void blockhash()
     {
-      ctxt->s.push(ctxt->callee.get_address());
+      const auto i = ctxt->s.popu64();
+      if (i >= 256)
+        ctxt->s.push(0);
+      else
+        ctxt->s.push(get_block_hash(i % 256));
     }
 
-    void balance()
+    void coinbase()
     {
-      auto address = pop_addr(ctxt->s);
-      const Account& given_account = contract->get_account(address);
-      ctxt->s.push(given_account.get_balance_u64());
+      ctxt->s.push(get_current_block().coinbase);
     }
 
-    void origin()
+    void timestamp()
     {
-      ctxt->s.push(*transaction.to_address);
+      ctxt->s.push(get_current_block().timestamp);
     }
 
-    void caller()
+    void number()
     {
-      ctxt->s.push(ctxt->caller);
+      ctxt->s.push(eosio::tapos_block_num());
     }
 
-    void callvalue()
+    void difficulty()
     {
-      ctxt->s.push(ctxt->call_value);
+      ctxt->s.push(get_current_block().difficulty);
     }
+
+    void gaslimit()
+    {
+      ctxt->s.push(get_current_block().gas_limit);
+    }
+
+    void chainid()
+    {
+      ctxt->s.push(CURRENT_CHAIN_ID);
+    }
+
+    // TODO check if balance of contract is correct if it changes mid operation from start
+    void selfbalance()
+    {
+      ctxt->s.push(ctxt->callee.get_balance_u64());
+    }
+
+    void pop()
+    {
+      ctxt->s.pop();
+    }
+
+    void mload()
+    {
+      const auto offset = ctxt->s.popu64();
+      prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+      const auto start = ctxt->mem.data() + offset;
+      auto res = intx::from_big_endian(start, ProcessorConsts::WORD_SIZE);
+      ctxt->s.push(res);
+    }
+
+    void mstore()
+    {
+      const auto offset = ctxt->s.popu64();
+      const auto word = ctxt->s.pop();
+      prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+      intx::to_big_endian(word, ctxt->mem.data() + offset);
+    }
+
+    void mstore8()
+    {
+      const auto offset = ctxt->s.popu64();
+      const auto b = shrink<uint8_t>(ctxt->s.pop());
+      prepare_mem_access(offset, sizeof(b));
+      ctxt->mem[offset] = b;
+    }
+
+    void sload()
+    {
+      const auto k = ctxt->s.pop();
+      auto loaded = contract->loadkv(ctxt->callee.get_address(), k);
+      ctxt->s.push(loaded);
+    }
+
+    void sstore()
+    {
+      eosio::check(!ctxt->is_static, "Invalid static state change");
+      const auto k = ctxt->s.pop();
+      const auto v = ctxt->s.pop();
+      // eosio::print("\nSSTORE Key ", intx::hex(k), " Value: ", intx::hex(v));
+
+      if (!v) {
+        contract->removekv(ctxt->callee.get_address(), k);
+      } else {
+        contract->storekv(ctxt->callee.get_address(), k, v);
+      }
+    }
+
+    void jump()
+    {
+      const auto newPc = ctxt->s.popu64();
+      jump_to(newPc);
+    }
+
+    void jumpi()
+    {
+      const auto newPc = ctxt->s.popu64();
+      const auto cond = ctxt->s.pop();
+      if (cond)
+        jump_to(newPc);
+    }
+
+    void pc()
+    {
+      ctxt->s.push(ctxt->get_pc());
+    }
+
+    void msize()
+    {
+      ctxt->s.push(ctxt->get_used_mem() * 32);
+    }
+
+    void gas()
+    {
+      ctxt->s.push(ctxt->gas_left);
+    }
+
+    void jumpdest() {}
 
     void push()
     {
@@ -1046,21 +1138,30 @@ namespace evm4eos
       ctxt->set_pc(pc);
     }
 
-    void pop()
+    void dup()
     {
-      ctxt->s.pop();
+      ctxt->s.dup(get_op() - DUP1);
+    }
+
+    void swap()
+    {
+      ctxt->s.swap(get_op() - SWAP1 + 1);
     }
 
     void log()
     {
       eosio::check(!ctxt->is_static, "Invalid static state change");
 
-      const uint8_t n = get_op() - LOG0;
       const auto offset = ctxt->s.popu64();
       const auto size = ctxt->s.popu64();
 
-      vector<uint256_t> topics(n);
-      for (int i = 0; i < n; i++) {
+      // Gas
+      use_gas(size * GP_LOG_DATA);
+
+      // Get topic data from stack
+      const uint8_t number_of_logs = get_op() - LOG0;
+      vector<uint256_t> topics(number_of_logs);
+      for (int i = 0; i < number_of_logs; i++) {
         topics[i] = ctxt->s.pop();
       }
 
@@ -1072,136 +1173,7 @@ namespace evm4eos
       });
     }
 
-    void blockhash()
-    {
-      const auto i = ctxt->s.popu64();
-      if (i >= 256)
-        ctxt->s.push(0);
-      else
-        ctxt->s.push(get_block_hash(i % 256));
-    }
-
-    void number()
-    {
-      ctxt->s.push(eosio::tapos_block_num());
-    }
-
-    void gasprice()
-    {
-      ctxt->s.push(GAS_PRICE);
-    }
-
-    void coinbase()
-    {
-      ctxt->s.push(get_current_block().coinbase);
-    }
-
-    void timestamp()
-    {
-      ctxt->s.push(get_current_block().timestamp);
-    }
-
-    void difficulty()
-    {
-      ctxt->s.push(get_current_block().difficulty);
-    }
-
-    void gas()
-    {
-      // TODO fix
-      ctxt->s.push(ctxt->gas_left - 2);
-    }
-
-    void gaslimit()
-    {
-      ctxt->s.push(get_current_block().gas_limit);
-    }
-
-    void chainid()
-    {
-      ctxt->s.push(CURRENT_CHAIN_ID);
-    }
-
-    // TODO check if balance of contract is correct if it changes mid operation from start
-    void selfbalance()
-    {
-      ctxt->s.push(ctxt->callee.get_balance_u64());
-    }
-
-    void sha3()
-    {
-      const auto offset = ctxt->s.popu64();
-      const auto size = ctxt->s.popu64();
-      prepare_mem_access(offset, size);
-
-      // Update gas (ceiling)
-      use_gas(((size + 31) / 32) * GP_SHA3_WORD);
-
-      uint8_t h[32];
-      keccak_256(ctxt->mem.data() + offset, static_cast<unsigned int>(size), h);
-      ctxt->s.push(intx::from_big_endian(h, sizeof(h)));
-    }
-
-    void return_()
-    {
-      const auto offset = ctxt->s.popu64();
-      const auto size = ctxt->s.popu64();
-
-      // invoke caller's return handler
-      ctxt->result_cb(copy_from_mem(offset, size));
-      pop_context();
-    }
-
-    void revert()
-    {
-      const auto offset = ctxt->s.popu64();
-      const auto size = ctxt->s.popu64();
-
-      // invoke caller's return handler
-      ctxt->error_cb(
-        Exception(Exception::Type::revert, "The transaction has been reverted to it's initial state. Likely issue: A non-payable function was called with value, or your balance is too low."),
-        copy_from_mem(offset, size)
-      );
-      pop_context();
-    }
-
-    void stop()
-    {
-      // (1) save halt handler
-      auto halt_cb = ctxt->halt_cb;
-
-      // (2) pop current context
-      pop_context();
-
-      // (3) invoke halt handler
-      halt_cb();
-    }
-
-    void selfdestruct()
-    {
-      eosio::check(!ctxt->is_static, "Invalid static state change");
-
-      // Find recipient
-      auto recipient_address = pop_addr(ctxt->s);
-      auto recipient = contract->get_account(recipient_address);
-
-      // Check contract balance
-      auto balance = ctxt->callee.get_balance();
-      if (balance > 0) {
-        // New Account gas fee
-        if (recipient.is_empty()) {
-          use_gas(GP_NEW_ACCOUNT);
-        }
-
-        // Transfer all balance
-        contract->transfer_internal(ctxt->callee.get_address(), recipient.get_address(), balance);
-      }
-
-      // Add to list for later
-      transaction.selfdestruct_list.push_back(ctxt->callee.get_address());
-      stop();
-    }
-
+    // Common for both CREATE and CREATE2
     void _create (const uint64_t& contract_value, const uint64_t& offset, const int64_t& size, const Address& new_address) {
       auto initCode = copy_from_mem(offset, size);
 
@@ -1244,31 +1216,41 @@ namespace evm4eos
       );
     }
 
-    // Starting point for both CREATE and CREATE2
-    void create(bool create2 = false)
+    void create()
     {
       eosio::check(!ctxt->is_static, "Invalid static state change");
 
       const auto contract_value = ctxt->s.popAmount();
       const auto offset         = ctxt->s.popu64();
       const auto size           = ctxt->s.popu64();
-      const auto arbitrary      = create2
-                                    ? ctxt->s.pop()
-                                    : ctxt->callee.get_nonce();
+      const auto arbitrary      = ctxt->callee.get_nonce();
 
       auto new_address = generate_address(ctxt->callee.get_address(), arbitrary);
       _create(contract_value, offset, size, new_address);
     }
 
+    void create2()
+    {
+      eosio::check(!ctxt->is_static, "Invalid static state change");
+
+      const auto contract_value = ctxt->s.popAmount();
+      const auto offset         = ctxt->s.popu64();
+      const auto size           = ctxt->s.popu64();
+      const auto arbitrary      = ctxt->s.pop();
+
+      // Gas cost for hashing new address
+      const auto arbitrary_size = static_cast<int>(intx::count_significant_words<uint8_t>(arbitrary));
+      use_gas(GP_SHA3_WORD * ((arbitrary_size + 31) / 32));
+
+      auto new_address = generate_address(ctxt->callee.get_address(), arbitrary);
+      _create(contract_value, offset, size, new_address);
+    }
+
+    // TODO fix gas pricing
     void call()
     {
       // Get current OP
       const auto op = get_op();
-
-      // Check not static
-      if (op == Opcode::CALL || op == Opcode::CALLCODE) {
-        eosio::check(!ctxt->is_static, "Invalid static state change");
-      }
 
       // Pop 6 (DELEGATECALL) or 7 (REST) from stack
       const auto _gas_limit = ctxt->s.pop();
@@ -1295,6 +1277,10 @@ namespace evm4eos
       if (value != 0) {
         // callValueTransfer (9000) - callStipend (2300)
         if (op == Opcode::CALL || op == Opcode::CALLCODE) {
+          // Check not static
+          eosio::check(!ctxt->is_static, "Invalid static state change");
+
+          // Gas change
           use_gas(GP_CALL_VALUE_TRANSFER - GP_CALL_STIPEND);
         }
 
@@ -1310,6 +1296,11 @@ namespace evm4eos
       // 63/64 gas
       const auto gas_allowed = ctxt->gas_left - (ctxt->gas_left / 64);
       const auto gas_limit = (_gas_limit > gas_allowed) ? gas_allowed : _gas_limit;
+
+      // Check max depth
+      if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
+        eosio::check(false, "Reached max call depth (" + to_string(ProcessorConsts::MAX_CALL_DEPTH) + ") (outOfBounds)");
+      }
 
       // Fetch input if available
       std::vector<uint8_t> input = {};
@@ -1363,6 +1354,63 @@ namespace evm4eos
         halt_cb,
         he
       );
+    }
+
+    void return_()
+    {
+      const auto offset = ctxt->s.popu64();
+      const auto size = ctxt->s.popu64();
+
+      // invoke caller's return handler
+      ctxt->result_cb(copy_from_mem(offset, size));
+      pop_context();
+    }
+
+    void revert()
+    {
+      const auto offset = ctxt->s.popu64();
+      const auto size = ctxt->s.popu64();
+
+      // invoke caller's return handler
+      ctxt->error_cb(
+        Exception(Exception::Type::revert, "The transaction has been reverted to it's initial state. Likely issue: A non-payable function was called with value, or your balance is too low."),
+        copy_from_mem(offset, size)
+      );
+      pop_context();
+    }
+
+    void selfdestruct()
+    {
+      eosio::check(!ctxt->is_static, "Invalid static state change");
+
+      // Find recipient
+      auto recipient_address = pop_addr(ctxt->s);
+      auto recipient = contract->get_account(recipient_address);
+
+      // Contract addres
+      auto contract_address = ctxt->callee.get_address();
+
+      // Gas refund if not already scheduled for deletion
+      auto existing = std::find(transaction.selfdestruct_list.begin(), transaction.selfdestruct_list.end(), contract_address);
+      if (existing != transaction.selfdestruct_list.end()) {
+        refund_gas(GP_SELFDESTRUCT_REFUND);
+      }
+
+      // Check contract balance
+      auto balance = ctxt->callee.get_balance();
+      if (balance > 0) {
+        // New Account gas fee
+        if (recipient.is_empty()) {
+          use_gas(GP_NEW_ACCOUNT);
+        }
+
+        // Transfer all balance
+        contract->transfer_internal(contract_address, recipient_address, balance);
+      }
+
+      // Add to list for later
+      transaction.selfdestruct_list.push_back(contract_address);
+      stop();
     }
   };
 

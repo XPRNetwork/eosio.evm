@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model.hpp"
+#include "tables.hpp"
 #include "eosio.evm.hpp"
 #include "stack.hpp"
 

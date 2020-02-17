@@ -12,6 +12,7 @@
     "@bloks/utils": "^4.0.153",
     "@jafri/eosjs2": "^21.0.0-rc.8",
     "@warren-bank/ethereumjs-tx-sign": "^2.0.0",
+    "commander": "^4.1.1",
     "eosjs": "^20.0.3",
     "ethereum-input-data-decoder": "^0.3.0",
     "ethereum-tx-decoder": "^3.0.0",

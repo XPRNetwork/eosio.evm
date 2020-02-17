@@ -1,0 +1,4 @@
+[submodule "tests/jsontests"]
+	path = tests/jsontests
+	url = https://github.com/ethereum/tests
+	branch = develop

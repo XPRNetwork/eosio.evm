@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests-complete.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-install.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-mkdir.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-download.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-update.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-patch.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-configure.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-build.rule"
+		},
+		{
+			"file" : "/Users/jafri/eosio.evm/contracts_unit_tests-prefix/src/contracts_unit_tests-stamp/contracts_unit_tests-test.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"contracts_unit_tests"
+		],
+		"name" : "contracts_unit_tests"
+	}
+}

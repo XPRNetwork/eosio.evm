@@ -71,6 +71,20 @@
             ]
         },
         {
+            "name": "devcreate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                },
+                {
+                    "name": "account",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "printtx",
             "base": "",
             "fields": [
@@ -129,6 +143,11 @@
             "name": "create",
             "type": "create",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CREATE\nsummary: 'Create'\nicon:\n---"
+        },
+        {
+            "name": "devcreate",
+            "type": "devcreate",
+            "ricardian_contract": ""
         },
         {
             "name": "printtx",

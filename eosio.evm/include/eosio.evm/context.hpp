@@ -48,7 +48,7 @@ namespace evm4eos {
       ReturnHandler&& result_cb,
       HaltHandler&& halt_cb,
       ExceptionHandler&& error_cb
-    ) :
+    ) noexcept :
       caller(caller),
       callee(callee),
       gas_left(gas_left),
@@ -59,7 +59,12 @@ namespace evm4eos {
       result_cb(result_cb),
       halt_cb(halt_cb),
       error_cb(error_cb)
-    {}
+    {
+      // Reserve 4 KB of memory if code
+      if (!prog.code.empty()) {
+        mem.reserve(4096);
+      }
+    }
 
     bool pc_valid() const { return pc < prog.code.size(); }
     auto get_used_mem() const { return (mem.size() + ProcessorConsts::WORD_SIZE - 1) / ProcessorConsts::WORD_SIZE;  }

@@ -43,10 +43,10 @@ RM = /usr/local/Cellar/cmake/3.16.4/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jafri/eosio_contracts/tests
+CMAKE_SOURCE_DIR = /Users/jafri/eosio.evm/tests
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jafri/eosio_contracts/tests
+CMAKE_BINARY_DIR = /Users/jafri/eosio.evm/tests
 
 # Utility rule file for ExperimentalStart.
 
@@ -71,6 +71,6 @@ CMakeFiles/ExperimentalStart.dir/clean:
 .PHONY : CMakeFiles/ExperimentalStart.dir/clean
 
 CMakeFiles/ExperimentalStart.dir/depend:
-	cd /Users/jafri/eosio_contracts/tests && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests /Users/jafri/eosio_contracts/tests/CMakeFiles/ExperimentalStart.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jafri/eosio.evm/tests && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests /Users/jafri/eosio.evm/tests/CMakeFiles/ExperimentalStart.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ExperimentalStart.dir/depend
 

@@ -8,7 +8,7 @@
 #include "constants.hpp"
 #include "util.hpp"
 #include "logs.hpp"
-#include "model.hpp"
+#include "tables.hpp"
 
 namespace evm4eos
 {
@@ -84,6 +84,7 @@ namespace evm4eos
       eosio::check(value >= 0 && value <= eosio::asset::max_amount, "Invalid Transaction: Max Value in EOS EVM TX is 2^62 - 1, and it must be positive.");
 
       // Hash
+      // TODO do we need this in prod? how many times are we calling encode() too
       hash = keccak_256(encode());
 
       // Gas
@@ -179,8 +180,10 @@ namespace evm4eos
     void print() const
     {
       eosio::print(
+        "\x1b[36m\n",
         "sender ",   *sender,                           "\n",
-        "data ",      bin2hex(data),                    "\n",
+        // "data ",      bin2hex(data),                    "\n",
+        "data size: ",  data.size(),                    "\n",
         "gasPrice ", static_cast<int128_t>(gas_price), "\n",
         "gasLimit ", static_cast<int128_t>(gas_limit), "\n",
         "nonce ",     intx::hex(nonce),                 "\n",
@@ -189,13 +192,14 @@ namespace evm4eos
         "v ",         v,                                "\n"
         "r ",         intx::hex(r),                     "\n",
         "s ",         intx::hex(s),                     "\n",
-        "hash ",      hash,                             "\n"
+        "hash ",      hash,                             "\n",
+        "\x1b[0m"
       );
     }
     void printhex() const
     {
       eosio::print(
-        "data ",      bin2hex(data),        "\n",
+        // "data ",      bin2hex(data),        "\n",
         "gasLimit ",  intx::hex(gas_limit), "\n",
         "gasPrice ",  intx::hex(gas_price), "\n",
         "nonce ",     intx::hex(nonce),     "\n",

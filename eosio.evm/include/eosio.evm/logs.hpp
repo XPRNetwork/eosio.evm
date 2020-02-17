@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "model.hpp"
+#include "tables.hpp"
 
 namespace evm4eos
 {

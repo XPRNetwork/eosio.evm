@@ -6,5 +6,5 @@ CXX_FLAGS =  -O3    -fnative
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/jafri/eosio_contracts/contracts/eosio.evm/tests/../include -I/Users/jafri/eosio_contracts/contracts/eosio.evm/tests/../external 
+CXX_INCLUDES = -I/Users/jafri/eosio.evm/eosio.evm/tests/../include -I/Users/jafri/eosio.evm/eosio.evm/tests/../external 
 

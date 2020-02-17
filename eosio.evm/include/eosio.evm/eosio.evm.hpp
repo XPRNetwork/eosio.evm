@@ -5,7 +5,7 @@
 #include <vector>
 
 // External
-#include <intx/div.cpp>
+#include <intx/base.hpp>
 #include <ecc/uECC.c>
 #include <keccak256/k.c>
 #include <rlp/rlp.hpp>
@@ -25,7 +25,8 @@
 #include "context.hpp"
 #include "processor.hpp"
 #include "stack.hpp"
-#include "model.hpp"
+#include "tables.hpp"
+// #include "account.hpp"
 
 namespace evm4eos {
   class [[eosio::contract("eosio.evm")]] evm : public eosio::contract {
@@ -59,6 +60,7 @@ namespace evm4eos {
     account_state_table _accounts_states;
 
     // TODO remove in prod
+    ACTION devcreate(const eosio::checksum160& address, const eosio::name& account);
     ACTION testtx(const std::vector<int8_t>& tx);
     ACTION printtx(const std::vector<int8_t>& tx);
     template <typename T>

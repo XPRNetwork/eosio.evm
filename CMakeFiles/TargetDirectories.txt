@@ -1,4 +1,0 @@
-/Users/jafri/eosio.evm/CMakeFiles/rebuild_cache.dir
-/Users/jafri/eosio.evm/CMakeFiles/edit_cache.dir
-/Users/jafri/eosio.evm/CMakeFiles/contracts_unit_tests.dir
-/Users/jafri/eosio.evm/CMakeFiles/contracts_project.dir

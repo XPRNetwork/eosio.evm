@@ -1,3 +1,0 @@
-/Users/jafri/eosio.evm/eosio.evm/CMakeFiles/rebuild_cache.dir
-/Users/jafri/eosio.evm/eosio.evm/CMakeFiles/edit_cache.dir
-/Users/jafri/eosio.evm/eosio.evm/CMakeFiles/eosio.evm.dir

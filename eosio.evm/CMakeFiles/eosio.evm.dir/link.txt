@@ -1,1 +1,0 @@
-/Users/jafri/eosio.cdt/build/bin/eosio-ld  CMakeFiles/eosio.evm.dir/src/eosio.evm.cpp.obj CMakeFiles/eosio.evm.dir/src/processor.cpp.obj CMakeFiles/eosio.evm.dir/src/account.cpp.obj CMakeFiles/eosio.evm.dir/src/transfer.cpp.obj CMakeFiles/eosio.evm.dir/src/testing.cpp.obj -o eosio.evm.wasm 

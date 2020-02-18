@@ -357,11 +357,11 @@ namespace evm4eos
       /* SWAP16 */  3, // Exchange 1st and 17th stack item
 
       // a0s: Logging Operations
-      /* LOG0 */  (1 * 375), // Append log record with no topics
-      /* LOG1 */  (2 * 375), // Append log record with 1 topic
-      /* LOG2 */  (3 * 375), // Append log record with 2 topics
-      /* LOG3 */  (4 * 375), // Append log record with 3 topics
-      /* LOG4 */  (5 * 375), // Append log record with 4 topics
+      /* LOG0 */  (375), // Append log record with no topics
+      /* LOG1 */  (375), // Append log record with 1 topic
+      /* LOG2 */  (375), // Append log record with 2 topics
+      /* LOG3 */  (375), // Append log record with 3 topics
+      /* LOG4 */  (375), // Append log record with 4 topics
       /* NULL */  0,
       /* NULL */  0,
       /* NULL */  0,
@@ -543,11 +543,11 @@ namespace evm4eos
       { 0x9f, "SWAP16" }, // Exchange 1st and 17th stack item
 
       // a0s: Logging Operations
-      { 0xa0, "LOG1" }, // Append log record with no topics
-      { 0xa1, "LOG2" }, // Append log record with 1 topic
-      { 0xa2, "LOG3" }, // Append log record with 2 topics
-      { 0xa3, "LOG4" }, // Append log record with 3 topics
-      { 0xa4, "LOG5" }, // Append log record with 4 topics
+      { 0xa0, "LOG0" }, // Append log record with no topics
+      { 0xa1, "LOG1" }, // Append log record with 1 topic
+      { 0xa2, "LOG2" }, // Append log record with 2 topics
+      { 0xa3, "LOG3" }, // Append log record with 3 topics
+      { 0xa4, "LOG4" }, // Append log record with 4 topics
 
       // f0s: System operations
       { 0xf0, "CREATE" }, // Create a new account with associated code

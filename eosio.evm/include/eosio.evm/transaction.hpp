@@ -44,10 +44,13 @@ namespace evm4eos
     std::optional<eosio::checksum160> sender; // Address recovered from 1) signature or 2) EOSIO Account Table (authorized by EOSIO account in case 2)
     std::optional<Address> to_address;        // Currently set as 256 bit. The 160-bit address of the message call’s recipient or, for a contract creation transaction, ∅, used here to denote the only member of B0 ;
     std::unique_ptr<Account> sender_account;  // Pointer to sender account
-    uint256_t gas_used;                       // CUSTOM base cost of gas used in a transaction
     std::vector<Address> selfdestruct_list;   // SELFDESTRUCT List
     LogHandler log_handler = {};              // Log handler for transaction
     eosio::checksum256 hash = {};             // Log handler for transaction
+
+    uint256_t gas_used;  // Gas used in transaction
+    uint256_t gas_refunds;  // Refunds processed in transaction
+    std::map<uint256_t, uint256_t> original_storage; // Cache for SSTORE
 
     // Signature data
     uint8_t v;

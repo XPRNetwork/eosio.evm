@@ -188,39 +188,43 @@ namespace evm4eos
     // - Current value is what is currently stored in EOSIO
     // - New value is the value to be stored
     void process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
-      eosio::check(ctxt->gas_left > 2300, "out of gas");
+      eosio::check(ctxt->gas_left > GP_SSTORE_MINIMUM, "out of gas");
 
       if (current_value == new_value) {
-        return use_gas(800);
+        return use_gas(GP_SLOAD_GAS);
       }
 
       if (original_value == current_value) {
-        if (!original_value) {
-          return use_gas(20000);
-        }
-        if (!new_value) {
-          refund_gas(15000);
-        }
-        return use_gas(5000);
-      }
-
-      if (original_value) {
-        if (!current_value) {
-          // sub_refund(15000);
-        } else if (!new_value) {
-          refund_gas(15000);
-        }
-      }
-
-      if (original_value == new_value) {
-        if (!original_value) {
-          refund_gas(19200);
+        if (original_value == 0) {
+          return use_gas(GP_SSTORE_SET_GAS);
         } else {
-          refund_gas(4200);
+          refund_gas(GP_SSTORE_RESET_GAS);
+        }
+
+        if (new_value == 0) {
+          transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
+        }
+      } else {
+        use_gas(GP_SLOAD_GAS);
+
+        if (original_value != 0) {
+          if (current_value == 0 && new_value != 0) {
+            transaction.gas_refunds -= GP_SSTORE_CLEARS_SCHEDULE;
+          }
+
+          if (new_value == 0 && current_value != 0) {
+            transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
+          }
+        }
+
+        if (original_value == new_value) {
+          if (original_value == 0) {
+            transaction.gas_refunds += GP_SSTORE_SET_GAS - GP_SLOAD_GAS;
+          } else {
+            transaction.gas_refunds += GP_SSTORE_RESET_GAS - GP_SLOAD_GAS;
+          }
         }
       }
-
-      return use_gas(800);
     }
 
     // TODO fix memory gas usage (evmone check_memory)
@@ -1066,17 +1070,28 @@ namespace evm4eos
     void sload()
     {
       const auto k = ctxt->s.pop();
-      auto loaded = contract->loadkv(ctxt->callee.get_address(), k);
+      uint256_t loaded = contract->loadkv(ctxt->callee.get_address(), k);
       ctxt->s.push(loaded);
     }
 
     void sstore()
     {
       eosio::check(!ctxt->is_static, "Invalid static state change");
+
+      // Get items from stack
       const auto k = ctxt->s.pop();
       const auto v = ctxt->s.pop();
-      // eosio::print("\nSSTORE Key ", intx::hex(k), " Value: ", intx::hex(v));
 
+      // Store as original if first time seeing it
+      uint256_t current_value = contract->loadkv(ctxt->callee.get_address(), k);
+      if (transaction.original_storage.count(k) == 0) {
+        transaction.original_storage[k] = current_value;
+      }
+
+      // Charge gas
+      process_sstore_gas(transaction.original_storage[k], current_value, v);
+
+      // Remove or store
       if (!v) {
         contract->removekv(ctxt->callee.get_address(), k);
       } else {
@@ -1155,15 +1170,15 @@ namespace evm4eos
       const auto offset = ctxt->s.popu64();
       const auto size = ctxt->s.popu64();
 
-      // Gas
-      use_gas(size * GP_LOG_DATA);
-
       // Get topic data from stack
       const uint8_t number_of_logs = get_op() - LOG0;
       vector<uint256_t> topics(number_of_logs);
       for (int i = 0; i < number_of_logs; i++) {
         topics[i] = ctxt->s.pop();
       }
+
+      // Gas
+      use_gas((size * GP_LOG_DATA) + (number_of_logs * GP_EXTRA_PER_LOG));
 
       // TODO implement log table as optional feature
       transaction.log_handler.add({

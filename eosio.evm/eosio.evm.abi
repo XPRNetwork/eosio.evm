@@ -48,6 +48,10 @@
                 {
                     "name": "value",
                     "type": "checksum256"
+                },
+                {
+                    "name": "address",
+                    "type": "checksum160"
                 }
             ]
         },

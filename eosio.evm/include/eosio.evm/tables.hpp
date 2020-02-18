@@ -40,11 +40,13 @@ namespace evm4eos {
     uint64_t index;
     eosio::checksum256 key;
     bigint::checksum256 value;
+    eosio::checksum160 address; // TODO not really needed
 
     uint64_t primary_key() const { return index; };
     eosio::checksum256 by_key() const { return key; };
+    eosio::checksum256 by_address() const { return pad160(address); }; // TODO not really needed
 
-    EOSLIB_SERIALIZE(AccountState, (index)(key)(value));
+    EOSLIB_SERIALIZE(AccountState, (index)(key)(value)(address));
   };
 
   typedef eosio::multi_index<"account"_n, Account,
@@ -52,6 +54,7 @@ namespace evm4eos {
     eosio::indexed_by<eosio::name("byaccount"), eosio::const_mem_fun<Account, uint64_t, &Account::get_account>>
   > account_table;
   typedef eosio::multi_index<"accountstate"_n, AccountState,
-    eosio::indexed_by<eosio::name("bykey"), eosio::const_mem_fun<AccountState, eosio::checksum256, &AccountState::by_key>>
+    eosio::indexed_by<eosio::name("bykey"), eosio::const_mem_fun<AccountState, eosio::checksum256, &AccountState::by_key>>,
+    eosio::indexed_by<eosio::name("byaddress"), eosio::const_mem_fun<AccountState, eosio::checksum256, &AccountState::by_address>> // TODO not really needed
   > account_state_table;
 }

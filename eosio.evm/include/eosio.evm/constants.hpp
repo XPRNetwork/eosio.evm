@@ -51,22 +51,28 @@ namespace evm4eos
   // Gas
   static constexpr uint256_t GAS_PRICE              = 1;
 
-  static constexpr uint256_t GP_TRANSACTION         = 21000;
-  static constexpr uint256_t GP_TXDATAZERO          = 4;
-  static constexpr uint256_t GP_TXDATANONZERO       = 16;
-  static constexpr uint256_t GP_TXCREATE            = 32000;
-  static constexpr uint256_t GP_NEW_ACCOUNT         = 25000;
-  static constexpr uint256_t GP_COPY                = 3;
-  static constexpr uint256_t GP_CALL_VALUE_TRANSFER = 9000;
-  static constexpr uint256_t GP_CALL_STIPEND        = 2300;
-  static constexpr uint256_t GP_SHA3_WORD           = 6;
-  static constexpr uint256_t GP_EXP_BYTE            = 50;
-  static constexpr uint256_t GP_CREATE_DATA         = 200;
-  static constexpr uint256_t GP_LOG_DATA            = 8;
-  static constexpr uint256_t GP_SELFDESTRUCT_REFUND = 24000;
+  static constexpr uint256_t GP_TRANSACTION            = 21000;
+  static constexpr uint256_t GP_TXDATAZERO             = 4;
+  static constexpr uint256_t GP_TXDATANONZERO          = 16;
+  static constexpr uint256_t GP_TXCREATE               = 32000;
+  static constexpr uint256_t GP_NEW_ACCOUNT            = 25000;
+  static constexpr uint256_t GP_COPY                   = 3;
+  static constexpr uint256_t GP_CALL_VALUE_TRANSFER    = 9000;
+  static constexpr uint256_t GP_CALL_STIPEND           = 2300;
+  static constexpr uint256_t GP_SHA3_WORD              = 6;
+  static constexpr uint256_t GP_EXP_BYTE               = 50;
+  static constexpr uint256_t GP_CREATE_DATA            = 200;
+  static constexpr uint256_t GP_LOG_DATA               = 8;
+  static constexpr uint256_t GP_SELFDESTRUCT_REFUND    = 24000;
+  static constexpr uint256_t GP_SSTORE_MINIMUM         = 2300;
+  static constexpr uint256_t GP_SLOAD_GAS              = 800;
+  static constexpr uint256_t GP_SSTORE_SET_GAS         = 20000;
+  static constexpr uint256_t GP_SSTORE_RESET_GAS       = 5000;
+  static constexpr uint256_t GP_SSTORE_CLEARS_SCHEDULE = 15000;
+  static constexpr uint256_t GP_EXTRA_PER_LOG          = 375;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;
-  static constexpr size_t MAX_TX_SIZE = 128 * 1024; // Currently 128KB, more after EIP-2464
-  static constexpr size_t MAX_CODE_SIZE = 24 * 1024; // Currently 24KB, unlimited after EIP 1538
+  static constexpr size_t MAX_TX_SIZE    = 128 * 1024;  // Currently 128KB, more after EIP-2464
+  static constexpr size_t MAX_CODE_SIZE  = 24 * 1024;   // Currently 24KB, unlimited after EIP 1538
 } // namespace evm4eos

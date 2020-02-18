@@ -115,7 +115,7 @@ namespace evm4eos {
     });
   }
 
-  // Storage
+  // Returns original state
   void evm::storekv(const Address& address, const uint256_t& key, const uint256_t& value) {
     auto address_160               = addressToChecksum160(address);
     auto accounts_states_byaddress = _accounts_states.get_index<eosio::name("bykey")>();
@@ -142,6 +142,7 @@ namespace evm4eos {
         a.index   = _accounts_states.available_primary_key();
         a.key     = addresskey;
         a.value   = value;
+        a.address = address_160; // TODO not really needed
       });
     }
   }

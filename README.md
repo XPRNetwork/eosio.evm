@@ -14,15 +14,15 @@ make -j4
 ```
 
 # Directory structure
-- eosio.evm/: contains all contract code
-  - src/: all sourcefiles
-  - include/eosio.evm/: all headerfiles
-  - external/: external code for ecc, intx (bigint), keccak256 and rlp
-- js/: scripts for encoding/decoding transactions for testing
-- tests/: full Ethereum/EOS tests
-  - jsontests/: submodule of https://github.com/ethereum/tests
-  - system_wasms/: eosio.system and eosio.token ABIs/WASMS
-  - eosio.evm_tests/: testing suite
+- eosio.evm: contains all contract code
+  - src: all sourcefiles
+  - include/eosio.evm: all headerfiles
+  - external: external code for ecc, intx (bigint), keccak256 and rlp
+- js: scripts for encoding/decoding transactions for testing
+- tests: full Ethereum/EOS tests
+  - jsontests: submodule of https://github.com/ethereum/tests
+  - system_wasms: eosio.system and eosio.token ABIs/WASMS
+  - eosio.evm_tests.cpp: testing suite
 - truffle: ERC20 and ERC721 contracts
 
 # EVM Notes

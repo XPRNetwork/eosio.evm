@@ -10,7 +10,7 @@
 #include "logs.hpp"
 #include "tables.hpp"
 
-namespace evm4eos
+namespace eosio_evm
 {
   /**
    * Transaction Helpers
@@ -62,6 +62,9 @@ namespace evm4eos
     {
       // Max Transaction size
       eosio::check(encoded.size() < MAX_TX_SIZE, "Invalid Transaction: Max size of a transaction is 128 KB");
+
+      // Encoded
+      // eosio::print("Encoded: ", bin2hex(encoded));
 
       // Decode
       auto rlp = rlp::decode(encoded);
@@ -221,4 +224,4 @@ namespace evm4eos
       eosio::print("\n", encode() );
     }
   };
-} // namespace evm4eos
+} // namespace eosio_evm

@@ -10,7 +10,7 @@ namespace bigint {
   using checksum256 = intx::uint256;
 }
 
-namespace evm4eos {
+namespace eosio_evm {
   /**
    *  Serialize a fixed size int
    *

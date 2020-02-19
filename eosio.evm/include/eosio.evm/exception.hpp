@@ -6,7 +6,7 @@
 
 #include "opcode.hpp"
 
-namespace evm4eos
+namespace eosio_evm
 {
   class Exception
   {
@@ -34,4 +34,4 @@ namespace evm4eos
 
     const char* what() const noexcept { return msg.c_str(); }
   };
-} // namespace evm4eos
+} // namespace eosio_evm

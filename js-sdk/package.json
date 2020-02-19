@@ -1,0 +1,85 @@
+{
+  "name": "@jafri/eosjs2",
+  "version": "21.0.0-rc.008",
+  "description": "Talk to eos API",
+  "main": "dist/index.js",
+  "scripts": {
+    "cypress": "./scripts/run-cypress.sh",
+    "cypress-ui": "./scripts/run-cypress.sh ui",
+    "prepare": "npm run build",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "lint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
+    "test": "jest src/tests/*eosjs*",
+    "test-node": "jest src/tests/*node*",
+    "test-all": "yarn test && yarn test-node && yarn cypress",
+    "build": "tsc -p ./tsconfig.json",
+    "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
+    "build-production": "yarn build && yarn build-web && yarn test-all",
+    "clean": "rm -rf dist",
+    "docs-init": "sh .docs/scripts/init.sh",
+    "docs-build": "sh .docs/scripts/build.sh",
+    "docs-serve": "python -m SimpleHTTPServer",
+    "docs-publish": "sh .docs/scripts/publish.sh"
+  },
+  "author": "block.one",
+  "license": "MIT",
+  "dependencies": {
+    "bs58": "^4.0.1",
+    "ripemd-ts": "0.0.1",
+    "elliptic": "^6.5.2"
+  },
+  "devDependencies": {
+    "@blockone/tslint-config-blockone": "3.0.0",
+    "@types/bs58": "^4.0.0",
+    "@types/elliptic": "^6.4.9",
+    "@types/jest": "24.0.6",
+    "@types/node": "11.9.4",
+    "@types/text-encoding": "0.0.35",
+    "babel-cli": "6.26.0",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-preset-env": "1.7.0",
+    "babel-preset-stage-1": "6.24.1",
+    "babel-runtime": "6.26.0",
+    "cypress": "3.1.5",
+    "jest": "23.5.0",
+    "jest-fetch-mock": "2.1.1",
+    "json-loader": "0.5.7",
+    "mocha": "5.2.0",
+    "mochawesome": "3.1.1",
+    "text-encoding": "0.7.0",
+    "ts-jest": "24.0.0",
+    "ts-loader": "5.3.3",
+    "tslint": "5.12.1",
+    "tslint-eslint-rules": "5.4.0",
+    "typescript": "3.3.3",
+    "webpack": "4.29.5",
+    "webpack-cli": "3.2.3"
+  },
+  "resolutions": {
+    "braces": "2.3.1",
+    "handlebars": "4.1.2",
+    "js-yaml": "3.13.1"
+  },
+  "jest": {
+    "automock": false,
+    "setupFiles": [
+      "./src/tests/setupJest.js"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(tsx?)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "diagnostics": false
+      }
+    },
+    "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testEnvironment": "node"
+  }
+}

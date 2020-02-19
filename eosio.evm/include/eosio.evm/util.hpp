@@ -6,7 +6,7 @@
 
 #include "constants.hpp"
 
-namespace evm4eos
+namespace eosio_evm
 {
   /**
    * Conversions
@@ -33,7 +33,13 @@ namespace evm4eos
     intx::to_big_endian(address, address_bytes.data());
     return address_bytes;
   }
-
+  inline const std::array<uint8_t, 32u> fromChecksum256(const eosio::checksum256 input)
+  {
+    std::array<uint8_t, 32U> output = {};
+    auto input_bytes = input.extract_as_byte_array();
+    std::copy(std::begin(input_bytes), std::end(input_bytes), std::begin(output) + 12);
+    return output;
+  }
   inline const std::array<uint8_t, 32u> fromChecksum160(const eosio::checksum160 input)
   {
     std::array<uint8_t, 32U> output = {};
@@ -51,6 +57,10 @@ namespace evm4eos
   inline eosio::checksum256 toChecksum256(const uint256_t& address)
   {
     return eosio::checksum256( toBin(address) );
+  }
+  inline uint256_t to_key(eosio::checksum256 input)
+  {
+    return fromBin( fromChecksum256(input) );
   }
 
   static inline eosio::checksum256 pad160(const eosio::checksum160 input)
@@ -127,4 +137,4 @@ namespace evm4eos
     std::array<uint8_t, 32u> buffer = keccak_256(rlp_encoding);
     return intx::from_big_endian(buffer.data() + 12u, 20u);
   };
-} // namespace evm4eos
+} // namespace eosio_evm

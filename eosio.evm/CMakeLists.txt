@@ -11,6 +11,8 @@ add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/account.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/transfer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/testing.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/stack.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/instructions.cpp
 )
 
 target_include_directories(eosio.evm

@@ -48,10 +48,36 @@
                 {
                     "name": "value",
                     "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "Env",
+            "base": "",
+            "fields": [
+                {
+                    "name": "currentCoinbase",
+                    "type": "string"
                 },
                 {
-                    "name": "address",
-                    "type": "checksum160"
+                    "name": "currentDifficulty",
+                    "type": "string"
+                },
+                {
+                    "name": "currentGasLimit",
+                    "type": "string"
+                },
+                {
+                    "name": "currentNumber",
+                    "type": "string"
+                },
+                {
+                    "name": "currentTimestamp",
+                    "type": "string"
+                },
+                {
+                    "name": "previousHash",
+                    "type": "string"
                 }
             ]
         },
@@ -75,7 +101,7 @@
             ]
         },
         {
-            "name": "devcreate",
+            "name": "devnewacct",
             "base": "",
             "fields": [
                 {
@@ -83,8 +109,48 @@
                     "type": "checksum160"
                 },
                 {
+                    "name": "balance",
+                    "type": "uint64"
+                },
+                {
+                    "name": "code",
+                    "type": "uint8[]"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint64"
+                },
+                {
                     "name": "account",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "devnewstore",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "printstate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
                 }
             ]
         },
@@ -109,6 +175,20 @@
                 {
                     "name": "sender",
                     "type": "checksum160?"
+                }
+            ]
+        },
+        {
+            "name": "teststatetx",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                },
+                {
+                    "name": "env",
+                    "type": "Env"
                 }
             ]
         },
@@ -149,8 +229,18 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CREATE\nsummary: 'Create'\nicon:\n---"
         },
         {
-            "name": "devcreate",
-            "type": "devcreate",
+            "name": "devnewacct",
+            "type": "devnewacct",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "devnewstore",
+            "type": "devnewstore",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "printstate",
+            "type": "printstate",
             "ricardian_contract": ""
         },
         {
@@ -162,6 +252,11 @@
             "name": "raw",
             "type": "raw",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: RAW\nsummary: 'Raw'\nicon:\n---"
+        },
+        {
+            "name": "teststatetx",
+            "type": "teststatetx",
+            "ricardian_contract": ""
         },
         {
             "name": "testtx",

@@ -7,7 +7,7 @@
 #include "eosio.evm.hpp"
 #include "tables.hpp"
 
-namespace evm4eos {
+namespace eosio_evm {
   // Forward Declaration
   class evm;
 
@@ -24,4 +24,4 @@ namespace evm4eos {
       eos_account = &*existing_address;
     }
   };
-} // namespace evm4eos
+} // namespace eosio_evm

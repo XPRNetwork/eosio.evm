@@ -98,13 +98,6 @@ public:
            ( "tx", tx)
       );
    }
-   transaction_trace_ptr devcreate( const fc::ripemd160& address, const name& account )
-   {
-      return base_tester::push_action( N(eosio.evm), N(devcreate), N(eosio.evm), mvo()
-           ( "address", address )
-           ( "account", account )
-      );
-   }
 
    action_result withdraw( const name& signer, const name& to, const asset& quantity) {
 
@@ -165,9 +158,15 @@ BOOST_FIXTURE_TEST_CASE( test_create_wrong_auth, eosio_evm_tester ) try {
    );
 } FC_LOG_AND_RETHROW()
 
+/**
+ * ERC20
+ */
 BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
-   base_tester::push_action( N(eosio.evm), N(devcreate), N(eosio.evm), mvo()
+   base_tester::push_action( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
       ( "address", "f79b834a37f3143f4a73fc3934edac67fd3a01cd")
+      ( "balance", 0)
+      ( "code", std::vector<uint8_t>{})
+      ( "nonce", 0)
       ( "account", "")
    );
    base_tester::push_action( N(eosio.evm), N(raw), N(erc20), mvo()
@@ -176,6 +175,9 @@ BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
    );
 } FC_LOG_AND_RETHROW()
 
+/**
+ * Transaction tests
+ */
 // BOOST_FIXTURE_TEST_CASE( transaction_tests, eosio_evm_tester ) try {
 //    auto testDirectory = "jsontests/TransactionTests";
 
@@ -244,7 +246,6 @@ BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
 //                          << "\033[1;31m (Actual: 1) \033[0m" << std::endl << std::endl;
 //             } catch(const fc::exception& e) {
 //                auto matches = expect_assert_message(e, "Invalid Transaction") || expect_assert_message(e, "secp256k1_ecdsa_recover_compact") || expect_assert_message(e, "Invalid hex character");
-//                // std::cout << "ABCD:" << e.get_log().at(0).get_message() << std::endl;
 //                if (matches) {
 //                   // std::cout << "\033[1;32m" << e.top_message() << "\033[0m" << std::endl;
 //                } else {
@@ -259,10 +260,43 @@ BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
 //    }
 // } FC_LOG_AND_RETHROW()
 
-// BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
-//    auto testDirectory = "jsontests/GeneralStateTests";
+/**
+ * Debugging
+ */
+// BOOST_FIXTURE_TEST_CASE( debugging, eosio_evm_tester ) try {
+//    try {
+//       base_tester::push_action( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+//          ( "address", "a94f5374fce5edbc8e2a8697c15331677e6ebf0b")
+//          ( "balance", "1000000000000000000")
+//          ( "code", std::vector<uint8_t>{})
+//          ( "nonce", 0)
+//          ( "account", "")
+//       );
+//       base_tester::push_action( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+//          ( "address", "095e7baea6a6c7c4c2dfeb977efac326af552d87")
+//          ( "balance", 0)
+//          ( "code", eosio_system::HexToBytes("73095e7baea6a6c7c4c2dfeb977efac326af552d873173095e7baea6a6c7c4c2dfeb977efac326af552d873173095e7baea6a6c7c4c2dfeb977efac326af552d8731f060005500"))
+//          ( "nonce", 0)
+//          ( "account", "")
+//       );
+//       base_tester::push_action( N(eosio.evm), N(raw), N(eosio.evm), mvo()
+//          ( "tx", "f85f800183061a8094095e7baea6a6c7c4c2dfeb977efac326af552d870180259ffc52968a0cfe417d4f0d046e3d4763d78e5e53932ea3b3b7aa987e5a631cf7a021e496f759eafe0c921834b2397439e518ac04e6a6654e714d8000cd12e44a55")
+//          ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
+//       );
+//    } catch(const fc::exception& e) {
+//       std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
+//    }
+//    produce_blocks(1);
+// } FC_LOG_AND_RETHROW()
 
-//    // For each folder in TransactionTests
+/**
+ * General state tests
+ */
+// BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
+//    auto testDirectory = "jsontests/GeneralStateTestsEOS";
+
+//    // For each folder in GeneralStateTestsEOS
+//    auto totalTests = 0;
 //    for (const auto & entry : fs::directory_iterator(testDirectory)) {
 //       std::string subFolderPath = entry.path();
 
@@ -285,56 +319,127 @@ BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
 
 //          // Get the json
 //          auto json = fc::json::from_file(testPath, fc::json::relaxed_parser);
+//          auto testJson = json.get_object()[testName];
 
-//          // Find out if it is valid
-//          auto fork_res = json.get_object()[testName][FORK].get_object();
-//          auto is_valid = fork_res.find("hash") != fork_res.end();
+//          // Deconstruct
+//          auto env = testJson["env"].get_object();
+//          auto pre = testJson["pre"];
+//          auto post = testJson["post"][FORK];
+//          auto transactions = testJson["transactions"];
 
-//          // Get rlp and erase 0x
-//          std::string rlp = json.get_object()[testName]["rlp"].get_string();
-//          rlp.erase(0, 2);
+//          // For each expected transaction post
+//          for (std::size_t i = 0; i < post.size(); ++i) {
+//             auto results = post[i]["result"];
 
-//          // Skip
-//          if (testName == "") {
-//             // NO OP
-//          }
-//          // If valid
-//          else if (is_valid)
-//          {
-//             auto res             = testtx(rlp);
-//             auto console         = fc::json::from_string(res->action_traces[0].console);
-//             auto hash            = *(console.get_object().find("hash"));
-//             auto sender          = *(console.get_object().find("sender"));
-//             auto expected_hash   = *(fork_res.find("hash"));
-//             auto expected_sender = *(fork_res.find("sender"));
+//             // PREPOPULATE
+//             for (std::size_t j = 0; j < pre.size(); ++j) {
+//                // Get address (only necessary for prepopulate, the rest are not 0x encoded)
+//                std::string address = fc::json::to_string(pre[j]["address"], fc::time_point::maximum());
+//                address = address.substr(3, address.length() - 4);
 
-//             if (hash != expected_hash || sender != expected_sender) {
-//                std::cout << "\033[1;32m" << category << " - " << testName << " (Expected: " << is_valid << ")\"\033[0m" << std::endl;
-//                BOOST_REQUIRE_EQUAL( hash, expected_hash );
-//                BOOST_REQUIRE_EQUAL( sender, expected_sender );
-//             }
-//          }
-//          // If not valid
-//          else
-//          {
-//             try {
-//                testtx(rlp);
+//                // Code
+//                auto code_string = pre[j]["code"].get_string();
+//                code_string.erase(0, 2);
+//                auto code = eosio_system::HexToBytes(code_string);
 
-//                std::cout << "\033[1;32m" << category << " - " << testName << " (Expected: " << is_valid << ")\033[0m"
-//                          << "\033[1;31m (Actual: 1) \033[0m" << std::endl << std::endl;
-//             } catch(const fc::exception& e) {
-//                auto matches = expect_assert_message(e, "Invalid Transaction") || expect_assert_message(e, "secp256k1_ecdsa_recover_compact") || expect_assert_message(e, "Invalid hex character");
-//                // std::cout << "ABCD:" << e.get_log().at(0).get_message() << std::endl;
-//                if (matches) {
-//                   // std::cout << "\033[1;32m" << e.top_message() << "\033[0m" << std::endl;
-//                } else {
-//                   std::cout << "\033[1;31m" << category << " - " << testName << " (Expected: " << is_valid << ")\033[0m" << std::endl;
-//                   std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
+//                // Convert to uint64_t
+//                std::cout << testName << ": " << pre[j]["balance"].get_string() << std::endl;
+
+//                // TODO handle high balance
+//                unsigned long long balance = 0;
+//                unsigned long long nonce = 0;
+//                try {
+//                   balance = std::stoull(pre[j]["balance"].get_string(), 0, 16);
+//                   nonce = std::stoull(pre[j]["nonce"].get_string(), 0, 16);
+//                } catch (const std::exception& e) {
+//                   goto next_test;
+//                }
+
+//                // Create pre accounts
+//                base_tester::push_action( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+//                   ( "address", address )
+//                   ( "balance", balance )
+//                   ( "code", code )
+//                   ( "nonce", nonce )
+//                   ( "account", "" )
+//                );
+//                produce_blocks(2);
+
+
+//                // Create pre storage
+//                auto store = pre[j]["storage"];
+//                for (std::size_t h = 0; h < store.size(); ++h) {
+//                   // Create pre key values
+//                   auto key = store[h]["key"].get_string();
+//                   key.erase(0, 2);
+//                   auto value = store[h]["value"].get_string();
+//                   value.erase(0, 2);
+
+//                   base_tester::push_action( N(eosio.evm), N(devnewstore), N(eosio.evm), mvo()
+//                      ( "address", address)
+//                      ( "key", key )
+//                      ( "value", value )
+//                   );
+//                   produce_blocks(1);
 //                }
 //             }
-//          }
 
+//             // Print test name
+//             std::cout << totalTests << ". " << testName << ": " << i << std::endl;
+
+//             // Execute transaction
+//             base_tester::push_action( N(eosio.evm), N(teststatetx), N(eosio.evm), mvo()
+//                ( "tx", transactions[i].get_string())
+//                ( "env", env)
+//             );
+//             produce_blocks(2);
+
+//             // For each result
+//             for (std::size_t x = 0; x < results.size(); ++x) {
+//                // Get state
+//                auto res = base_tester::push_action( N(eosio.evm), N(printstate), N(eosio.evm), mvo()
+//                   ( "address", results[x]["address"].get_string() )
+//                );
+//                produce_blocks(1);
+
+//                // Check console against storage
+//                auto expected_storage = fc::json::to_string(results[x]["storage"], fc::time_point::maximum());
+//                auto console          = res->action_traces[0].console;
+
+//                if (expected_storage != console) {
+//                   // std::cout << "Failed Test: " << testName << ": " << i << std::endl;
+//                   BOOST_REQUIRE_EQUAL( console, expected_storage );
+//                }
+
+//                // Get state
+//                // const auto& db = control->db();
+//                // namespace chain = eosio::chain;
+//                // const auto* secondary_table_id = db.find<eosio::chain::table_id_object, chain::by_code_scope_table>(
+//                //    boost::make_tuple( N(eosio.evm), N(eosio.evm), name(N(accountstate).to_uint64_t() | 2))
+//                // );
+//                // const auto& secondary_index = db.get_index<index_double_index>().indices();
+//                // const auto& secondary_index_by_secondary = secondary_index.get<by_secondary>();
+//                // auto itr = secondary_index_by_secondary.lower_bound(address);
+
+//                // while (itr != secondary_index_by_secondary.end()) {
+//                //    std::cout << fc::json::to_string(*itr, fc::time_point::maximum()) << std::endl;
+//                //    itr++;
+//                // }
+
+//                // For each storage
+//                // for (std::size_t k = 0; k < storage.size(); ++k) {
+//                //    auto value = storage[x];
+//                // }
+//             }
+
+//             // Reset chain
+//             base_tester::push_action( N(eosio.evm), N(clearall), N(eosio.evm), mvo());
+//          }
+//    next_test:
+//          // Reset chain
+//          base_tester::push_action( N(eosio.evm), N(clearall), N(eosio.evm), mvo());
 //          produce_blocks(1);
+//          totalTests++;
 //       }
 //    }
 // } FC_LOG_AND_RETHROW()

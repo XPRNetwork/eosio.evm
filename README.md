@@ -34,3 +34,4 @@ make -j4
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block num available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
 - No patricia merkle tree is used
+- A value of 1 represents 0.0001 SYS

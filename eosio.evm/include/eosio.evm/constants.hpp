@@ -4,6 +4,9 @@
 // Licensed under the MIT License.
 #pragma once
 
+// Testing
+#define TESTING true
+
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "SYS"
 #define TOKEN_CONTRACT_RAW "eosio.token"
@@ -19,7 +22,7 @@
 // Crypto
 #define MBEDTLS_ASN1_OCTET_STRING 0x04
 
-namespace evm4eos
+namespace eosio_evm
 {
   struct ChainIDs
   {
@@ -75,4 +78,5 @@ namespace evm4eos
   static constexpr size_t R_FIXED_LENGTH = 32u;
   static constexpr size_t MAX_TX_SIZE    = 128 * 1024;  // Currently 128KB, more after EIP-2464
   static constexpr size_t MAX_CODE_SIZE  = 24 * 1024;   // Currently 24KB, unlimited after EIP 1538
-} // namespace evm4eos
+  static constexpr size_t MAX_STACK_SIZE = 1024;
+} // namespace eosio_evm

@@ -4,31 +4,37 @@
 
 #include <eosio.evm/eosio.evm.hpp>
 
-namespace evm4eos {
+namespace eosio_evm {
   void evm::increment_nonce(const Address& address) {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
-    eosio::check(existing_address != accounts_byaddress.end(), "cannot increment nonce, account does not exist.");
-    accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
-      a.nonce += 1;
-    });
+
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+        a.nonce += 1;
+      });
+    }
   }
 
   const Account& evm::set_code(const Address& address, const std::vector<uint8_t>& code) {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
 
-    // Address not found, create it
-    if (existing_address == accounts_byaddress.end()) {
-      return create_account(address, 0, code, {});
-    // Address found, set code
-    } else {
+    // Code exists
+    if (!code.empty()) {
+      // Address not found, create it
+      if (existing_address == accounts_byaddress.end())
+      {
+        return create_account(address, 0, code, {});
+      }
+      // Address found, set code
       // This happens if account was pre-created e.g. https://github.com/ConsenSys/smart-contract-best-practices/issues/61
-      eosio::check(existing_address->get_code().empty() && !code.empty(), "cannot set code, code already exists at account");
-
-      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
-        a.code = code;
-      });
+      else if (existing_address->get_code().empty())
+      {
+        accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+          a.code = code;
+        });
+      }
     }
 
     return *existing_address;
@@ -43,11 +49,13 @@ namespace evm4eos {
     if (existing_address == accounts_byaddress.end())
     {
       static const Account& empty_account = {};
+      empty_account.print();
       return empty_account;
     }
     // Address does exist, return it
     else
     {
+      (*existing_address).print();
       return *existing_address;
     }
   }
@@ -72,13 +80,6 @@ namespace evm4eos {
     // 3. Ethereum account (no code) -> 0
     uint64_t nonce = account || !code.empty() ? 1 : 0;
 
-    // Debug
-    eosio::print("\n--------------");
-    eosio::print("\nCreate Account");
-    eosio::print("\nAddress 160: ", address_160);
-    eosio::print("\nAddress 256: ", address_256);
-    eosio::print("\n--------------");
-
     // Address not found, create it
     if (existing_address == accounts_byaddress.end())
     {
@@ -90,6 +91,15 @@ namespace evm4eos {
         a.code    = code;
         a.account = account;
       });
+
+      // Debug
+      // eosio::print("\n--------------");
+      // eosio::print("\nCreating Account");
+      // eosio::print("\nAddress 160: ", address_160);
+      // eosio::print("\nAddress 256: ", address_256);
+      // (*new_address).print();
+      // eosio::print("\n--------------");
+
       return *new_address;
     }
     // Address found
@@ -106,62 +116,64 @@ namespace evm4eos {
   {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
-    eosio::check(existing_address != accounts_byaddress.end(), "cannot remove code, account does not exist.");
 
-    accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
-      a.nonce = 0;
-      a.balance.amount = 0;
-      a.code = std::vector<uint8_t>{};
-    });
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+        a.nonce = 0;
+        a.balance.amount = 0;
+        a.code = std::vector<uint8_t>{};
+      });
+    }
   }
 
   // Returns original state
-  void evm::storekv(const Address& address, const uint256_t& key, const uint256_t& value) {
-    auto address_160               = addressToChecksum160(address);
-    auto accounts_states_byaddress = _accounts_states.get_index<eosio::name("bykey")>();
-    auto addresskey                = generate_key(address_160, key);
-    auto account_state             = accounts_states_byaddress.find(addresskey);
+  void evm::storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
+    // Get scoped state table for account state
+    account_state_table accounts_states(get_self(), address_index);
+    auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
+    auto checksum_key          = toChecksum256(key);
+    auto account_state         = accounts_states_bykey.find(checksum_key);
 
     // eosio::print("\n\nStore KV for address ", intx::hex(address),
     //              "\nKey: ", to_string(key, 10),
     //              "\nValue ", to_string(value, 10),
-    //              "\nAddressKey: ", addresskey,
+    //              "\nAddress Index: ", to_string(address_index),
     //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
 
     // Key found, set value
-    if (account_state != accounts_states_byaddress.end())
+    if (account_state != accounts_states_bykey.end())
     {
-      accounts_states_byaddress.modify(account_state, eosio::same_payer, [&](auto& a) {
+      accounts_states_bykey.modify(account_state, eosio::same_payer, [&](auto& a) {
         a.value = value;
       });
     }
     // Key not found, create key and value
     else
     {
-      _accounts_states.emplace(get_self(), [&](auto& a) {
-        a.index   = _accounts_states.available_primary_key();
-        a.key     = addresskey;
+      accounts_states.emplace(get_self(), [&](auto& a) {
+        a.index   = accounts_states.available_primary_key();
+        a.key     = checksum_key;
         a.value   = value;
-        a.address = address_160; // TODO not really needed
       });
     }
   }
 
-  uint256_t evm::loadkv(const Address& address, const uint256_t& key) {
-    auto address_160               = addressToChecksum160(address);
-    auto accounts_states_byaddress = _accounts_states.get_index<eosio::name("bykey")>();
-    auto addresskey                = generate_key(address_160, key);
-    auto account_state             = accounts_states_byaddress.find(addresskey);
+  uint256_t evm::loadkv(const uint64_t& address_index, const uint256_t& key) {
+    // Get scoped state table for account
+    account_state_table accounts_states(get_self(), address_index);
+    auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
+    auto checksum_key          = toChecksum256(key);
+    auto account_state         = accounts_states_bykey.find(checksum_key);
 
     // eosio::print("\n\nLoad KV for address ", intx::hex(address),
-    //              "\nKey: ", to_string(key, 10),
-    //              "\nAddressKey: ", addresskey,
-    //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
+    //              "\nKey: ", key,
+    //              "\nAddress Index: ", to_string(address_index),
+    //              "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
 
     // Key found
-    if (account_state != accounts_states_byaddress.end())
+    if (account_state != accounts_states_bykey.end())
     {
-      eosio::print("\nFound KV Value ", to_string(account_state->value, 10));
+      // eosio::print("\nFound KV Value ", to_string(account_state->value, 10));
       return account_state->value;
     }
     // Key not found
@@ -170,20 +182,21 @@ namespace evm4eos {
     }
   }
 
-  void evm::removekv(const Address& address, const uint256_t& key) {
-    auto address_160               = addressToChecksum160(address);
-    auto accounts_states_byaddress = _accounts_states.get_index<eosio::name("bykey")>();
-    auto addresskey                = generate_key(address_160, key);
-    auto account_state             = accounts_states_byaddress.find(addresskey);
+  void evm::removekv(const uint64_t& address_index, const uint256_t& key) {
+    // Get scoped state table for account state
+    account_state_table accounts_states(get_self(), address_index);
+    auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
+    auto checksum_key          = toChecksum256(key);
+    auto account_state         = accounts_states_bykey.find(checksum_key);
 
-    eosio::print("\n\nRemove KV for address ", intx::hex(address),
-                 "\nKey: ", to_string(key, 10),
-                 "\nAddressKey: ", addresskey,
-                 "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
+    // eosio::print("\n\nRemove KV for address ", intx::hex(address),
+    //              "\nKey: ", to_string(key, 10),
+    //              "\Address Index: ", addresskey,
+    //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
 
     // Remove key value
-    if (account_state != accounts_states_byaddress.end()){
-      accounts_states_byaddress.erase(account_state);
+    if (account_state != accounts_states_bykey.end()){
+      accounts_states_bykey.erase(account_state);
     }
   }
-} // namespace evm4eos
+} // namespace eosio_evm

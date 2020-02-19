@@ -1,6 +1,6 @@
 #include <eosio.evm/eosio.evm.hpp>
 
-namespace evm4eos {
+namespace eosio_evm{
 
 void evm::create (
   const eosio::name& account,
@@ -30,7 +30,7 @@ void evm::raw(
 
   // Create transaction
   auto transaction = EthereumTransaction{ properTx };
-  transaction.print();
+  // transaction.print();
 
   // Index by address
   auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
@@ -95,8 +95,26 @@ void evm::raw(
   // Transfer value balance (will make "to" account not if does not exist currently).
   transfer_internal(from_account->get_address(), to_address, transaction.get_value());
 
+  // Callee params
+  auto callee = get_account(to_address);
+  auto code = transaction.is_create() ? transaction.data : callee.get_code();
+
   // Execute transaction
-  const ExecResult exec_result = Processor().run(transaction, from_160, get_account(to_address), this);
+  auto processor = Processor(transaction, this);
+  const ExecResult exec_result = processor.run(
+    from_160,
+    callee,
+    transaction.gas_left(),
+    false, // Is Static
+    transaction.data,
+    code,
+    transaction.get_value()
+  );
+
+  // clean-up
+  for (const auto& addr : transaction.selfdestruct_list) {
+    remove_code(addr);
+  }
 
   // Success
   if (exec_result.er == ExitReason::returned)
@@ -105,7 +123,10 @@ void evm::raw(
     if (transaction.is_create()) {
       // Validate size
       const auto output_size = exec_result.output.size();
-      eosio::check(output_size < MAX_CODE_SIZE, "Out of Gas");
+      if (output_size >= MAX_CODE_SIZE) {
+        eosio::print("Code is larger than max code size, out of gas!");
+        return;
+      }
 
       // Charge create data gas
       transaction.gas_used += output_size * GP_CREATE_DATA;
@@ -122,13 +143,13 @@ void evm::raw(
   // Error
   else
   {
-    eosio::check(exec_result.er != ExitReason::threw, "EVM Execution Error: " + exec_result.exmsg);
-    // eosio::check(false, "EVM Execution Error: " + exec_result.exmsg);
+    eosio::print("EVM Execution Error: ", exec_result.exmsg, " ", int(exec_result.er));
   }
 
   // Debug final gas
-  eosio::print("\nFinal Gas Used: ", to_string(transaction.gas_used),
-               "\nGas Left: ", to_string(transaction.gas_left()),
-               "\nGas Limit: ", to_string(transaction.gas_limit));
+  // eosio::print("\nFinal Gas Used: ", to_string(transaction.gas_used),
+  //              "\nGas Left: ", to_string(transaction.gas_left()),
+  //              "\nGas Limit: ", to_string(transaction.gas_limit));
 }
-}
+
+} // namepsace eosio_evm

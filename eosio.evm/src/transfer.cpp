@@ -1,6 +1,6 @@
 #include <eosio.evm/eosio.evm.hpp>
 
-namespace evm4eos {
+namespace eosio_evm {
   void evm::transfer (const eosio::name& from, const eosio::name& to, const eosio::asset& quantity, const std::string& memo) {
     auto token_contract = get_first_receiver();
 

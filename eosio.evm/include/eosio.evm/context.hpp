@@ -4,9 +4,14 @@
 
 #pragma once
 
+#include <deque>
+#include "constants.hpp"
+#include "exception.hpp"
 #include "processor.hpp"
+#include "program.hpp"
+#include "stack.hpp"
 
-namespace evm4eos {
+namespace eosio_evm {
   using ReturnHandler    = std::function<void(std::vector<uint8_t>)>;
   using HaltHandler      = std::function<void()>;
   using ExceptionHandler = std::function<void(const Exception&, std::vector<uint8_t>)>;
@@ -24,31 +29,29 @@ namespace evm4eos {
 
   public:
     std::vector<uint8_t> mem;
-    Stack s;
     ChangeLog changelog;
+    Stack s;
 
-    const Address caller;
+    const Address& caller;
     const Account& callee;
     uint256_t gas_left;
-    const bool is_static;
-    const std::vector<uint8_t> input;
-    const int64_t call_value;
-    const Program prog;
-    ReturnHandler result_cb;
-    HaltHandler halt_cb;
-    ExceptionHandler error_cb;
+    const bool& is_static;
+    const std::vector<uint8_t>& input;
+    const int64_t& call_value;
+    const Program& prog;
+    const ReturnHandler& result_cb;
+    const ExceptionHandler& error_cb;
 
     Context(
       const Address& caller,
       const Account& callee,
       uint256_t gas_left,
       const bool& is_static,
-      std::vector<uint8_t>&& input,
+      const std::vector<uint8_t>& input,
       const int64_t& call_value,
-      Program&& prog,
-      ReturnHandler&& result_cb,
-      HaltHandler&& halt_cb,
-      ExceptionHandler&& error_cb
+      const Program& prog,
+      const ReturnHandler& result_cb,
+      const ExceptionHandler& error_cb
     ) noexcept :
       caller(caller),
       callee(callee),
@@ -58,8 +61,8 @@ namespace evm4eos {
       call_value(call_value),
       prog(prog),
       result_cb(result_cb),
-      halt_cb(halt_cb),
-      error_cb(error_cb)
+      error_cb(error_cb),
+      s(this)
     {
       // Reserve 4 KB of memory if code
       if (!prog.code.empty()) {

@@ -6,7 +6,7 @@ export async function raw () {
   transact([
     {
       "account": process.env.CONTRACT,
-      "name": "devcreate",
+      "name": "devnewacct",
       "data": {
         address: 'f79b834a37f3143f4a73fc3934edac67fd3a01cd',
         account: ''

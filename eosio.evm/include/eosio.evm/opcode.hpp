@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace evm4eos
+namespace eosio_evm
 {
   /**
    * All opcodes as specified in original Ethereum Yellow Paper
@@ -374,6 +374,78 @@ namespace evm4eos
       /* NULL */  0,
       /* NULL */  0,
 
+      // b0s
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+
+      // c0s
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+
+      // d0s
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+
+      // e0s
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+      /* NULL */  0,
+
       // f0s: System operations
       /* CREATE       */  32000, // Create a new account with associated code
       /* CALL         */  700,   // Message-call into an account
@@ -564,4 +636,4 @@ namespace evm4eos
     return reverseOp[i];
   }
 
-} // namespace evm4eos
+} // namespace eosio_evm

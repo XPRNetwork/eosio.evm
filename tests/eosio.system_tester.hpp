@@ -1098,4 +1098,14 @@ inline uint64_t M( const string& eos_str ) {
    return core_sym::from_string( eos_str ).get_amount();
 }
 
+inline std::vector<uint8_t> HexToBytes(const std::string& hex) {
+  std::vector<uint8_t> bytes;
+  for (unsigned int i = 0; i < hex.length(); i += 2) {
+    std::string byteString = hex.substr(i, 2);
+    uint8_t byte = strtol(byteString.c_str(), NULL, 16);
+    bytes.push_back(byte);
+  }
+  return bytes;
+}
+
 }

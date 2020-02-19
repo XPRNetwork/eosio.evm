@@ -6,7 +6,7 @@
 
 #include "tables.hpp"
 
-namespace evm4eos
+namespace eosio_evm
 {
   /**
    * EVM Logs
@@ -51,4 +51,4 @@ namespace evm4eos
       }
     }
   };
-} // namespace evm4eos
+} // namespace eosio_evm

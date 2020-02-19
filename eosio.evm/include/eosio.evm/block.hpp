@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 #pragma once
 
-namespace evm4eos
+namespace eosio_evm
 {
   struct Block
   {
@@ -14,11 +14,28 @@ namespace evm4eos
     uint256_t coinbase   = 0;
   };
 
-  inline const Block get_current_block() {
-    Block current_block = {};
-    return current_block;
+  inline Block current_block = {};
+  inline const Block get_current_block() { return current_block; };
+  inline uint256_t get_block_hash(uint8_t offset) { return 0; };
+
+  #ifdef TESTING
+  struct Env
+  {
+    std::string currentCoinbase;
+    std::string currentDifficulty;
+    std::string currentGasLimit;
+    std::string currentNumber;
+    std::string currentTimestamp;
+    std::string previousHash;
   };
-  inline uint256_t get_block_hash(uint8_t offset) {
-    return 0;
-  };
-} // namespace evm4eos
+  inline void set_current_block (const Env& env) {
+    current_block = {
+      static_cast<uint64_t>(intx::from_string<uint256_t>(env.currentNumber)),
+      static_cast<uint64_t>(intx::from_string<uint256_t>(env.currentDifficulty)),
+      static_cast<uint64_t>(intx::from_string<uint256_t>(env.currentGasLimit)),
+      static_cast<uint64_t>(intx::from_string<uint256_t>(env.currentTimestamp)),
+      intx::from_string<uint256_t>(env.currentCoinbase)
+    };
+  }
+  #endif
+} // namespace eosio_evm

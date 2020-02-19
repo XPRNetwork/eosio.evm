@@ -17,6 +17,7 @@
 #include <eosio/transaction.hpp>
 
 // Local
+#include "constants.hpp"
 #include "util.hpp"
 #include "exception.hpp"
 #include "datastream.hpp"
@@ -24,19 +25,18 @@
 #include "transaction.hpp"
 #include "context.hpp"
 #include "processor.hpp"
-#include "stack.hpp"
+#include "program.hpp"
 #include "tables.hpp"
 // #include "account.hpp"
 
-namespace evm4eos {
+namespace eosio_evm {
   class [[eosio::contract("eosio.evm")]] evm : public eosio::contract {
   public:
     using contract::contract;
 
     evm( eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds )
       : contract(receiver, code, ds),
-        _accounts(receiver, receiver.value),
-        _accounts_states(receiver, receiver.value) {}
+        _accounts(receiver, receiver.value) {}
 
     ACTION raw      ( const std::vector<int8_t>& tx,
                       const std::optional<eosio::checksum160>& sender);
@@ -55,12 +55,14 @@ namespace evm4eos {
     using withdraw_action = eosio::action_wrapper<"withdraw"_n, &evm::withdraw>;
     using transfer_action = eosio::action_wrapper<"transfer"_n, &evm::transfer>;
 
-    // Define tables
+    // Define account table
     account_table _accounts;
-    account_state_table _accounts_states;
 
-    // TODO remove in prod
-    ACTION devcreate(const eosio::checksum160& address, const eosio::name& account);
+    #ifdef TESTING
+    ACTION teststatetx(const std::vector<int8_t>& tx, const Env& env);
+    ACTION devnewstore(const eosio::checksum160& address, const std::string& key, const std::string value);
+    ACTION devnewacct(const eosio::checksum160& address, const uint64_t balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account);
+    ACTION printstate(const eosio::checksum160& address);
     ACTION testtx(const std::vector<int8_t>& tx);
     ACTION printtx(const std::vector<int8_t>& tx);
     template <typename T>
@@ -76,6 +78,7 @@ namespace evm4eos {
       cleanTable<account_table>();
       cleanTable<account_state_table>();
     }
+    #endif
 
     // Transfer
     void sub_balance (const eosio::name& user, const eosio::asset& quantity);
@@ -102,8 +105,8 @@ namespace evm4eos {
     void increment_nonce (const Address& address);
 
     // Storage
-    void storekv(const Address& address, const uint256_t& key, const uint256_t& value);
-    uint256_t loadkv(const Address& address, const uint256_t& key);
-    void removekv(const Address& address, const uint256_t& key);
+    void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);
+    uint256_t loadkv(const uint64_t& address_index, const uint256_t& key);
+    void removekv(const uint64_t& address_index, const uint256_t& key);
   };
 }

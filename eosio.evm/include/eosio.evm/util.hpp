@@ -58,6 +58,7 @@ namespace eosio_evm
   {
     return eosio::checksum256( toBin(address) );
   }
+
   inline uint256_t to_key(eosio::checksum256 input)
   {
     return fromBin( fromChecksum256(input) );
@@ -66,20 +67,6 @@ namespace eosio_evm
   static inline eosio::checksum256 pad160(const eosio::checksum160 input)
   {
     return eosio::checksum256( fromChecksum160(input) );
-  }
-
-  static inline eosio::checksum256 generate_key(const eosio::checksum160& address, const uint256_t& key) {
-    std::array<char, 52u> arr = {};
-
-    // Address part
-    auto address_bytes = address.extract_as_byte_array();
-    std::memcpy(arr.data(), &address_bytes, 20);
-
-    // Key part
-    auto key_bytes = toBin(key);
-    std::memcpy(arr.data() + 20, &key_bytes, 32);
-
-    return eosio::sha256(arr.data(), arr.size());
   }
 
   static inline Address checksum160ToAddress(const eosio::checksum160& input) {

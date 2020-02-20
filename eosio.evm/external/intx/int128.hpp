@@ -809,8 +809,9 @@ constexpr uint128 operator""_u128(const char* s)
 template <unsigned N>
 inline std::string to_string(uint<N> x, int base = 10)
 {
+    // Reset to hex if invalid
     if (base < 2 || base > 36) {
-        eosio::check(false, "invalid base: " + std::to_string(base));
+        base = 16;
     }
 
     if (x == 0)

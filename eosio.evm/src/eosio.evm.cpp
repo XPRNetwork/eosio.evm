@@ -9,7 +9,7 @@ void evm::create (
   // Check that account is authorized
   require_auth(account);
 
-  // Check that account does not already exist
+  // Encode using RLP(account.value, data)
   auto accounts_byaccount = _accounts.get_index<eosio::name("byaccount")>();
   auto existing_account = accounts_byaccount.find(account.value);
   eosio::check(existing_account == accounts_byaccount.end(), "an EVM account is already linked to this EOS account.");
@@ -19,7 +19,8 @@ void evm::create (
   eosio::checksum160 address = toChecksum160( keccak_256(rlp_encoding) );
 
   // Create user account
-  create_account(checksum160ToAddress(address), 0, {}, account);
+  const Account* created_account = create_account(checksum160ToAddress(address), 0, {}, account);
+  eosio::check(created_account != NULL, "an EVM account with this address already exists.");
 }
 
 void evm::raw(
@@ -45,7 +46,7 @@ void evm::raw(
     eosio::check(from_account != accounts_byaddress.end(), "Invalid Transaction: sender address does not exist (without signature).");
 
     // Ensure EOSIO account is associated
-    eosio::check(from_account->get_account() != 0, "Invalid Transaction: no EOSIO account is associated with sender's address.");
+    eosio::check(from_account->get_account_value() != 0, "Invalid Transaction: no EOSIO account is associated with sender's address.");
 
     // Check authorization of associated EOSIO account
     // TODO maybe charge only the sending EOSIO account of the entire TX (not thereum) for RAM
@@ -84,26 +85,33 @@ void evm::raw(
   Address to_address;
   auto from_160 = checksum160ToAddress(*transaction.sender);
 
+  const Account* callee;
+  std::vector<uint8_t> code;
+
   // CREATE
   if (transaction.is_create()) {
     to_address = generate_address(from_account->get_address(), from_account->get_nonce() - 1);
+    callee = create_account(to_address, 0, {}, {});
+    if (callee == NULL) {
+      return eosio::print("Execution Error: ", intx::hex(to_address), " already exists.");
+    }
+    callee->print();
+    code = transaction.data;
   // CALL
   } else {
     to_address = *transaction.to_address;
+    callee = &get_account(to_address);
+    code = callee->get_code();
   }
 
   // Transfer value balance (will make "to" account not if does not exist currently).
   transfer_internal(from_account->get_address(), to_address, transaction.get_value());
 
-  // Callee params
-  auto callee = get_account(to_address);
-  auto code = transaction.is_create() ? transaction.data : callee.get_code();
-
   // Execute transaction
   auto processor = Processor(transaction, this);
   const ExecResult exec_result = processor.run(
     from_160,
-    callee,
+    *callee,
     transaction.gas_left(),
     false, // Is Static
     transaction.data,
@@ -113,7 +121,7 @@ void evm::raw(
 
   // clean-up
   for (const auto& addr : transaction.selfdestruct_list) {
-    remove_code(addr);
+    selfdestruct(addr);
   }
 
   // Success
@@ -136,20 +144,12 @@ void evm::raw(
         set_code(to_address, std::move(exec_result.output));
       }
     }
-
-    // Print output (DEBUG).
-    // eosio::print("OUTPUT:", bin2hex(exec_result.output) );
   }
   // Error
   else
   {
-    eosio::print("EVM Execution Error: ", exec_result.exmsg, " ", int(exec_result.er));
+    eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
   }
-
-  // Debug final gas
-  // eosio::print("\nFinal Gas Used: ", to_string(transaction.gas_used),
-  //              "\nGas Left: ", to_string(transaction.gas_left()),
-  //              "\nGas Limit: ", to_string(transaction.gas_limit));
 }
 
 } // namepsace eosio_evm

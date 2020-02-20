@@ -13,9 +13,11 @@ namespace eosio_evm {
     uint64_t nonce;
     std::vector<uint8_t> code;
 
+    Account () = default;
+    Account (uint256_t _address): address(addressToChecksum160(_address)) {}
     uint64_t primary_key() const { return index; };
 
-    uint64_t get_account() const { return account.value; };
+    uint64_t get_account_value() const { return account.value; };
     uint256_t get_address() const { return checksum160ToAddress(address); };
     int64_t get_balance() const { return balance.amount; };
     uint64_t get_balance_u64() const { return (uint64_t) balance.amount; };
@@ -26,12 +28,13 @@ namespace eosio_evm {
     eosio::checksum256 by_address() const { return pad160(address); };
 
     void print() const {
-      // eosio::print("\n---Acc Info Start-----");
-      // eosio::print("\nAddress ", address);
-      // eosio::print("\nEOS Account " + account.to_string());
-      // eosio::print("\nBalance ", balance);
-      // eosio::print("\nNonce ", nonce);
-      // eosio::print("\n---Acc Info End---\n");
+      eosio::print("\n---Acc Info Start-----");
+      eosio::print("\nAddress ", address);
+      eosio::print("\nIndex ", index);
+      eosio::print("\nEOS Account " + account.to_string());
+      eosio::print("\nBalance ", balance);
+      eosio::print("\nNonce ", nonce);
+      eosio::print("\n---Acc Info End---\n");
     }
 
     EOSLIB_SERIALIZE(Account, (index)(address)(account)(balance)(nonce)(code));
@@ -50,7 +53,7 @@ namespace eosio_evm {
 
   typedef eosio::multi_index<"account"_n, Account,
     eosio::indexed_by<eosio::name("byaddress"), eosio::const_mem_fun<Account, eosio::checksum256, &Account::by_address>>,
-    eosio::indexed_by<eosio::name("byaccount"), eosio::const_mem_fun<Account, uint64_t, &Account::get_account>>
+    eosio::indexed_by<eosio::name("byaccount"), eosio::const_mem_fun<Account, uint64_t, &Account::get_account_value>>
   > account_table;
   typedef eosio::multi_index<"accountstate"_n, AccountState,
     eosio::indexed_by<eosio::name("bykey"), eosio::const_mem_fun<AccountState, eosio::checksum256, &AccountState::by_key>>

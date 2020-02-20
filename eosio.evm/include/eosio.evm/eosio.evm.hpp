@@ -45,7 +45,7 @@ namespace eosio_evm {
     ACTION withdraw ( const eosio::name& to,
                       const eosio::asset& quantity);
 
-    [[eosio::on_notify(INCOMING_TRANSFER_NOTIFY)]]
+    [[eosio::on_notify("eosio.token::transfer")]]
     void transfer( const eosio::name& from,
                    const eosio::name& to,
                    const eosio::asset& quantity,
@@ -65,18 +65,22 @@ namespace eosio_evm {
     ACTION printstate(const eosio::checksum160& address);
     ACTION testtx(const std::vector<int8_t>& tx);
     ACTION printtx(const std::vector<int8_t>& tx);
-    template <typename T>
-    void cleanTable(){
-      T db(get_self(), get_self().value);
+    ACTION clearall () {
+      require_auth(get_self());
+
+      account_table db(get_self(), get_self().value);
       auto itr = db.end();
       while(db.begin() != itr){
         itr = db.erase(--itr);
       }
-    }
-    ACTION clearall () {
-      require_auth(get_self());
-      cleanTable<account_table>();
-      cleanTable<account_state_table>();
+
+      for(int i = 0; i < 10; i++) {
+        account_state_table db2(get_self(), i);
+        auto itr = db2.end();
+        while(db2.begin() != itr){
+          itr = db2.erase(--itr);
+        }
+      }
     }
     #endif
 
@@ -85,24 +89,19 @@ namespace eosio_evm {
     void sub_balance (const Address& address, const int64_t& amount);
     void add_balance (const eosio::name& user, const eosio::asset& quantity);
     void add_balance (const Address& address, const int64_t& amount);
-
-    inline void transfer_internal(const Address& from, const Address& to, const int64_t amount) {
-      if (amount == 0) return;
-      sub_balance(from, amount);
-      add_balance(to, amount);
-    }
+    void transfer_internal(const Address& from, const Address& to, const int64_t amount);
 
     // State
     const Account& get_account(const Address& address);
-    const Account& create_account(
+    const Account* create_account(
       const Address& address,
       const int64_t& balance = 0,
       const std::vector<uint8_t>& code = {},
       const eosio::name& account = {}
     );
-    const Account& set_code(const Address& address, const std::vector<uint8_t>& code);
-    void remove_code(const Address& addr);
-    void increment_nonce (const Address& address);
+    void increment_nonce(const Address& address);
+    void set_code(const Address& address, const std::vector<uint8_t>& code);
+    void selfdestruct(const Address& addr);
 
     // Storage
     void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);

@@ -1,0 +1,2 @@
+Replace get_self() with actual ram payer
+- Remove  eosio::check from transfer.cpp

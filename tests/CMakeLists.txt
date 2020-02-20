@@ -1,9 +1,13 @@
 cmake_minimum_required( VERSION 3.6 )
 
+project(eosio_evm)
+
 set(EOSIO_VERSION_MIN "2.0")
 set(EOSIO_VERSION_SOFT_MAX "2.0")
 #set(EOSIO_VERSION_HARD_MAX "")
-set(eosio_DIR "/Users/jafri/eosio/2.0/lib/cmake/eosio")
+
+set(EOSIO_INSTALL_DIR "~/eosio/2.0")
+set(eosio_DIR "${EOSIO_INSTALL_DIR}/lib/cmake/eosio")
 
 find_package(eosio)
 

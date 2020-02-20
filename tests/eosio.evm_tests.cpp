@@ -121,7 +121,7 @@ BOOST_FIXTURE_TEST_CASE( test_create, eosio_evm_tester ) try {
       ("index", 0)
       ("address", "bc5c5b389d1bd6b0e356bfcb2b3d748a98304a0c")
       ("account", "1234test1111")
-      ("balance", "0.0000 SYS")
+      ("balance", "0.0000 EOS")
       ("nonce", 1)
       ("code", vector<uint8_t>{})
    );

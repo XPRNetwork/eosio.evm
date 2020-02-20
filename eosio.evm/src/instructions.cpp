@@ -782,6 +782,9 @@ namespace eosio_evm
     process_sstore_gas(transaction.original_storage[k], current_value, v);
 
     // Remove or store
+    eosio::print("\n");
+    ctxt->callee.print();
+
     if (!v) {
       contract->removekv(ctxt->callee.primary_key(), k);
     } else {
@@ -896,15 +899,18 @@ namespace eosio_evm
     contract->increment_nonce(ctxt->callee.get_address());
 
     // Create account using new address and value
-    decltype(auto) new_account = contract->create_account(new_address, contract_value, {}, {});
+    const Account* new_account = contract->create_account(new_address, contract_value, {}, {});
+    if (new_account == NULL) {
+      return throw_error(Exception(ET::outOfBounds, "New account already exists"), {});
+    }
 
     // In contract creation, the transaction value is an endowment for the newly created account
-    contract->transfer_internal(ctxt->callee.get_address(), new_account.get_address(), contract_value);
+    contract->transfer_internal(ctxt->callee.get_address(), new_account->get_address(), contract_value);
 
     // Execute new account's code
     auto result = run(
       ctxt->callee.get_address(),
-      new_account,
+      *new_account,
       transaction.gas_left(),
       false, // CREATE and CREATE2 cannot be called statically
       {}, // Data
@@ -916,19 +922,18 @@ namespace eosio_evm
     if (result.er == ExitReason::returned)
     {
       // Set code from output
+      auto new_account_address = new_account->get_address();
       if (!result.output.empty()) {
-        contract->set_code(new_account.get_address(), move(result.output));
+        contract->set_code(new_account_address, move(result.output));
       }
 
-      eosio::print("NEW ADDRESS ", intx::hex(new_account.get_address()));
-      ctxt->s.push(new_account.get_address());
+      ctxt->s.push(new_account_address);
 
       // TODO should we push 0 on stack here in case of halt?
     }
     else
     {
       ctxt->s.push(0);
-      eosio::print("CREATE error: ", int(result.er), " ", result.exmsg);
 
       if (result.ex == ET::revert) {
         last_return_data = move(result.output);

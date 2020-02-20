@@ -16,19 +16,11 @@ namespace eosio_evm
     Address address;
     std::vector<uint8_t> data;
     std::vector<uint256_t> topics;
-
-    bool operator==(const LogEntry& that) const
-    {
-      return address == that.address &&
-             data == that.data &&
-             topics == that.topics;
-    }
   };
 
   struct LogHandler
   {
     std::vector<LogEntry> logs = {};
-
     inline void add(LogEntry&& e) { logs.emplace_back(e); }
   };
 

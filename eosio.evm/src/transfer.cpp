@@ -2,15 +2,16 @@
 
 namespace eosio_evm {
   void evm::transfer (const eosio::name& from, const eosio::name& to, const eosio::asset& quantity, const std::string& memo) {
+    bool outgoing = from == get_self();
+    bool system_deposit = from == "eosio.stake"_n || from == "eosio.ram"_n || from == "eosio"_n;
+    if (outgoing || system_deposit) {
+      return;
+    }
+
     bool valid_symbol = quantity.symbol == TOKEN_SYMBOL;
     bool valid_contract = get_first_receiver() == TOKEN_CONTRACT;
     bool valid_to = to == get_self();
     eosio::check(valid_symbol && valid_contract && valid_to, "Invalid Deposit");
-
-    bool system_deposit = from == "eosio.stake"_n || from == "eosio.ram"_n || from == "eosio"_n;
-    if (system_deposit) {
-      return;
-    }
 
     // process deposit
     add_balance(from, quantity);

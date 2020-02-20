@@ -10,7 +10,6 @@
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
 #define TOKEN_CONTRACT_RAW "eosio.token"
-#define INCOMING_TRANSFER_NOTIFY "eosio.token::transfer"
 
 #define TOKEN_SYMBOL_CODE eosio::symbol_code(TOKEN_SYMBOL_CODE_RAW)
 #define TOKEN_CONTRACT eosio::name(TOKEN_CONTRACT_RAW)

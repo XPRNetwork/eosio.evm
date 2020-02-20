@@ -535,9 +535,11 @@ namespace eosio_evm
     // Update gas (ceiling)
     use_gas(((size + 31) / 32) * GP_SHA3_WORD);
 
+    // Find keccak 256 hash
     uint8_t h[32];
     keccak_256(ctxt->mem.data() + offset, static_cast<unsigned int>(size), h);
-    ctxt->s.push(intx::from_big_endian(h, sizeof(h)));
+
+    ctxt->s.push(intx::be::load<uint256_t>(h));
   }
 
   void Processor::address()
@@ -674,10 +676,11 @@ namespace eosio_evm
     // Get account code
     auto code = code_account.get_code();
 
-    // Hash and return result
+    // Hash code
     uint8_t h[32];
     keccak_256(code.data(), code.size(), h);
-    ctxt->s.push(intx::from_big_endian(h, sizeof(h)));
+
+    ctxt->s.push(intx::be::load<uint256_t>(h));
   }
 
   void Processor::blockhash()
@@ -734,8 +737,7 @@ namespace eosio_evm
   {
     const auto offset = ctxt->s.popu64();
     prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-    const auto start = ctxt->mem.data() + offset;
-    auto res = intx::from_big_endian(start, ProcessorConsts::WORD_SIZE);
+    auto res = intx::be::unsafe::load<uint256_t>(&ctxt->mem[offset]);
     ctxt->s.push(res);
   }
 
@@ -744,7 +746,7 @@ namespace eosio_evm
     const auto offset = ctxt->s.popu64();
     const auto word = ctxt->s.pop();
     prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-    intx::to_big_endian(word, ctxt->mem.data() + offset);
+    intx::be::unsafe::store(ctxt->mem.data() + offset, word);
   }
 
   void Processor::mstore8()
@@ -871,7 +873,7 @@ namespace eosio_evm
     // Gas
     use_gas((size * GP_LOG_DATA) + (number_of_logs * GP_EXTRA_PER_LOG));
 
-    // TODO implement log table as optional feature
+    // TODO implement printing log table in transaction receipt
     transaction.log_handler.add({
       ctxt->callee.get_address(),
       copy_from_mem(offset, size),

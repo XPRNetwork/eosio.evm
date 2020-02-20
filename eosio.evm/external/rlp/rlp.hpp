@@ -474,10 +474,10 @@ namespace rlp {
         return rlp.write();
     }
 
-    static RLPValue decode(std::vector<uint8_t> bytes){
+    static RLPValue decode(std::vector<int8_t> bytes){
         RLPValue rlp;
 	    size_t consumed, wanted;
-    	bool valid = rlp.read(bytes.data(), bytes.size(), consumed, wanted);
+    	bool valid = rlp.read((unsigned char *) bytes.data(), bytes.size(), consumed, wanted);
         eosio::check(valid, "Invalid Transaction: RLP could not be decoded");
         return rlp;
     }

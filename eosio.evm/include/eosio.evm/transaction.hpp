@@ -58,7 +58,7 @@ namespace eosio_evm
     uint256_t s;
 
     // RLP constructor
-    EthereumTransaction(const std::vector<uint8_t>& encoded)
+    EthereumTransaction(const std::vector<int8_t>& encoded)
     {
       // Max Transaction size
       eosio::check(encoded.size() < MAX_TX_SIZE, "Invalid Transaction: Max size of a transaction is 128 KB");
@@ -70,20 +70,20 @@ namespace eosio_evm
       auto rlp = rlp::decode(encoded);
       auto values = rlp.values;
 
-      nonce     = intx::from_big_endian(&values[0].value[0], values[0].value.size());
-      gas_price = intx::from_big_endian(&values[1].value[0], values[1].value.size());
-      gas_limit = intx::from_big_endian(&values[2].value[0], values[2].value.size());
+      nonce     = from_big_endian(&values[0].value[0], values[0].value.size());
+      gas_price = from_big_endian(&values[1].value[0], values[1].value.size());
+      gas_limit = from_big_endian(&values[2].value[0], values[2].value.size());
       to        = values[3].value;
-      value     = intx::from_big_endian(&values[4].value[0], values[4].value.size());
+      value     = from_big_endian(&values[4].value[0], values[4].value.size());
       data      = values[5].value;
       v         = values[6].value[0];
-      r         = intx::from_big_endian(&values[7].value[0], values[7].value.size());
-      s         = intx::from_big_endian(&values[8].value[0], values[8].value.size());
+      r         = from_big_endian(&values[7].value[0], values[7].value.size());
+      s         = from_big_endian(&values[8].value[0], values[8].value.size());
 
       // Validate To Address
       eosio::check(to.empty() || to.size() == 20, "Invalid Transaction: to address must be 40 characters long if provided (excluding 0x prefix)");
       if (!to.empty()) {
-        to_address = intx::from_big_endian(to.data(), to.size());
+        to_address = from_big_endian(to.data(), to.size());
       }
 
       // Validate Value
@@ -129,8 +129,8 @@ namespace eosio_evm
       eosio::check(s >= 1 && s <= intx::from_string<uint256_t>("0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0"), "Invalid Transaction: s value in signature must be between 1 and 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, inclusive.");
 
       // R and S
-      intx::to_big_endian(r, sig.data() + 1);
-      intx::to_big_endian(s, sig.data() + 1 + R_FIXED_LENGTH);
+      intx::be::unsafe::store(sig.data() + 1, r);
+      intx::be::unsafe::store(sig.data() + 1 + R_FIXED_LENGTH, s);
     }
 
     const KeccakHash to_be_signed()
@@ -181,6 +181,22 @@ namespace eosio_evm
       sender = toChecksum160(hashed_key);
 
       return *sender;
+    }
+
+    uint256_t from_big_endian(const uint8_t* begin, size_t size = 32u)
+    {
+        // Size validation
+        eosio::check(size <= 32, "Invalid Transaction: Calling from_big_endian with oversized array");
+
+        if (size == 32) {
+            return intx::be::unsafe::load<uint256_t>(begin);
+        } else {
+            uint8_t tmp[32] = {};
+            const auto offset = 32 - size;
+            memcpy(tmp + offset, begin, size);
+
+            return intx::be::load<uint256_t>(tmp);
+        }
     }
 
     void print() const

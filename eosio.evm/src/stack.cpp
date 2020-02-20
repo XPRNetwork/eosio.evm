@@ -3,8 +3,6 @@
 namespace eosio_evm {
   uint256_t Stack::pop()
   {
-    // TODO: don't check size for every single pop, but rather once at the
-    // beginning of each op handler in vm.cpp
     if (st.empty()) {
       ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Stack out of range"), {});
     }
@@ -37,12 +35,9 @@ namespace eosio_evm {
   void Stack::push(const uint256_t& val)
   {
     if (size() == MAX_STACK_SIZE) {
-      if (val > std::numeric_limits<uint64_t>::max()) {
-        ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Stack memory exceeded"), {});
-      }
+      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Stack memory exceeded"), {});
     }
 
-    // TODO Could throw bad_alloc
     st.push_front(val);
   }
 

@@ -23,14 +23,10 @@ namespace eosio_evm
     return res;
   }
 
-  inline uint256_t fromBin(const std::array<uint8_t, 32u>& input)
-  {
-    return intx::from_big_endian(input.data(), input.size());
-  }
   inline std::array<uint8_t, 32u> toBin(const uint256_t& address)
   {
     std::array<uint8_t, 32> address_bytes = {};
-    intx::to_big_endian(address, address_bytes.data());
+    intx::be::unsafe::store(address_bytes.data(), address);
     return address_bytes;
   }
   inline const std::array<uint8_t, 32u> fromChecksum256(const eosio::checksum256 input)
@@ -59,18 +55,14 @@ namespace eosio_evm
     return eosio::checksum256( toBin(address) );
   }
 
-  inline uint256_t to_key(eosio::checksum256 input)
-  {
-    return fromBin( fromChecksum256(input) );
-  }
-
   static inline eosio::checksum256 pad160(const eosio::checksum160 input)
   {
     return eosio::checksum256( fromChecksum160(input) );
   }
 
   static inline Address checksum160ToAddress(const eosio::checksum160& input) {
-    return fromBin( fromChecksum160(input) );
+    const std::array<uint8_t, 32u>& checksum = fromChecksum160(input);
+    return intx::be::unsafe::load<uint256_t>(checksum.data());
   }
   static inline eosio::checksum160 addressToChecksum160(const Address& input) {
     return toChecksum160( toBin(input) );
@@ -122,6 +114,6 @@ namespace eosio_evm
   inline Address generate_address(const Address& sender, uint256_t nonce) {
     const auto rlp_encoding = rlp::encode(sender, nonce);
     std::array<uint8_t, 32u> buffer = keccak_256(rlp_encoding);
-    return intx::from_big_endian(buffer.data() + 12u, 20u);
+    return intx::be::unsafe::load<uint256_t>(buffer.data());
   };
 } // namespace eosio_evm

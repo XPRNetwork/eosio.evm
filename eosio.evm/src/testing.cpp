@@ -4,15 +4,13 @@
 namespace eosio_evm {
   void evm::testtx(const std::vector<int8_t>& tx) {
     require_auth(get_self());
-    std::vector<uint8_t> properTx( tx.begin(), tx.end() );
-    auto transaction = EthereumTransaction{ properTx };
+    auto transaction = EthereumTransaction(tx);
     eosio::print(R"({"hash":")", transaction.hash, R"(", "sender":")", transaction.get_sender(), R"("})");
   }
 
   void evm::printtx(const std::vector<int8_t>& tx) {
     require_auth(get_self());
-    std::vector<uint8_t> properTx( tx.begin(), tx.end() );
-    auto transaction = EthereumTransaction{ properTx };
+    auto transaction = EthereumTransaction(tx);
     transaction.get_sender();
     transaction.printhex();
   }
@@ -66,7 +64,7 @@ namespace eosio_evm {
       account_state_table accounts_states(get_self(), existing_address->index);
       auto itr = accounts_states.begin();
       while(itr != accounts_states.end()){
-        eosio::print(R"({"key":")", intx::hex(to_key(itr->key)), R"(","value":")", intx::hex(itr->value), R"("})");
+        eosio::print(R"({"key":")", itr->key, R"(","value":")", intx::hex(itr->value), R"("})");
         itr++;
       }
     }

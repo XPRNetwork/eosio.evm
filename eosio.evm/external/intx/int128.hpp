@@ -820,7 +820,6 @@ inline std::string to_string(uint<N> x, int base = 10)
     auto s = std::string{};
     while (x != 0)
     {
-        // TODO: Use constexpr udivrem_1?
         const auto res = udivrem(x, uint<N>{base});
         const auto d = int(res.rem);
         const auto c = d < 10 ? '0' + d : 'a' + d - 10;

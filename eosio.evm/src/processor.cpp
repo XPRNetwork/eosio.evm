@@ -154,7 +154,6 @@ namespace eosio_evm
     }
   }
 
-  // TODO fix memory gas usage (evmone check_memory)
   void Processor::copy_mem_raw(
     const uint64_t offDst,
     const uint64_t offSrc,

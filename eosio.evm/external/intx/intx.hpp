@@ -623,13 +623,6 @@ constexpr unsigned clz(const uint<N>& x) noexcept
 {
     const auto half_bits = num_bits(x) / 2;
 
-    // TODO: Try:
-    // bool take_hi = h != 0;
-    // bool take_lo = !take_hi;
-    // unsigned clz_hi = take_hi * clz(h);
-    // unsigned clz_lo = take_lo * (clz(l) | half_bits);
-    // return clz_hi | clz_lo;
-
     // In this order `h == 0` we get less instructions than in case of `h != 0`.
     return x.hi == 0 ? clz(x.lo) + half_bits : clz(x.hi);
 }
@@ -1007,31 +1000,6 @@ using uint1024_t = intx::uint<1024>;
 using Address = uint256_t;
 
 namespace intx {
-    inline auto from_big_endian(const uint8_t* begin, size_t size = 32u)
-    {
-        // Size validation
-        eosio::check(size <= 32, "Invalid Transaction: Calling from_big_endian with oversized array");
-
-        if (size == 32) {
-            return intx::be::unsafe::load<uint256_t>(begin);
-        } else {
-            // TODO: Find out how common this path is, make it the caller's responsibility
-            uint8_t tmp[32] = {};
-            const auto offset = 32 - size;
-            memcpy(tmp + offset, begin, size);
-
-            return intx::be::load<uint256_t>(tmp);
-        }
-    }
-
-    inline void to_big_endian(const uint256_t& v, uint8_t* out)
-    {
-        // TODO: Is this cast safe?
-        // uint8_t(&arr)[32] =
-        // *static_cast<uint8_t(*)[32]>(static_cast<void*>(out));
-        intx::be::unsafe::store(out, v);
-    }
-
     inline std::vector<uint8_t> to_byte_string(const uint256_t& n)
     {
         std::vector<uint8_t> bs;

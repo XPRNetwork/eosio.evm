@@ -42,6 +42,10 @@ namespace eosio_evm {
     const ReturnHandler& result_cb;
     const ExceptionHandler& error_cb;
 
+    // Local storage
+    std::map<uint64_t, std::map<uint256_t, uint256_t>> local_account_states;
+    std::map<uint256_t, const Account&> local_accounts;
+
     Context(
       const Address& caller,
       const Account& callee,
@@ -86,6 +90,56 @@ namespace eosio_evm {
         pc_changed = false;
       } else {
         pc++;
+      }
+    }
+
+    void store_state(const uint64_t& index, const uint256_t& key, const uint256_t& value)
+    {
+      local_account_states[index] = {key, value};
+    }
+    void store_account(const uint256_t& address, const Account& account)
+    {
+      local_changes[address] = account;
+    }
+
+    uint256_t load_key(const uint64_t& address_index, const uint256_t& key)
+    {
+      const auto local_states_itr = local_account_states.find(key);
+      if (local_states_itr != local_account_states.end()) {
+        const auto local_states_kv_itr = local_states_itr->second().find(key);
+        if (local_states_kv_itr != local_states_itr->second().end()) {
+          return local_states_kv_itr->second()
+        }
+      }
+
+      // If not found, return from permanent store
+      return contract->loadkv(address_index, key)
+    }
+
+    uint256_t load_account(const uint256_t& address)
+    {
+      const auto local_accounts_itr = local_accounts.find(address);
+      if (local_accounts_itr != local_accounts.end()) {
+        return local_accounts_itr->second();
+      } else {
+        // If not found, return from permanent store
+        return contract->loadkv(address_index, key)
+      }
+    }
+
+    void apply()
+    {
+      // For accounts
+      for (const auto& [address, account]: local_accounts) {
+        permanent_state[k] = v;
+      }
+
+      // For account states
+      for (const auto& [index, kv]: local_changes) {
+        for (const auto& [k, v]: local_changes) {
+          permanent_state[k] = v;
+        }
+        permanent_state[k] = v;
       }
     }
   };

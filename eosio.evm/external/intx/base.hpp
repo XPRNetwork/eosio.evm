@@ -119,15 +119,6 @@ void udivrem_knuth(uint64_t q[], uint64_t un[], int m, const uint64_t vn[], int 
                 carry = s.hi;
             }
             un[j + n] += carry;
-
-            // TODO: Consider this alternative implementation:
-            // bool k = false;
-            // for (int i = 0; i < n; ++i) {
-            //     auto limit = std::min(un[j+i],vn[i]);
-            //     un[i + j] += vn[i] + k;
-            //     k = un[i + j] < limit || (k && un[i + j] == limit);
-            // }
-            // un[j+n] += k;
         }
 
         q[j] = qhat;  // Store quotient digit.

@@ -1,6 +1,6 @@
 #include <eosio.evm/eosio.evm.hpp>
-
-namespace eosio_evm{
+namespace eosio_evm
+{
 
 void evm::create (
   const eosio::name& account,
@@ -27,10 +27,8 @@ void evm::raw(
   const std::vector<int8_t>& tx,
   const std::optional<eosio::checksum160>& sender
 ) {
-  std::vector<uint8_t> properTx( tx.begin(), tx.end() );
-
   // Create transaction
-  auto transaction = EthereumTransaction{ properTx };
+  auto transaction = EthereumTransaction(tx);
   // transaction.print();
 
   // Index by address

@@ -42,7 +42,7 @@ namespace eosio_evm {
   eosio::datastream<Stream>& operator>> ( eosio::datastream<Stream>& ds, bigint::checksum256& v ) {
       std::array<uint8_t, 32> tmp;
       ds >> tmp;
-      v = fromBin(tmp);
+      v = intx::be::unsafe::load<uint256_t>(tmp.data());
       return ds;
   }
 }

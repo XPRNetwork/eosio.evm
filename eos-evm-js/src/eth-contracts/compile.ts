@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+const fs = require('fs')
+const path = require('path')
 const solc = require('solc')
 
 const contractInput = {
@@ -26,7 +26,7 @@ const contractInput = {
   }
 }
 
-const findImports = (_path: string) => ({ contents: fs.readFileSync(path.join(__dirname, '../../../', _path), 'utf8')});
+const findImports = (_path: string) => ({ contents: fs.readFileSync(path.join(__dirname, '../../', _path), 'utf8')});
 
 const compiled = solc.compile(JSON.stringify(contractInput), { import: findImports })
 fs.writeFileSync(path.join(__dirname, 'compiled.json'), JSON.stringify(JSON.parse(compiled), null, 4));

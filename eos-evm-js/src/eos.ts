@@ -166,7 +166,7 @@ export class EosApi {
       upper_bound: padded,
       limit: 1
     })
-    return (rows.length && rows[0].address === address && rows[0]) || {}
+    return (rows.length && rows[0].address === address && rows[0]) || undefined
   }
 
   /**

@@ -109,8 +109,6 @@ namespace eosio_evm {
 
   // Returns original state
   void evm::storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
-    eosio::print("ADDRESS INDEX ", address_index);
-
     // Get scoped state table for account state
     account_state_table accounts_states(get_self(), address_index);
     auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();

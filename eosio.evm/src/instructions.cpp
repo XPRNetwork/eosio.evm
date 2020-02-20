@@ -781,10 +781,6 @@ namespace eosio_evm
     // Charge gas
     process_sstore_gas(transaction.original_storage[k], current_value, v);
 
-    // Remove or store
-    eosio::print("\n");
-    ctxt->callee.print();
-
     if (!v) {
       contract->removekv(ctxt->callee.primary_key(), k);
     } else {

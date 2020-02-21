@@ -125,7 +125,7 @@ namespace eosio_evm
     };
 
     // Store parent context pointer to restore after execution
-    auto parent_context = ctxt;
+    auto parent_context = ctx;
 
     // Add new context
     auto c = make_unique<Context>(
@@ -139,22 +139,22 @@ namespace eosio_evm
       result_cb,
       error_cb
     );
-    ctxts.emplace_back(move(c));
-    ctxt = ctxts.back().get();
+    ctxs.emplace_back(move(c));
+    ctx = ctxs.back().get();
 
     // Execute code
-    while(ctxt->get_pc() < ctxt->prog.code.size())
+    while(ctx->get_pc() < ctx->prog.code.size())
     {
       dispatch();
 
       if (int(result.er))
         break;
 
-      ctxt->step();
+      ctx->step();
     }
 
     // Restore to parent context
-    ctxt = parent_context;
+    ctx = parent_context;
 
     // Set result if not set yet
     if (!int(result.er)) {
@@ -164,34 +164,67 @@ namespace eosio_evm
     return result;
   }
 
-  uint16_t Processor::get_call_depth() const { return static_cast<uint16_t>(ctxts.size()); }
-  Opcode Processor::get_op() const { return static_cast<Opcode>(ctxt->prog.code[ctxt->get_pc()]); }
+  /**
+   * Storage
+   */
+  // Only used by CREATE instruction to increment nonce of contract
+  void Processor::increment_nonce(const uint256_t& address) {
+    auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
+    auto existing_address = accounts_byaddress.find(toChecksum256(address));
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.modify(existing_address, contract->get_self(), [&](auto& a) {
+        a.nonce += 1;
+      });
+    }
+  }
+
+  void Processor::store_account(const uint256_t& address, const Account& account)
+  {
+    ctx->local_accounts[address] = account;
+  }
+
+  Account Processor::load_account(const uint256_t& address)
+  {
+    const auto local_accounts_itr = ctx->local_accounts.find(address);
+    if (local_accounts_itr != ctx->local_accounts.end())
+    {
+      return local_accounts_itr->second;
+    }
+    else
+    {
+      // If not found, return from permanent store
+      return contract->get_account(address);
+    }
+  }
+
+  uint16_t Processor::get_call_depth() const { return static_cast<uint16_t>(ctxs.size()); }
+  Opcode Processor::get_op() const { return static_cast<Opcode>(ctx->prog.code[ctx->get_pc()]); }
 
   void Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
     // Consume all call gas on exception
     if (exception.type != ET::revert) {
-      use_gas(ctxt->gas_left);
+      use_gas(ctx->gas_left);
     }
 
-    ctxt->error_cb(exception, output);
+    ctx->error_cb(exception, output);
   }
 
   // Gas
   void Processor::use_gas(uint256_t amount) {
     // If higher than gas limit or more than gas left
     bool over_gas_limit = transaction.gas_used + amount > transaction.gas_limit;
-    bool not_enough_gas_left = amount > ctxt->gas_left;
-    if (ctxt->gas_left && (over_gas_limit || not_enough_gas_left)) {
+    bool not_enough_gas_left = amount > ctx->gas_left;
+    if (ctx->gas_left && (over_gas_limit || not_enough_gas_left)) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
     // Reflect gas changes
     transaction.gas_used += amount;
-    ctxt->gas_left -= amount;
+    ctx->gas_left -= amount;
   }
   void Processor::refund_gas(uint256_t amount) {
     transaction.gas_used -= amount;
-    ctxt->gas_left += amount;
+    ctx->gas_left += amount;
   }
 
   // Complex calculation from EIP 2200
@@ -199,7 +232,7 @@ namespace eosio_evm
   // - Current value is what is currently stored in EOSIO
   // - New value is the value to be stored
   void Processor::process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
-    if (ctxt->gas_left <= GP_SSTORE_MINIMUM) {
+    if (ctx->gas_left <= GP_SSTORE_MINIMUM) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
@@ -279,9 +312,9 @@ namespace eosio_evm
 
   void Processor::copy_mem(vector<uint8_t>& dst, const vector<uint8_t>& src, const uint8_t pad)
   {
-    const auto offDst = ctxt->s.popu64();
-    const auto offSrc = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto offDst = ctx->s.popu64();
+    const auto offSrc = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
 
     // Gas calculation (copy cost is 3)
     use_gas(GP_COPY * ((size + 31) / 32));
@@ -296,7 +329,7 @@ namespace eosio_evm
     }
 
     const auto new_size = offset + size;
-    const auto current_size = ctxt->mem.size();
+    const auto current_size = ctx->mem.size();
 
     if (new_size > current_size)
     {
@@ -314,21 +347,21 @@ namespace eosio_evm
       if (end >= ProcessorConsts::MAX_MEM_SIZE) {
         return throw_error(Exception(ET::outOfBounds, "Memory limit exceeded"), {});
       }
-      ctxt->mem.resize(end);
+      ctx->mem.resize(end);
     }
   }
 
   vector<uint8_t> Processor::copy_from_mem(const uint64_t offset, const uint64_t size)
   {
     prepare_mem_access(offset, size);
-    return {ctxt->mem.begin() + offset, ctxt->mem.begin() + offset + size};
+    return {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
   }
 
   void Processor::jump_to(const uint64_t newPc)
   {
-    if (ctxt->prog.jump_dests.find(newPc) == ctxt->prog.jump_dests.end()) {
+    if (ctx->prog.jump_dests.find(newPc) == ctx->prog.jump_dests.end()) {
       return throw_error(Exception(ET::illegalInstruction, "Invalid Jump Destination"), {});
     }
-    ctxt->set_pc(newPc);
+    ctx->set_pc(newPc);
   }
 } // namespace eosio_evm

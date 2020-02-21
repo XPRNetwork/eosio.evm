@@ -4,7 +4,7 @@ namespace eosio_evm {
   uint256_t Stack::pop()
   {
     if (st.empty()) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Stack out of range"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Stack out of range"), {});
     }
 
     uint256_t val = st.front();
@@ -16,7 +16,7 @@ namespace eosio_evm {
   {
     const auto val = pop();
     if (val > std::numeric_limits<uint64_t>::max()) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^64"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^64"), {});
     }
 
     return static_cast<uint64_t>(val);
@@ -26,7 +26,7 @@ namespace eosio_evm {
   {
     const auto val = pop();
     if (val > eosio::asset::max_amount) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^62 - 1"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^62 - 1"), {});
     }
 
     return static_cast<int64_t>(val);
@@ -35,7 +35,7 @@ namespace eosio_evm {
   void Stack::push(const uint256_t& val)
   {
     if (size() == MAX_STACK_SIZE) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Stack memory exceeded"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Stack memory exceeded"), {});
     }
 
     st.push_front(val);
@@ -49,7 +49,7 @@ namespace eosio_evm {
   void Stack::swap(uint64_t i)
   {
     if (i >= size()) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Swap out of range"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Swap out of range"), {});
     }
 
     std::swap(st[0], st[i]);
@@ -58,7 +58,7 @@ namespace eosio_evm {
   void Stack::dup(uint64_t a)
   {
     if (a >= size()) {
-      ctxt->error_cb(Exception(Exception::Type::outOfBounds, "Dup out of range"), {});
+      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Dup out of range"), {});
     }
 
     st.push_front(st[a]);

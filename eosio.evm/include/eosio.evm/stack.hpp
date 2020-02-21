@@ -13,9 +13,9 @@ namespace eosio_evm {
   {
   public:
     std::deque<uint256_t> st;
-    Context* ctxt;
+    Context* ctx;
 
-    Stack(Context* _ctxt): ctxt(_ctxt) {};
+    Stack(Context* _ctx): ctx(_ctx) {};
 
     uint256_t pop();
     uint64_t popu64();

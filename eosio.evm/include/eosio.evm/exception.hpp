@@ -34,4 +34,6 @@ namespace eosio_evm
 
     const char* what() const noexcept { return msg.c_str(); }
   };
+
+  using ET = Exception::Type;
 } // namespace eosio_evm

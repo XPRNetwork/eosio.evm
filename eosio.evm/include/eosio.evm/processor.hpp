@@ -40,15 +40,13 @@ namespace eosio_evm {
   class Processor
   {
   private:
-    EthereumTransaction& transaction;  // the transaction object
-    evm* contract;               // pointer to parent contract (to call EOSIO actions)
-    Context* ctxt;                     // pointer to the current context
-    std::vector<std::unique_ptr<Context>> ctxts; // the stack of contexts (one per nested call)
-    std::vector<uint8_t> last_return_data;  // last returned data
+    EthereumTransaction& transaction;           // the transaction object
+    evm* contract;                              // pointer to parent contract (to call EOSIO actions)
+    Context* ctx;                               // pointer to the current context
+    std::vector<std::unique_ptr<Context>> ctxs; // the stack of contexts (one per nested call)
+    std::vector<uint8_t> last_return_data;      // last returned data
 
   public:
-    using ET = Exception::Type;
-
     Processor(EthereumTransaction& transaction, evm* contract)
       : transaction(transaction),
         contract(contract)
@@ -66,6 +64,10 @@ namespace eosio_evm {
       const std::vector<uint8_t>& code,
       const int64_t& call_value
     );
+
+    void increment_nonce(const uint256_t& address);
+    void store_account(const uint256_t& address, const Account& account);
+    Account load_account(const uint256_t& address);
 
     inline constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
     {
@@ -88,10 +90,12 @@ namespace eosio_evm {
       return static_cast<T>(i & std::numeric_limits<T>::max());
     }
 
+
     void throw_error(const Exception& exception, const std::vector<uint8_t>& output);
     void use_gas(uint256_t amount);
     void refund_gas(uint256_t amount);
     void process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value);
+
     void copy_mem_raw(
       const uint64_t offDst,
       const uint64_t offSrc,

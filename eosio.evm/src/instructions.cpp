@@ -25,10 +25,10 @@ namespace eosio_evm
     eosio::print(
       "\n",
       "{",
-      "\"pc\":",      ctxt->get_pc(), ",",
-      "\"gasLeft\":", to_string(ctxt->gas_left), ",",
+      "\"pc\":",      ctx->get_pc(), ",",
+      "\"gasLeft\":", to_string(ctx->gas_left), ",",
       "\"gasCost\":", to_string(OpFees::by_code[op]), ",",
-      "\"stack\":",   ctxt->s.asArray(), ",",
+      "\"stack\":",   ctx->s.asArray(), ",",
       "\"depth\":",   to_string(get_call_depth()), ",",
       "\"opName\": \"",  opcodeToString(op), "\"",
       "}",
@@ -277,111 +277,111 @@ namespace eosio_evm
    */
   void Processor::stop()
   {
-    ctxt->result_cb({});
+    ctx->result_cb({});
   }
 
   void Processor::add()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x + y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x + y);
   }
 
   void Processor::mul()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x * y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x * y);
   }
 
   void Processor::sub()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x - y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x - y);
   }
 
   void Processor::div()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
 
     if (y == 0) {
-      ctxt->s.push(0);
+      ctx->s.push(0);
     } else {
-      ctxt->s.push(x / y);
+      ctx->s.push(x / y);
     }
   }
 
   void Processor::sdiv()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
     const auto min = (numeric_limits<uint256_t>::max() / 2) + 1;
 
     if (y == 0)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     // special "overflow case" from the yellow paper
     else if (x == min && y == -1)
-      ctxt->s.push(x);
+      ctx->s.push(x);
     else
-      ctxt->s.push(intx::sdivrem(x, y).quot);
+      ctx->s.push(intx::sdivrem(x, y).quot);
   }
 
   void Processor::mod()
   {
-    const auto x = ctxt->s.pop();
-    const auto m = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto m = ctx->s.pop();
 
     if (m == 0)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
-      ctxt->s.push(x % m);
+      ctx->s.push(x % m);
   }
 
   void Processor::addmod()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    const auto m = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    const auto m = ctx->s.pop();
 
     if (m == 0)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
-      ctxt->s.push(intx::addmod(x, y, m));
+      ctx->s.push(intx::addmod(x, y, m));
   }
 
   void Processor::smod()
   {
-    const auto x = ctxt->s.pop();
-    const auto m = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto m = ctx->s.pop();
 
     if (m == 0)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
-      ctxt->s.push(intx::sdivrem(x, m).rem);
+      ctx->s.push(intx::sdivrem(x, m).rem);
   }
 
   void Processor::mulmod()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    const auto m = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    const auto m = ctx->s.pop();
 
     if (m == 0)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
-      ctxt->s.push(intx::mulmod(x, y, m));
+      ctx->s.push(intx::mulmod(x, y, m));
   }
 
   void Processor::exp()
   {
-    const auto b = ctxt->s.pop();
-    const auto e = ctxt->s.pop();
+    const auto b = ctx->s.pop();
+    const auto e = ctx->s.pop();
 
     // Optimize: X^0 = 1
     if (e == 0) {
-      ctxt->s.push(1);
+      ctx->s.push(1);
       return;
     }
 
@@ -391,16 +391,16 @@ namespace eosio_evm
 
     // Push result
     const auto res = intx::exp(b, uint256_t(e));
-    ctxt->s.push(res);
+    ctx->s.push(res);
   }
 
   void Processor::signextend()
   {
-    const auto ext = ctxt->s.pop();
-    const auto x = ctxt->s.pop();
+    const auto ext = ctx->s.pop();
+    const auto x = ctx->s.pop();
 
     if (ext >= 32) {
-      ctxt->s.push(x);
+      ctx->s.push(x);
       return;
     }
 
@@ -408,130 +408,130 @@ namespace eosio_evm
     const auto sign_mask = uint256_t{1} << sign_bit;
     const auto value_mask = sign_mask - 1;
     const auto is_neg = (x & sign_mask) != 0;
-    ctxt->s.push(is_neg ? x | ~value_mask : x & value_mask);
+    ctx->s.push(is_neg ? x | ~value_mask : x & value_mask);
   }
 
   void Processor::lt()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x < y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x < y);
   }
 
   void Processor::gt()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x > y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x > y);
   }
 
   void Processor::slt()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
 
     auto x_neg = static_cast<bool>(x >> 255);
     auto y_neg = static_cast<bool>(y >> 255);
-    ctxt->s.push((x_neg ^ y_neg) ? x_neg : x < y);
+    ctx->s.push((x_neg ^ y_neg) ? x_neg : x < y);
   }
 
   void Processor::sgt()
   {
-    ctxt->s.swap(1);
+    ctx->s.swap(1);
     slt();
   }
 
   void Processor::eq()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x == y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x == y);
   }
 
   void Processor::isZero()
   {
-    const auto x = ctxt->s.pop();
-    ctxt->s.push(x == 0);
+    const auto x = ctx->s.pop();
+    ctx->s.push(x == 0);
   }
 
   void Processor::and_()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x & y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x & y);
   }
 
   void Processor::or_()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x | y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x | y);
   }
 
   void Processor::xor_()
   {
-    const auto x = ctxt->s.pop();
-    const auto y = ctxt->s.pop();
-    ctxt->s.push(x ^ y);
+    const auto x = ctx->s.pop();
+    const auto y = ctx->s.pop();
+    ctx->s.push(x ^ y);
   }
 
   void Processor::not_()
   {
-    const auto x = ctxt->s.pop();
-    ctxt->s.push(~x);
+    const auto x = ctx->s.pop();
+    ctx->s.push(~x);
   }
 
   void Processor::byte()
   {
-    const auto n = ctxt->s.pop();
-    const auto x = ctxt->s.pop();
+    const auto n = ctx->s.pop();
+    const auto x = ctx->s.pop();
 
     if (n > 31)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
     {
       auto sh = (31 - static_cast<unsigned>(n)) * 8;
       auto y = x >> sh;
-      ctxt->s.push(y & 0xff);
+      ctx->s.push(y & 0xff);
     }
   }
 
   void Processor::shl()
   {
-    const auto shift = ctxt->s.pop();
-    const auto value = ctxt->s.pop();
-    ctxt->s.push(value << shift);
+    const auto shift = ctx->s.pop();
+    const auto value = ctx->s.pop();
+    ctx->s.push(value << shift);
   }
 
   void Processor::shr()
   {
-    const auto shift = ctxt->s.pop();
-    const auto value = ctxt->s.pop();
-    ctxt->s.push(value >> shift);
+    const auto shift = ctx->s.pop();
+    const auto value = ctx->s.pop();
+    ctx->s.push(value >> shift);
   }
 
   void Processor::sar()
   {
-    const auto shift = ctxt->s.pop();
-    const auto value = ctxt->s.pop();
+    const auto shift = ctx->s.pop();
+    const auto value = ctx->s.pop();
 
     if ((value & (uint256_t{1} << 255)) == 0) {
-      ctxt->s.push(value >> shift);
+      ctx->s.push(value >> shift);
       return;
     }
 
     constexpr auto ones = ~uint256_t{};
     if (shift >= 256) {
-      ctxt->s.push(ones);
+      ctx->s.push(ones);
     } else {
-      ctxt->s.push((value >> shift) | (ones << (256 - shift)));
+      ctx->s.push((value >> shift) | (ones << (256 - shift)));
     }
   }
 
   void Processor::sha3()
   {
-    const auto offset = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto offset = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
     prepare_mem_access(offset, size);
 
     // Update gas (ceiling)
@@ -539,46 +539,46 @@ namespace eosio_evm
 
     // Find keccak 256 hash
     uint8_t h[32];
-    keccak_256(ctxt->mem.data() + offset, static_cast<unsigned int>(size), h);
+    keccak_256(ctx->mem.data() + offset, static_cast<unsigned int>(size), h);
 
-    ctxt->s.push(intx::be::load<uint256_t>(h));
+    ctx->s.push(intx::be::load<uint256_t>(h));
   }
 
   void Processor::address()
   {
-    ctxt->s.push(ctxt->callee.get_address());
+    ctx->s.push(ctx->callee.get_address());
   }
 
   void Processor::balance()
   {
-    const auto address = pop_addr(ctxt->s);
+    const auto address = pop_addr(ctx->s);
     const Account& given_account = contract->get_account(address);
-    ctxt->s.push(given_account.get_balance_u64());
+    ctx->s.push(given_account.get_balance_u64());
   }
 
   void Processor::origin()
   {
     const auto address = checksum160ToAddress(*transaction.sender);
-    ctxt->s.push(address);
+    ctx->s.push(address);
   }
 
   void Processor::caller()
   {
-    ctxt->s.push(ctxt->caller.get_address());
+    ctx->s.push(ctx->caller.get_address());
   }
 
   void Processor::callvalue()
   {
-    ctxt->s.push(ctxt->call_value);
+    ctx->s.push(ctx->call_value);
   }
 
   void Processor::calldataload()
   {
-    const auto index = ctxt->s.pop();
-    const auto input_size = ctxt->input.size();
+    const auto index = ctx->s.pop();
+    const auto input_size = ctx->input.size();
 
     if (input_size < index)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
     {
       const auto begin = static_cast<size_t>(index);
@@ -586,36 +586,36 @@ namespace eosio_evm
 
       uint8_t data[32] = {};
       for (size_t i = 0; i < (end - begin); ++i)
-          data[i] = ctxt->input[begin + i];
+          data[i] = ctx->input[begin + i];
 
-      ctxt->s.push(intx::be::load<uint256_t>(data));
+      ctx->s.push(intx::be::load<uint256_t>(data));
     }
   }
 
   void Processor::calldatasize()
   {
-    ctxt->s.push(ctxt->input.size());
+    ctx->s.push(ctx->input.size());
   }
 
   void Processor::calldatacopy()
   {
-    copy_mem(ctxt->mem, ctxt->input, 0);
+    copy_mem(ctx->mem, ctx->input, 0);
   }
 
   void Processor::codesize()
   {
-    ctxt->s.push(ctxt->prog.code.size());
+    ctx->s.push(ctx->prog.code.size());
   }
 
   void Processor::codecopy()
   {
-    const auto mem_index = ctxt->s.popu64();
-    const auto input_index = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto mem_index = ctx->s.popu64();
+    const auto input_index = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
 
     prepare_mem_access(mem_index, size);
 
-    const auto code_size = ctxt->prog.code.size();
+    const auto code_size = ctx->prog.code.size();
     auto dst = static_cast<size_t>(mem_index);
     auto src = code_size < input_index ? code_size : static_cast<size_t>(input_index);
     auto s = static_cast<size_t>(size);
@@ -625,53 +625,53 @@ namespace eosio_evm
     use_gas(num_words(s) * GP_COPY);
 
     if (copy_size > 0)
-        std::memcpy(&ctxt->mem[dst], &ctxt->prog.code[src], copy_size);
+        std::memcpy(&ctx->mem[dst], &ctx->prog.code[src], copy_size);
 
     if (s - copy_size > 0)
-        std::memset(&ctxt->mem[dst + copy_size], 0, s - copy_size);
+        std::memset(&ctx->mem[dst + copy_size], 0, s - copy_size);
 
   }
 
   void Processor::gasprice()
   {
-    ctxt->s.push(GAS_PRICE);
+    ctx->s.push(GAS_PRICE);
   }
 
   void Processor::extcodesize()
   {
-    auto address = pop_addr(ctxt->s);
+    auto address = pop_addr(ctx->s);
     auto code = contract->get_account(address).get_code();
-    ctxt->s.push(code.size());
+    ctx->s.push(code.size());
   }
 
   void Processor::extcodecopy()
   {
-    auto address = pop_addr(ctxt->s);
+    auto address = pop_addr(ctx->s);
     auto code = contract->get_account(address).get_code();
-    copy_mem(ctxt->mem, code, Opcode::STOP);
+    copy_mem(ctx->mem, code, Opcode::STOP);
   }
 
   void Processor::returndatasize()
   {
-    ctxt->s.push(last_return_data.size());
+    ctx->s.push(last_return_data.size());
   }
 
   void Processor::returndatacopy()
   {
     auto size = (last_return_data.size());
-    copy_mem(ctxt->mem, last_return_data, 0);
+    copy_mem(ctx->mem, last_return_data, 0);
   }
 
   void Processor::extcodehash()
   {
-    auto address = pop_addr(ctxt->s);
+    auto address = pop_addr(ctx->s);
 
     // Fetch code account
     const Account& code_account = contract->get_account(address);
 
     // If account is empty, return 0
     if (code_account.is_empty()) {
-      ctxt->s.push(0);
+      ctx->s.push(0);
       return;
     }
 
@@ -682,102 +682,102 @@ namespace eosio_evm
     uint8_t h[32];
     keccak_256(code.data(), code.size(), h);
 
-    ctxt->s.push(intx::be::load<uint256_t>(h));
+    ctx->s.push(intx::be::load<uint256_t>(h));
   }
 
   void Processor::blockhash()
   {
-    const auto i = ctxt->s.popu64();
+    const auto i = ctx->s.popu64();
     if (i >= 256)
-      ctxt->s.push(0);
+      ctx->s.push(0);
     else
-      ctxt->s.push(get_block_hash(i % 256));
+      ctx->s.push(get_block_hash(i % 256));
   }
 
   void Processor::coinbase()
   {
-    ctxt->s.push(get_current_block().coinbase);
+    ctx->s.push(get_current_block().coinbase);
   }
 
   void Processor::timestamp()
   {
-    ctxt->s.push(get_current_block().timestamp);
+    ctx->s.push(get_current_block().timestamp);
   }
 
   void Processor::number()
   {
-    ctxt->s.push(eosio::tapos_block_num());
+    ctx->s.push(eosio::tapos_block_num());
   }
 
   void Processor::difficulty()
   {
-    ctxt->s.push(get_current_block().difficulty);
+    ctx->s.push(get_current_block().difficulty);
   }
 
   void Processor::gaslimit()
   {
-    ctxt->s.push(get_current_block().gas_limit);
+    ctx->s.push(get_current_block().gas_limit);
   }
 
   void Processor::chainid()
   {
-    ctxt->s.push(CURRENT_CHAIN_ID);
+    ctx->s.push(CURRENT_CHAIN_ID);
   }
 
   // TODO check if balance of contract is correct if it changes mid operation from start
   void Processor::selfbalance()
   {
-    ctxt->s.push(ctxt->callee.get_balance_u64());
+    ctx->s.push(ctx->callee.get_balance_u64());
   }
 
   void Processor::pop()
   {
-    ctxt->s.pop();
+    ctx->s.pop();
   }
 
   void Processor::mload()
   {
-    const auto offset = ctxt->s.popu64();
+    const auto offset = ctx->s.popu64();
     prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-    auto res = intx::be::unsafe::load<uint256_t>(&ctxt->mem[offset]);
-    ctxt->s.push(res);
+    auto res = intx::be::unsafe::load<uint256_t>(&ctx->mem[offset]);
+    ctx->s.push(res);
   }
 
   void Processor::mstore()
   {
-    const auto offset = ctxt->s.popu64();
-    const auto word = ctxt->s.pop();
+    const auto offset = ctx->s.popu64();
+    const auto word = ctx->s.pop();
     prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
-    intx::be::unsafe::store(ctxt->mem.data() + offset, word);
+    intx::be::unsafe::store(ctx->mem.data() + offset, word);
   }
 
   void Processor::mstore8()
   {
-    const auto offset = ctxt->s.popu64();
-    const auto b = shrink<uint8_t>(ctxt->s.pop());
+    const auto offset = ctx->s.popu64();
+    const auto b = shrink<uint8_t>(ctx->s.pop());
     prepare_mem_access(offset, sizeof(b));
-    ctxt->mem[offset] = b;
+    ctx->mem[offset] = b;
   }
 
   void Processor::sload()
   {
-    const auto k = ctxt->s.pop();
-    uint256_t loaded = contract->loadkv(ctxt->callee.primary_key(), k);
-    ctxt->s.push(loaded);
+    const auto k = ctx->s.pop();
+    uint256_t loaded = contract->loadkv(ctx->callee.primary_key(), k);
+    ctx->s.push(loaded);
   }
 
   void Processor::sstore()
   {
-    if (ctxt->is_static) {
+    if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
 
     // Get items from stack
-    const auto k = ctxt->s.pop();
-    const auto v = ctxt->s.pop();
+    const auto k = ctx->s.pop();
+    const auto v = ctx->s.pop();
 
     // Store as original if first time seeing it
-    uint256_t current_value = contract->loadkv(ctxt->callee.primary_key(), k);
+    uint256_t current_value = contract->loadkv(ctx->callee.primary_key(), k);
     if (transaction.original_storage.count(k) == 0) {
       transaction.original_storage[k] = current_value;
     }
@@ -786,36 +786,36 @@ namespace eosio_evm
     process_sstore_gas(transaction.original_storage[k], current_value, v);
 
     // Store
-    contract->storekv(ctxt->callee.primary_key(), k, v);
+    contract->storekv(ctx->callee.primary_key(), k, v);
   }
 
   void Processor::jump()
   {
-    const auto newPc = ctxt->s.popu64();
+    const auto newPc = ctx->s.popu64();
     jump_to(newPc);
   }
 
   void Processor::jumpi()
   {
-    const auto newPc = ctxt->s.popu64();
-    const auto cond = ctxt->s.pop();
+    const auto newPc = ctx->s.popu64();
+    const auto cond = ctx->s.pop();
     if (cond)
       jump_to(newPc);
   }
 
   void Processor::pc()
   {
-    ctxt->s.push(ctxt->get_pc());
+    ctx->s.push(ctx->get_pc());
   }
 
   void Processor::msize()
   {
-    ctxt->s.push(ctxt->get_used_mem() * 32);
+    ctx->s.push(ctx->get_used_mem() * 32);
   }
 
   void Processor::gas()
   {
-    ctxt->s.push(ctxt->gas_left);
+    ctx->s.push(ctx->gas_left);
   }
 
   void Processor::jumpdest() {}
@@ -823,50 +823,50 @@ namespace eosio_evm
   void Processor::push()
   {
     const uint8_t bytes = get_op() - PUSH1 + 1;
-    const auto end = ctxt->get_pc() + bytes;
+    const auto end = ctx->get_pc() + bytes;
 
-    if (end < ctxt->get_pc()) {
+    if (end < ctx->get_pc()) {
       return throw_error(Exception(ET::outOfBounds, "Integer overflow in push"), {});
     }
-    if (end >= ctxt->prog.code.size()) {
+    if (end >= ctx->prog.code.size()) {
       return throw_error(Exception(ET::outOfBounds, "Push immediate exceeds size of program "), {});
     }
 
     // TODO: parse immediate once and not every time
-    auto pc = ctxt->get_pc() + 1;
+    auto pc = ctx->get_pc() + 1;
     uint256_t imm = 0;
     for (int i = 0; i < bytes; i++) {
-      imm = (imm << 8) | ctxt->prog.code[pc++];
+      imm = (imm << 8) | ctx->prog.code[pc++];
     }
 
-    ctxt->s.push(imm);
-    ctxt->set_pc(pc);
+    ctx->s.push(imm);
+    ctx->set_pc(pc);
   }
 
   void Processor::dup()
   {
-    ctxt->s.dup(get_op() - DUP1);
+    ctx->s.dup(get_op() - DUP1);
   }
 
   void Processor::swap()
   {
-    ctxt->s.swap(get_op() - SWAP1 + 1);
+    ctx->s.swap(get_op() - SWAP1 + 1);
   }
 
   void Processor::log()
   {
-    if (ctxt->is_static) {
+    if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
 
-    const auto offset = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto offset = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
 
     // Get topic data from stack
     const uint8_t number_of_logs = get_op() - LOG0;
     vector<uint256_t> topics(number_of_logs);
     for (int i = 0; i < number_of_logs; i++) {
-      topics[i] = ctxt->s.pop();
+      topics[i] = ctx->s.pop();
     }
 
     // Gas
@@ -874,7 +874,7 @@ namespace eosio_evm
 
     // TODO implement printing log table in transaction receipt
     transaction.log_handler.add({
-      ctxt->callee.get_address(),
+      ctx->callee.get_address(),
       copy_from_mem(offset, size),
       topics
     });
@@ -893,7 +893,7 @@ namespace eosio_evm
     auto init_code = copy_from_mem(offset, size);
 
     // For contract accounts, the nonce counts the number of contract-creations by this account
-    contract->increment_nonce(ctxt->callee.get_address());
+    contract->increment_nonce(ctx->callee.get_address());
 
     // Create account using new address
     auto [new_account, error] = contract->create_account(new_address, 0, true);
@@ -902,11 +902,11 @@ namespace eosio_evm
     }
 
     // In contract creation, the transaction value is an endowment for the newly created account
-    contract->transfer_internal(ctxt->callee.get_address(), new_account.get_address(), contract_value);
+    contract->transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
 
     // Execute new account's code
     auto result = run(
-      ctxt->callee.get_address(),
+      ctx->callee.get_address(),
       new_account,
       transaction.gas_left(),
       false, // CREATE and CREATE2 cannot be called statically
@@ -924,13 +924,13 @@ namespace eosio_evm
         contract->set_code(new_account_address, move(result.output));
       }
 
-      ctxt->s.push(new_account_address);
+      ctx->s.push(new_account_address);
 
       // TODO should we push 0 on stack here in case of halt?
     }
     else
     {
-      ctxt->s.push(0);
+      ctx->s.push(0);
 
       if (result.ex == ET::revert) {
         last_return_data = move(result.output);
@@ -940,35 +940,35 @@ namespace eosio_evm
 
   void Processor::create()
   {
-    if (ctxt->is_static) {
+    if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
 
-    const auto contract_value = ctxt->s.popAmount();
-    const auto offset         = ctxt->s.popu64();
-    const auto size           = ctxt->s.popu64();
-    const auto nonce          = ctxt->callee.get_nonce();
+    const auto contract_value = ctx->s.popAmount();
+    const auto offset         = ctx->s.popu64();
+    const auto size           = ctx->s.popu64();
+    const auto nonce          = ctx->callee.get_nonce();
 
-    auto new_address = generate_address(ctxt->callee.get_address(), nonce);
+    auto new_address = generate_address(ctx->callee.get_address(), nonce);
     _create(contract_value, offset, size, new_address);
   }
 
   void Processor::create2()
   {
-    if (ctxt->is_static) {
+    if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
 
-    const auto contract_value = ctxt->s.popAmount();
-    const auto offset         = ctxt->s.popu64();
-    const auto size           = ctxt->s.popu64();
-    const auto arbitrary      = ctxt->s.pop();
+    const auto contract_value = ctx->s.popAmount();
+    const auto offset         = ctx->s.popu64();
+    const auto size           = ctx->s.popu64();
+    const auto arbitrary      = ctx->s.pop();
 
     // Gas cost for hashing new address
     const auto arbitrary_size = static_cast<int>(intx::count_significant_words<uint8_t>(arbitrary));
     use_gas(GP_SHA3_WORD * ((arbitrary_size + 31) / 32));
 
-    auto new_address = generate_address(ctxt->callee.get_address(), arbitrary);
+    auto new_address = generate_address(ctx->callee.get_address(), arbitrary);
     _create(contract_value, offset, size, new_address);
   }
 
@@ -977,13 +977,13 @@ namespace eosio_evm
     const auto op = get_op();
 
     // Pop 6 (DELEGATECALL) or 7 (REST) from stack
-    const auto _gas_limit = ctxt->s.pop();
-    const auto toAddress  = pop_addr(ctxt->s);
-    const auto value      = op == Opcode::DELEGATECALL ? 0 : ctxt->s.popAmount();
-    const auto offIn      = ctxt->s.popu64();
-    const auto sizeIn     = ctxt->s.popu64();
-    const auto offOut     = ctxt->s.popu64();
-    const auto sizeOut    = ctxt->s.popu64();
+    const auto _gas_limit = ctx->s.pop();
+    const auto toAddress  = pop_addr(ctx->s);
+    const auto value      = op == Opcode::DELEGATECALL ? 0 : ctx->s.popAmount();
+    const auto offIn      = ctx->s.popu64();
+    const auto sizeIn     = ctx->s.popu64();
+    const auto offOut     = ctx->s.popu64();
+    const auto sizeOut    = ctx->s.popu64();
 
     // TODO: implement precompiled contracts
     if (toAddress >= 1 && toAddress <= 8) {
@@ -994,7 +994,7 @@ namespace eosio_evm
     // Get new account and check not empty
     Account new_callee = contract->get_account(toAddress);
     if (new_callee.get_code().empty()) {
-      ctxt->s.push(1);
+      ctx->s.push(1);
       return;
     }
 
@@ -1003,7 +1003,7 @@ namespace eosio_evm
       // callValueTransfer (9000) - callStipend (2300)
       if (op == Opcode::CALL || op == Opcode::CALLCODE) {
         // Check not static
-        if (ctxt->is_static) {
+        if (ctx->is_static) {
           return throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
         }
 
@@ -1017,11 +1017,11 @@ namespace eosio_evm
       }
 
       // Transfer value
-      contract->transfer_internal(ctxt->callee.get_address(), new_callee.get_address(), value);
+      contract->transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
     }
 
     // 63/64 gas
-    const auto gas_allowed = ctxt->gas_left - (ctxt->gas_left / 64);
+    const auto gas_allowed = ctx->gas_left - (ctx->gas_left / 64);
     const auto gas_limit = (_gas_limit > gas_allowed) ? gas_allowed : _gas_limit;
 
     // Check max depth
@@ -1038,7 +1038,7 @@ namespace eosio_evm
     // Prepare memory for output and handlers
     prepare_mem_access(offOut, sizeOut);
 
-    auto parentContext = ctxt;
+    auto parentContext = ctx;
     auto result_cb = [offOut, sizeOut, parentContext, this](const vector<uint8_t>& output) {
       if (!output.empty()) {
         // Memory
@@ -1059,22 +1059,22 @@ namespace eosio_evm
     };
 
     // Address, callee and value are variable amongst call ops
-    auto new_caller = ctxt->callee;
+    auto new_caller = ctx->callee;
     auto new_value  = value;
-    auto is_static  = ctxt->is_static;
+    auto is_static  = ctx->is_static;
 
     if (op == Opcode::STATICCALL) {
       is_static = true;
     }
 
     if (op == Opcode::CALLCODE) {
-      new_callee = ctxt->callee;
+      new_callee = ctx->callee;
     }
 
     if (op == Opcode::DELEGATECALL) {
-      new_callee = ctxt->callee;
-      new_caller = ctxt->caller;
-      new_value  = ctxt->call_value;
+      new_callee = ctx->callee;
+      new_caller = ctx->caller;
+      new_value  = ctx->call_value;
     }
 
     // Push call context
@@ -1091,17 +1091,17 @@ namespace eosio_evm
 
   void Processor::return_()
   {
-    const auto offset = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto offset = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
 
     // invoke caller's return handler
-    ctxt->result_cb(copy_from_mem(offset, size));
+    ctx->result_cb(copy_from_mem(offset, size));
   }
 
   void Processor::revert()
   {
-    const auto offset = ctxt->s.popu64();
-    const auto size = ctxt->s.popu64();
+    const auto offset = ctx->s.popu64();
+    const auto size = ctx->s.popu64();
 
     // invoke caller's return handler
     throw_error(
@@ -1113,18 +1113,18 @@ namespace eosio_evm
   void Processor::selfdestruct()
   {
     // Check not static
-    if (ctxt->is_static) {
+    if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
     }
 
     // Pop Stack
-    auto recipient_address = pop_addr(ctxt->s);
+    auto recipient_address = pop_addr(ctx->s);
 
     // Find recipient
     auto recipient = contract->get_account(recipient_address);
 
     // Contract addres
-    auto contract_address = ctxt->callee.get_address();
+    auto contract_address = ctx->callee.get_address();
 
     // Gas refund if not already scheduled for deletion
     auto existing = std::find(transaction.selfdestruct_list.begin(), transaction.selfdestruct_list.end(), contract_address);
@@ -1133,7 +1133,7 @@ namespace eosio_evm
     }
 
     // Check contract balance
-    auto balance = ctxt->callee.get_balance();
+    auto balance = ctx->callee.get_balance();
     if (balance > 0) {
       // New Account gas fee
       if (recipient.is_empty()) {

@@ -10,7 +10,7 @@ namespace eosio_evm {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+      accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
         a.nonce += 1;
       });
     }
@@ -20,8 +20,11 @@ namespace eosio_evm {
   void evm::set_code(const Address& address, const std::vector<uint8_t>& code) {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
+    eosio::print("Searching for ", intx::hex(address));
+    eosio::print("Searching for ", toChecksum256(address));
+    eosio::print("Found for ", existing_address != accounts_byaddress.end());
     if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+      accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
         a.code = code;
       });
     }
@@ -44,50 +47,37 @@ namespace eosio_evm {
     }
   }
 
-  const Account* evm::create_account(
+  // Returns [account, error], error is true if account already exists
+  evm::AccountResult evm::create_account(
     const Address& address,
     const int64_t& balance,
-    const std::vector<uint8_t>& code,
-    const eosio::name& account
+    const bool& is_contract // default false
   )
   {
     // Find address
-    auto address_bin        = toBin(address);
-    auto address_160        = toChecksum160(address_bin);
+    auto address_160        = addressToChecksum160(address);
     auto address_256        = pad160(address_160);
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address   = accounts_byaddress.find(address_256);
 
     // ERROR
     if (existing_address != accounts_byaddress.end()) {
-      return nullptr;
+      static const auto empty_account = Account(address);
+      return { empty_account, true };
     }
 
-    // Nonce: 3 states
-    // 1. EOS account -> 1
-    // 2. Ethereum contract -> 1
-    // 3. Ethereum account (no code) -> 0
-    uint64_t nonce = account || !code.empty() ? 1 : 0;
+    // Initial Nonce is 1 for contracts and 0 for accounts (no code)
+    uint64_t nonce = is_contract ? 1 : 0;
 
     // Create address if it does not exists
     auto new_address = _accounts.emplace(get_self(), [&](auto& a) {
       a.index   = _accounts.available_primary_key();
+      a.nonce   = nonce;
       a.address = address_160;
       a.balance = eosio::asset(balance, TOKEN_SYMBOL);
-      a.nonce   = nonce;
-      a.code    = code;
-      a.account = account;
     });
 
-    // Debug
-    // eosio::print("\n--------------");
-    // eosio::print("\nCreating Account");
-    // eosio::print("\nAddress 160: ", address_160);
-    // eosio::print("\nAddress 256: ", address_256);
-    // (*new_address).print();
-    // eosio::print("\n--------------");
-
-    return &(*new_address);
+    return { *new_address, false };
   }
 
   /**

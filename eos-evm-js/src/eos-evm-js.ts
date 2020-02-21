@@ -1,20 +1,92 @@
 import { Transaction } from 'ethereumjs-tx'
 import { EosApi } from './eos'
-const abi = require('ethereumjs-abi')
-const compiled = require('./eth-contracts/compiled.json')
+const abiEncoder = require('ethereumjs-abi')
 
 export class EosEvmApi extends EosApi {
-  ethPrivateKeys: any;
+  ethPrivateKeys: any
+  abi: any
+  eth: any
 
-  constructor ({ ethPrivateKeys, eosPrivateKeys, endpoint } : { ethPrivateKeys?: any, eosPrivateKeys: string[], endpoint: string }) {
+  constructor({
+    ethPrivateKeys,
+    eosPrivateKeys,
+    endpoint
+  }: {
+    ethPrivateKeys?: any
+    eosPrivateKeys: string[]
+    endpoint: string
+  }) {
     super({ eosPrivateKeys, endpoint })
+    this.ethPrivateKeys = ethPrivateKeys
+  }
 
-    this.ethPrivateKeys = ethPrivateKeys;
+  async loadContractFromAbi({
+    contract,
+    account,
+    sender,
+    to,
+    abi,
+    bytecodeObject
+  }: {
+    contract: string
+    account: string
+    sender: string
+    abi: any
+    to: string
+    bytecodeObject: string
+  }) {
+    // Load interface
+    let abiInterface: any = {
+      function: [],
+      event: [],
+      constructor: []
+    }
+    for (const item of abi) {
+      abiInterface[item.type].push(item)
+    }
+    this.abi = abi
+
+    const that = this
+    let eth: any = {}
+
+    // Populate functions
+    for (const action of abiInterface.function) {
+      eth[action.name] = async function(...args: any[]) {
+        const internalTypes = action.inputs.map((i: any) => i.internalType)
+        const names = action.inputs.map((i: any) => i.name)
+        const types = action.inputs.map((i: any) => i.type)
+        if (args.length != internalTypes.length)
+          throw new Error(
+            `${internalTypes.length} arguments expected for function ${action.name}: ${names}`
+          )
+
+        const params = abiEncoder.rawEncode(internalTypes, args).toString('hex')
+        const data = `0x${params}`
+        const encodedTx = await that.createEthTx({ contract, sender, data, to })
+
+        return that.raw({ contract, account, tx: encodedTx, sender })
+      }
+    }
+
+    eth['deploy'] = async function(...args: any[]) {
+      const internalTypes = abiInterface.constructor[0].inputs.map((i: any) => i.internalType)
+      const names = abiInterface.constructor[0].inputs.map((i: any) => i.name)
+      if (args.length != internalTypes.length)
+        throw new Error(`${internalTypes.length} arguments expected for deploy: ${names}`)
+
+      const params = abiEncoder.rawEncode(internalTypes, args).toString('hex')
+      const data = `0x${bytecodeObject}${params.toString('hex')}`
+      const encodedTx = await that.createEthTx({ contract, sender, data, to: undefined })
+      return that.raw({ contract, account, tx: encodedTx, sender })
+    }
+
+    this.eth = eth
   }
 
   /**
    * Generates RLP encoded transaction from parameters
    *
+   * @param contract The EOS account where the EVM contract is deployed
    * @param sender The ETH address sending the transaction (nonce is fetched on-chain for this address)
    * @param data The data in transaction
    * @param gasLimit The gas limit of the transaction
@@ -24,8 +96,24 @@ export class EosEvmApi extends EosApi {
    *
    * @returns RLP encoded transaction
    */
-  async createEthTx ({ sender, data, gasLimit, value, to, sign = true }: { sender?: string, data?: string, gasLimit?: string, value?: string, to?: string, sign?: boolean }) {
-    const nonce = await this.getNonce('1234test1111', sender)
+  async createEthTx({
+    contract,
+    sender,
+    data,
+    gasLimit,
+    value,
+    to,
+    sign = true
+  }: {
+    contract: string
+    sender?: string
+    data?: string
+    gasLimit?: string
+    value?: string
+    to?: string
+    sign?: boolean
+  }) {
+    const nonce = await this.getNonce(contract, sender)
     const txData = {
       nonce,
       gasPrice: '0x01',
@@ -35,54 +123,15 @@ export class EosEvmApi extends EosApi {
       data
     }
 
-    const tx = new Transaction(txData);
+    const tx = new Transaction(txData)
 
     if (sign) {
-      if (!sender) throw new Error('Signature requested in createEthTx, but no sender provided');
-      if (!this.ethPrivateKeys[sender]) throw new Error('No private key provided for ETH address ' + sender);
-      tx.sign(this.ethPrivateKeys[sender]);
+      if (!sender) throw new Error('Signature requested in createEthTx, but no sender provided')
+      if (!this.ethPrivateKeys[sender])
+        throw new Error('No private key provided for ETH address ' + sender)
+      tx.sign(this.ethPrivateKeys[sender])
     }
 
-    return tx.serialize().toString('hex');
-  }
-
-  /**
-   * Gets RLP encoded transaction for the deployment of ERC721 token
-   *
-   * @param sender The ETH address sending the transaction
-   * @param name Name of token
-   * @param symbol Symbol of token
-   *
-   * @returns RLP encoded transaction
-   */
-  async deployERC721 ({ sender, name, symbol } : { sender: string, name: string, symbol: string }) {
-    const params = abi.rawEncode(['string', 'string'], [name, symbol])
-    const deployBytecode = compiled.contracts.ERC721.Token.evm.bytecode.object
-    const data = `0x${deployBytecode}${params.toString('hex')}`
-    return await this.createEthTx({
-      sender,
-      data
-    })
-  }
-
-  /**
-   * Gets RLP encoded transaction for the deployment of ERC20 token
-   *
-   * @param sender The ETH address sending the transaction
-   * @param name Name of token
-   * @param symbol Symbol of token
-   * @param decimals The precision of your new token
-   * @param initialSupply The initial supply of the token
-   *
-   * @returns RLP encoded transaction
-   */
-  async deployERC20 ({ sender, name, symbol, decimals, initialSupply } : { sender: string, name: string, symbol: string, decimals: number, initialSupply: number }) {
-    const params = abi.rawEncode(['string', 'string', 'uint8', 'uint256'], [name, symbol, decimals, initialSupply])
-    const deployBytecode = compiled.contracts.ERC20.Token.evm.bytecode.object
-    const data = `0x${deployBytecode}${params.toString('hex')}`
-    return await this.createEthTx({
-      sender,
-      data
-    })
+    return tx.serialize().toString('hex')
   }
 }

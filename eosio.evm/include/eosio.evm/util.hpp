@@ -112,8 +112,15 @@ namespace eosio_evm
    * RLP
    */
   inline Address generate_address(const Address& sender, uint256_t nonce) {
+    // RLP encode and keccak hash
     const auto rlp_encoding = rlp::encode(sender, nonce);
     std::array<uint8_t, 32u> buffer = keccak_256(rlp_encoding);
-    return intx::be::unsafe::load<uint256_t>(buffer.data());
+
+    // Copy right 160 bits from keccak buffer
+    uint8_t right_160[32] = {};
+    memcpy(right_160 + 12u, buffer.data() + 12u, 20u);
+
+    // Return as address
+    return intx::be::load<uint256_t>(right_160);
   };
 } // namespace eosio_evm

@@ -21,6 +21,7 @@ namespace eosio_evm
     last_return_data.shrink_to_fit();
 
     // Debug
+    #if (OPTRACE == true)
     eosio::print(
       "\n",
       "{",
@@ -33,6 +34,7 @@ namespace eosio_evm
       "}",
       ","
     );
+    #endif /* OPTRACE */
 
     // Charge gas
     use_gas(OpFees::by_code[op]);
@@ -562,7 +564,7 @@ namespace eosio_evm
 
   void Processor::caller()
   {
-    ctxt->s.push(ctxt->caller);
+    ctxt->s.push(ctxt->caller.get_address());
   }
 
   void Processor::callvalue()
@@ -896,19 +898,19 @@ namespace eosio_evm
     // For contract accounts, the nonce counts the number of contract-creations by this account
     contract->increment_nonce(ctxt->callee.get_address());
 
-    // Create account using new address and value
-    const Account* new_account = contract->create_account(new_address, contract_value, {}, {});
-    if (new_account == NULL) {
-      return throw_error(Exception(ET::outOfBounds, "New account already exists"), {});
+    // Create account using new address
+    auto [new_account, error] = contract->create_account(new_address, 0, true);
+    if (error) {
+      return throw_error(Exception(ET::outOfBounds, "Cannot CREATE contract address as it already exists"), {});
     }
 
     // In contract creation, the transaction value is an endowment for the newly created account
-    contract->transfer_internal(ctxt->callee.get_address(), new_account->get_address(), contract_value);
+    contract->transfer_internal(ctxt->callee.get_address(), new_account.get_address(), contract_value);
 
     // Execute new account's code
     auto result = run(
       ctxt->callee.get_address(),
-      *new_account,
+      new_account,
       transaction.gas_left(),
       false, // CREATE and CREATE2 cannot be called statically
       {}, // Data
@@ -920,7 +922,7 @@ namespace eosio_evm
     if (result.er == ExitReason::returned)
     {
       // Set code from output
-      auto new_account_address = new_account->get_address();
+      auto new_account_address = new_account.get_address();
       if (!result.output.empty()) {
         contract->set_code(new_account_address, move(result.output));
       }
@@ -948,9 +950,9 @@ namespace eosio_evm
     const auto contract_value = ctxt->s.popAmount();
     const auto offset         = ctxt->s.popu64();
     const auto size           = ctxt->s.popu64();
-    const auto arbitrary      = ctxt->callee.get_nonce();
+    const auto nonce          = ctxt->callee.get_nonce();
 
-    auto new_address = generate_address(ctxt->callee.get_address(), arbitrary);
+    auto new_address = generate_address(ctxt->callee.get_address(), nonce);
     _create(contract_value, offset, size, new_address);
   }
 
@@ -993,7 +995,7 @@ namespace eosio_evm
     }
 
     // Get new account and check not empty
-    decltype(auto) new_callee = contract->get_account(toAddress);
+    Account new_callee = contract->get_account(toAddress);
     if (new_callee.get_code().empty()) {
       ctxt->s.push(1);
       return;
@@ -1060,34 +1062,33 @@ namespace eosio_evm
     };
 
     // Address, callee and value are variable amongst call ops
-    auto context_address = ctxt->callee.get_address();
-    auto context_callee  = new_callee;
-    auto context_value   = value;
-    auto is_static       = ctxt->is_static;
+    auto new_caller = ctxt->callee;
+    auto new_value  = value;
+    auto is_static  = ctxt->is_static;
 
     if (op == Opcode::STATICCALL) {
       is_static = true;
     }
 
     if (op == Opcode::CALLCODE) {
-      context_callee = ctxt->callee;
+      new_callee = ctxt->callee;
     }
 
     if (op == Opcode::DELEGATECALL) {
-      context_callee  = ctxt->callee;
-      context_address = ctxt->caller;
-      context_value   = ctxt->call_value;
+      new_callee = ctxt->callee;
+      new_caller = ctxt->caller;
+      new_value  = ctxt->call_value;
     }
 
     // Push call context
     auto result = run(
-      context_address,
-      context_callee,
+      new_caller,
+      new_callee,
       gas_limit,
       is_static,
       move(input),
       new_callee.get_code(),
-      context_value
+      new_value
     );
   }
 
@@ -1119,8 +1120,10 @@ namespace eosio_evm
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
     }
 
-    // Find recipient
+    // Pop Stack
     auto recipient_address = pop_addr(ctxt->s);
+
+    // Find recipient
     auto recipient = contract->get_account(recipient_address);
 
     // Contract addres

@@ -12,21 +12,106 @@ using namespace std;
 
 namespace eosio_evm
 {
+  void Processor::initialize_create(const Account& caller) {
+    // Nonce - 1, since the caller's nonce has been incremented in "raw" action
+    const Address to_address = generate_address(caller.get_address(), caller.get_nonce() - 1);
+
+    // Prevent collision
+    const auto [callee, error] = contract->create_account(to_address, 0, true);
+    if (error) {
+      eosio::print("EVM Execution Error: ", intx::hex(to_address), " already exists.");
+      return;
+    }
+
+    // Transfer value
+    contract->transfer_internal(caller.get_address(), to_address, transaction.get_value());
+
+    // Run
+    const ExecResult exec_result = run(
+      caller,
+      callee,
+      transaction.gas_left(),
+      false, // Is Static
+      {}, // Data is empty
+      transaction.data, // Init data used as code here
+      transaction.get_value()
+    );
+
+    // Success
+    if (exec_result.er == ExitReason::returned) {
+      // Validate size
+      const auto output_size = exec_result.output.size();
+      if (output_size >= MAX_CODE_SIZE) {
+        eosio::print("EVM Execution Error: Code is larger than max code size, out of gas!");
+        return;
+      }
+
+      // Charge create data gas
+      const auto create_gas_cost = output_size * GP_CREATE_DATA;
+      const bool out_of_gas = create_gas_cost > transaction.gas_limit;
+      if (out_of_gas) {
+        eosio::print("EVM Execution Error: Out of Gas");
+        return;
+      } else {
+        transaction.gas_used += output_size * GP_CREATE_DATA;
+      }
+
+      // Set code if not empty
+      if (output_size > 0) {
+        contract->set_code(to_address, std::move(exec_result.output));
+      }
+    }
+    // Error
+    else
+    {
+      eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+    }
+
+    // TODO revert if there was an error
+  }
+
+  void Processor::initialize_call(const Account& caller)
+  {
+    Address to_address = *transaction.to_address;
+    const Account& callee = contract->get_account(to_address);
+
+    // Transfer value
+    contract->transfer_internal(caller.get_address(), to_address, transaction.get_value());
+
+    // Run
+    const ExecResult exec_result = run(
+      caller,
+      callee,
+      transaction.gas_left(),
+      false, // Is Static
+      transaction.data,
+      callee.get_code(),
+      transaction.get_value()
+    );
+
+    // Success
+    if (exec_result.er == ExitReason::returned)
+    {
+    }
+    // Error
+    else
+    {
+      eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+    }
+
+    // TODO revert if there was an error
+  }
+
   ExecResult Processor::run(
-    const Address& caller,
+    const Account& caller,
     const Account& callee,
     uint256_t gas_limit,
     const bool& is_static,
-    const vector<uint8_t>& data,
-    const vector<uint8_t>& code,
+    const std::vector<uint8_t>& data,
+    const std::vector<uint8_t>& code,
     const int64_t& call_value
   )
   {
-    // Debug
-    // eosio::print("\nProcessor:\n");
-    // callee.print();
-    // eosio::print("Data: ", bin2hex(data), "\n", "code: ", bin2hex(code), "\n", "ISCREATE?: ", transaction.is_create(), "\n", "call_value: ", call_value, "\n");
-
     // Create result and error callbacks
     ExecResult result;
     auto result_cb = [&result](const vector<uint8_t>& output) {
@@ -43,7 +128,6 @@ namespace eosio_evm
     auto parent_context = ctxt;
 
     // Add new context
-    auto program = Program(code);
     auto c = make_unique<Context>(
       caller,
       callee,
@@ -51,7 +135,7 @@ namespace eosio_evm
       is_static,
       data,
       call_value,
-      program,
+      Program(code),
       result_cb,
       error_cb
     );
@@ -69,9 +153,10 @@ namespace eosio_evm
       ctxt->step();
     }
 
+    // Restore to parent context
     ctxt = parent_context;
 
-    // Mock success
+    // Set result if not set yet
     if (!int(result.er)) {
       result_cb({});
     }
@@ -93,15 +178,16 @@ namespace eosio_evm
 
   // Gas
   void Processor::use_gas(uint256_t amount) {
-    transaction.gas_used += amount;
-    ctxt->gas_left -= amount;
-
     // If higher than gas limit or more than gas left
     bool over_gas_limit = transaction.gas_used + amount > transaction.gas_limit;
     bool not_enough_gas_left = amount > ctxt->gas_left;
     if (ctxt->gas_left && (over_gas_limit || not_enough_gas_left)) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
+
+    // Reflect gas changes
+    transaction.gas_used += amount;
+    ctxt->gas_left -= amount;
   }
   void Processor::refund_gas(uint256_t amount) {
     transaction.gas_used -= amount;

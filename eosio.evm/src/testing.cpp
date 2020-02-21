@@ -17,13 +17,18 @@ namespace eosio_evm {
 
   void evm::devnewacct(const eosio::checksum160& address, const uint64_t balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account) {
     require_auth(get_self());
-    create_account(checksum160ToAddress(address), balance, code, account);
 
-    // Modify nonce
+    // Create account
+    auto address_256        = pad160(address);
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
-    auto existing_address   = accounts_byaddress.find(pad160(address));
-    accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
-      a.nonce = nonce;
+    auto existing_address   = accounts_byaddress.find(address_256);
+    eosio::check(existing_address == accounts_byaddress.end(), "An account already exists with this address");
+    _accounts.emplace(get_self(), [&](auto& a) {
+      a.index   = _accounts.available_primary_key();
+      a.address = address;
+      a.balance = eosio::asset(balance, TOKEN_SYMBOL);
+      a.nonce   = nonce;
+      a.account = account;
     });
   }
 

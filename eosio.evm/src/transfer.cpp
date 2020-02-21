@@ -67,7 +67,7 @@ namespace eosio_evm {
       });
     // Does not exist
     } else {
-      create_account(address, amount, {}, {});
+      create_account(address, amount);
     }
   }
 

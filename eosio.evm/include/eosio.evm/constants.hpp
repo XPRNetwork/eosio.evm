@@ -6,6 +6,7 @@
 
 // Testing
 #define TESTING true
+#define OPTRACE true
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"

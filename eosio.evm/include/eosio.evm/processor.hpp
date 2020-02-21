@@ -55,8 +55,11 @@ namespace eosio_evm {
         contract(contract)
     {}
 
+    void initialize_create (const Account& caller);
+    void initialize_call (const Account& caller);
+
     ExecResult run(
-      const Address& caller,
+      const Account& caller,
       const Account& callee,
       uint256_t gas_limit,
       const bool& is_static,

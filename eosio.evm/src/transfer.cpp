@@ -49,28 +49,6 @@ namespace eosio_evm {
     });
   }
 
-  // Creates address if not found
-  void evm::add_balance (
-    const Address& address,
-    const int64_t& amount
-  ) {
-    if (amount == 0) return;
-
-    auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
-    auto account = accounts_byaddress.find(toChecksum256(address));
-    eosio::check(amount >= 0, "amount must not be negative");
-
-    // Exists
-    if (account != accounts_byaddress.end()) {
-      accounts_byaddress.modify(account, eosio::same_payer, [&](auto& a) {
-        a.balance.amount += amount;
-      });
-    // Does not exist
-    } else {
-      create_account(address, amount);
-    }
-  }
-
   void evm::sub_balance (
     const eosio::name& user,
     const eosio::asset& quantity
@@ -85,23 +63,6 @@ namespace eosio_evm {
 
     accounts_byaccount.modify(account, eosio::same_payer, [&](auto& a) {
       a.balance -= quantity;
-    });
-  }
-
-  void evm::sub_balance (
-    const Address& address,
-    const int64_t& amount
-  ) {
-    if (amount == 0) return;
-
-    auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
-    auto account = accounts_byaddress.find(toChecksum256(address));
-    eosio::check(account != accounts_byaddress.end(), "account does not have a balance (sub_balance).");
-    eosio::check(amount >= 0, "amount must not be negative");
-    eosio::check(account->get_balance() >= amount, "account balance too low.");
-
-    accounts_byaddress.modify(account, eosio::same_payer, [&](auto& a) {
-      a.balance.amount -= amount;
     });
   }
 }

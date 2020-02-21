@@ -8,8 +8,6 @@
 
 #include <eosio.evm/eosio.evm.hpp>
 
-using namespace std;
-
 namespace eosio_evm
 {
   void Processor::dispatch()
@@ -26,10 +24,10 @@ namespace eosio_evm
       "\n",
       "{",
       "\"pc\":",      ctx->get_pc(), ",",
-      "\"gasLeft\":", to_string(ctx->gas_left), ",",
-      "\"gasCost\":", to_string(OpFees::by_code[op]), ",",
+      "\"gasLeft\":", intx::to_string(ctx->gas_left), ",",
+      "\"gasCost\":", std::to_string(OpFees::by_code[op]), ",",
       "\"stack\":",   ctx->s.asArray(), ",",
-      "\"depth\":",   to_string(get_call_depth()), ",",
+      "\"depth\":",   std::to_string(get_call_depth()), ",",
       "\"opName\": \"",  opcodeToString(op), "\"",
       "}",
       ","
@@ -317,7 +315,7 @@ namespace eosio_evm
   {
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
-    const auto min = (numeric_limits<uint256_t>::max() / 2) + 1;
+    const auto min = (std::numeric_limits<uint256_t>::max() / 2) + 1;
 
     if (y == 0)
       ctx->s.push(0);
@@ -552,7 +550,7 @@ namespace eosio_evm
   void Processor::balance()
   {
     const auto address = pop_addr(ctx->s);
-    const Account& given_account = contract->get_account(address);
+    const Account& given_account = get_account(address);
     ctx->s.push(given_account.get_balance_u64());
   }
 
@@ -639,14 +637,14 @@ namespace eosio_evm
   void Processor::extcodesize()
   {
     auto address = pop_addr(ctx->s);
-    auto code = contract->get_account(address).get_code();
+    auto code = get_account(address).get_code();
     ctx->s.push(code.size());
   }
 
   void Processor::extcodecopy()
   {
     auto address = pop_addr(ctx->s);
-    auto code = contract->get_account(address).get_code();
+    auto code = get_account(address).get_code();
     copy_mem(ctx->mem, code, Opcode::STOP);
   }
 
@@ -666,7 +664,7 @@ namespace eosio_evm
     auto address = pop_addr(ctx->s);
 
     // Fetch code account
-    const Account& code_account = contract->get_account(address);
+    const Account& code_account = get_account(address);
 
     // If account is empty, return 0
     if (code_account.is_empty()) {
@@ -761,7 +759,7 @@ namespace eosio_evm
   void Processor::sload()
   {
     const auto k = ctx->s.pop();
-    uint256_t loaded = contract->loadkv(ctx->callee.primary_key(), k);
+    uint256_t loaded = loadkv(ctx->callee.primary_key(), k);
     ctx->s.push(loaded);
   }
 
@@ -776,7 +774,7 @@ namespace eosio_evm
     const auto v = ctx->s.pop();
 
     // Store as original if first time seeing it
-    uint256_t current_value = contract->loadkv(ctx->callee.primary_key(), k);
+    uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
     if (transaction.original_storage.count(k) == 0) {
       transaction.original_storage[k] = current_value;
     }
@@ -785,7 +783,7 @@ namespace eosio_evm
     process_sstore_gas(transaction.original_storage[k], current_value, v);
 
     // Store
-    contract->storekv(ctx->callee.primary_key(), k, v);
+    storekv(ctx->callee.primary_key(), k, v);
   }
 
   void Processor::jump()
@@ -863,7 +861,7 @@ namespace eosio_evm
 
     // Get topic data from stack
     const uint8_t number_of_logs = get_op() - LOG0;
-    vector<uint256_t> topics(number_of_logs);
+    std::vector<uint256_t> topics(number_of_logs);
     for (int i = 0; i < number_of_logs; i++) {
       topics[i] = ctx->s.pop();
     }
@@ -893,16 +891,16 @@ namespace eosio_evm
     auto init_code = copy_from_mem(offset, size);
 
     // For contract accounts, the nonce counts the number of contract-creations by this account
-    contract->increment_nonce(transaction, ctx->callee.get_address());
+    increment_nonce(ctx->callee.get_address());
 
     // Create account using new address
-    auto [new_account, error] = contract->create_account(new_address, 0, true);
+    auto [new_account, error] = create_account(new_address, 0, true);
     if (error) {
       return throw_error(Exception(ET::outOfBounds, "Cannot CREATE contract address as it already exists"), {});
     }
 
     // In contract creation, the transaction value is an endowment for the newly created account
-    contract->transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
+    transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
 
     // Execute new account's code
     auto result = run(
@@ -921,7 +919,7 @@ namespace eosio_evm
       // Set code from output
       auto new_account_address = new_account.get_address();
       if (!result.output.empty()) {
-        contract->set_code(new_account_address, move(result.output));
+        set_code(new_account_address, move(result.output));
       }
 
       ctx->s.push(new_account_address);
@@ -993,7 +991,7 @@ namespace eosio_evm
     }
 
     // Get new account and check not empty
-    Account new_callee = contract->get_account(toAddress);
+    Account new_callee = get_account(toAddress);
     if (new_callee.get_code().empty()) {
       ctx->s.push(1);
       return;
@@ -1018,7 +1016,7 @@ namespace eosio_evm
       }
 
       // Transfer value
-      contract->transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
+      transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
     }
 
     // 63/64 gas
@@ -1119,7 +1117,7 @@ namespace eosio_evm
     auto recipient_address = pop_addr(ctx->s);
 
     // Find recipient
-    auto recipient = contract->get_account(recipient_address);
+    auto recipient = get_account(recipient_address);
 
     // Contract addres
     auto contract_address = ctx->callee.get_address();
@@ -1139,7 +1137,7 @@ namespace eosio_evm
       }
 
       // Transfer all balance
-      contract->transfer_internal(contract_address, recipient_address, balance);
+      transfer_internal(contract_address, recipient_address, balance);
     }
 
     // Add to list for later

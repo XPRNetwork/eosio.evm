@@ -40,11 +40,19 @@ namespace eosio_evm {
     auto existing_address   = accounts_byaddress.find(pad160(address));
     eosio::check(existing_address != accounts_byaddress.end(), "address does not exist");
 
-    storekv(
-      existing_address->index,
-      intx::from_string<uint256_t>(key),
-      intx::from_string<uint256_t>(value)
-    );
+    // Key value
+    auto checksum_key = toChecksum256(intx::from_string<uint256_t>(key));
+    auto checksum_value = intx::from_string<uint256_t>(key);
+
+    // Store KV
+    account_state_table accounts_states(get_self(), existing_address->index);
+    auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
+    auto account_state         = accounts_states_bykey.find(checksum_key);
+    accounts_states.emplace(get_self(), [&](auto& a) {
+        a.index   = accounts_states.available_primary_key();
+        a.key     = checksum_key;
+        a.value   = checksum_value;
+    });
   }
 
   void evm::teststatetx(const std::vector<int8_t>& tx, const Env& env) {

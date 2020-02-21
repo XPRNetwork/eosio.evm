@@ -88,6 +88,31 @@ namespace eosio_evm {
     void jump_to(const uint64_t newPc);
     void dispatch();
 
+    // State
+    struct AccountResult {
+      const Account& account;
+      const bool error;
+    };
+    const Account& get_account(const Address& address);
+    AccountResult create_account(
+      const Address& address,
+      const int64_t& balance = 0,
+      const bool& is_contract = false
+    );
+    void increment_nonce(const Address& address);
+    void set_code(const Address& address, const std::vector<uint8_t>& code);
+    void selfdestruct(const Address& addr);
+    void transfer_internal(const Address& from, const Address& to, const int64_t amount);
+
+    // Reverting
+    void remove_code(const Address& address);
+    void remove_account(const Address& address);
+    void decrement_nonce(const Address& address);
+
+    // Storage
+    void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);
+    uint256_t loadkv(const uint64_t& address_index, const uint256_t& key);
+
     // Instructions
     void stop();
     void add();

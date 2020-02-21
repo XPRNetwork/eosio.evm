@@ -95,11 +95,6 @@ void evm::raw(
   } else {
     processor.initialize_call(*caller);
   }
-
-  // clean-up
-  for (const auto& addr : transaction.selfdestruct_list) {
-    selfdestruct(addr);
-  }
 }
 
 } // namepsace eosio_evm

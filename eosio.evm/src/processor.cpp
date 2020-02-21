@@ -8,8 +8,6 @@
 
 #include <eosio.evm/eosio.evm.hpp>
 
-using namespace std;
-
 namespace eosio_evm
 {
   void Processor::initialize_create(const Account& caller) {
@@ -17,14 +15,14 @@ namespace eosio_evm
     const Address to_address = generate_address(caller.get_address(), caller.get_nonce() - 1);
 
     // Prevent collision
-    const auto [callee, error] = contract->create_account(to_address, 0, true);
+    const auto [callee, error] = create_account(to_address, 0, true);
     if (error) {
       eosio::print("EVM Execution Error: ", intx::hex(to_address), " already exists.");
       return;
     }
 
     // Transfer value
-    contract->transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    transfer_internal(caller.get_address(), to_address, transaction.get_value());
 
     // Run
     const ExecResult exec_result = run(
@@ -58,7 +56,7 @@ namespace eosio_evm
 
       // Set code if not empty
       if (output_size > 0) {
-        contract->set_code(to_address, std::move(exec_result.output));
+        set_code(to_address, std::move(exec_result.output));
       }
     }
     // Error
@@ -67,16 +65,19 @@ namespace eosio_evm
       eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
     }
 
-    // TODO revert if there was an error
+    // clean-up
+    for (const auto& addr : transaction.selfdestruct_list) {
+      selfdestruct(addr);
+    }
   }
 
   void Processor::initialize_call(const Account& caller)
   {
     Address to_address = *transaction.to_address;
-    const Account& callee = contract->get_account(to_address);
+    const Account& callee = get_account(to_address);
 
     // Transfer value
-    contract->transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    transfer_internal(caller.get_address(), to_address, transaction.get_value());
 
     // Run
     const ExecResult exec_result = run(
@@ -96,10 +97,15 @@ namespace eosio_evm
     // Error
     else
     {
+      // TODO revert if there was an error
+
       eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
     }
 
-    // TODO revert if there was an error
+    // clean-up
+    for (const auto& addr : transaction.selfdestruct_list) {
+      selfdestruct(addr);
+    }
   }
 
   ExecResult Processor::run(
@@ -114,7 +120,7 @@ namespace eosio_evm
   {
     // Create result and error callbacks
     ExecResult result;
-    auto result_cb = [&result](const vector<uint8_t>& output) {
+    auto result_cb = [&result](const std::vector<uint8_t>& output) {
       result.er = ExitReason::returned;
       result.output = move(output);
     };
@@ -125,7 +131,7 @@ namespace eosio_evm
     };
 
     // Add new context
-    auto c = make_unique<Context>(
+    auto c = std::make_unique<Context>(
       caller,
       callee,
       gas_limit,
@@ -172,19 +178,19 @@ namespace eosio_evm
       const auto [type, index, key, oldvalue, amount] = transaction.state_modifications[i];
       switch (type) {
         case SMT::STORE_KV:
-          contract->storekv(index, key, oldvalue);
+          storekv(index, key, oldvalue);
           break;
         case SMT::CREATE_ACCOUNT:
-          contract->remove_account(key);
+          remove_account(key);
           break;
         case SMT::SET_CODE:
-          contract->remove_code(key);
+          remove_code(key);
           break;
         case SMT::INCREMENT_NONCE:
-          contract->decrement_nonce(key);
+          decrement_nonce(key);
           break;
         case SMT::TRANSFER:
-          contract->transfer_internal(oldvalue, key, amount);
+          transfer_internal(oldvalue, key, amount);
           break;
         case SMT::LOG:
           transaction.log_handler.pop();
@@ -278,8 +284,8 @@ namespace eosio_evm
     const uint64_t offDst,
     const uint64_t offSrc,
     const uint64_t size,
-    vector<uint8_t>& dst,
-    const vector<uint8_t>& src,
+    std::vector<uint8_t>& dst,
+    const std::vector<uint8_t>& src,
     const uint8_t pad
   )
   {
@@ -297,7 +303,7 @@ namespace eosio_evm
       dst.resize(lastDst);
 
     const auto lastSrc = offSrc + size;
-    const auto endSrc = min(lastSrc, static_cast<decltype(lastSrc)>(src.size()));
+    const auto endSrc = std::min(lastSrc, static_cast<decltype(lastSrc)>(src.size()));
 
     uint64_t remaining;
     if (endSrc > offSrc) {
@@ -311,7 +317,7 @@ namespace eosio_evm
     fill(dst.begin() + lastDst - remaining, dst.begin() + lastDst, pad);
   }
 
-  void Processor::copy_mem(vector<uint8_t>& dst, const vector<uint8_t>& src, const uint8_t pad)
+  void Processor::copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad)
   {
     const auto offDst = ctx->s.popu64();
     const auto offSrc = ctx->s.popu64();
@@ -352,7 +358,7 @@ namespace eosio_evm
     }
   }
 
-  vector<uint8_t> Processor::copy_from_mem(const uint64_t offset, const uint64_t size)
+  std::vector<uint8_t> Processor::copy_from_mem(const uint64_t offset, const uint64_t size)
   {
     prepare_mem_access(offset, size);
     return {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};

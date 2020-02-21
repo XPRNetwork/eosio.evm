@@ -109,6 +109,5 @@ namespace eosio_evm {
     // Storage
     void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);
     uint256_t loadkv(const uint64_t& address_index, const uint256_t& key);
-    void removekv(const uint64_t& address_index, const uint256_t& key);
   };
 }

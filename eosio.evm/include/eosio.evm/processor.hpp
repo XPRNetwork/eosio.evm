@@ -12,7 +12,6 @@
 namespace eosio_evm {
   // Forward Declarations
   class evm;
-  class Context;
 
   enum class ExitReason : uint8_t
   {

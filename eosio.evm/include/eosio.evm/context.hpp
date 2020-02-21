@@ -7,11 +7,12 @@
 #include <deque>
 #include "constants.hpp"
 #include "exception.hpp"
-#include "processor.hpp"
 #include "program.hpp"
 #include "stack.hpp"
 
 namespace eosio_evm {
+  class evm;
+
   using ReturnHandler    = std::function<void(std::vector<uint8_t>)>;
   using HaltHandler      = std::function<void()>;
   using ExceptionHandler = std::function<void(const Exception&, std::vector<uint8_t>)>;
@@ -93,13 +94,12 @@ namespace eosio_evm {
       }
     }
 
+    void store_account(const uint256_t& address, const Account& account);
+    uint256_t load_account(evm* contract, const uint256_t& address);
+
     // void store_state(const uint64_t& index, const uint256_t& key, const uint256_t& value)
     // {
     //   local_account_states[index] = {key, value};
-    // }
-    // void store_account(const uint256_t& address, const Account& account)
-    // {
-    //   local_changes[address] = account;
     // }
 
     // uint256_t load_key(const uint64_t& address_index, const uint256_t& key)
@@ -116,16 +116,6 @@ namespace eosio_evm {
     //   return contract->loadkv(address_index, key)
     // }
 
-    // uint256_t load_account(const uint256_t& address)
-    // {
-    //   const auto local_accounts_itr = local_accounts.find(address);
-    //   if (local_accounts_itr != local_accounts.end()) {
-    //     return local_accounts_itr->second;
-    //   } else {
-    //     // If not found, return from permanent store
-    //     return contract->loadkv(address_index, key)
-    //   }
-    // }
 
     // void apply()
     // {

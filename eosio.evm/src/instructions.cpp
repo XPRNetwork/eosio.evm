@@ -785,11 +785,8 @@ namespace eosio_evm
     // Charge gas
     process_sstore_gas(transaction.original_storage[k], current_value, v);
 
-    if (!v) {
-      contract->removekv(ctxt->callee.primary_key(), k);
-    } else {
-      contract->storekv(ctxt->callee.primary_key(), k, v);
-    }
+    // Store
+    contract->storekv(ctxt->callee.primary_key(), k, v);
   }
 
   void Processor::jump()

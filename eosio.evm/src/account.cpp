@@ -111,14 +111,18 @@ namespace eosio_evm {
     //              "\nAddress Index: ", to_string(address_index),
     //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
 
-    // Key found, set value
+    // Key found
     if (account_state != accounts_states_bykey.end())
     {
-      accounts_states_bykey.modify(account_state, eosio::same_payer, [&](auto& a) {
-        a.value = value;
-      });
+      if (value == 0) {
+        accounts_states_bykey.erase(account_state);
+      } else {
+        accounts_states_bykey.modify(account_state, eosio::same_payer, [&](auto& a) {
+          a.value = value;
+        });
+      }
     }
-    // Key not found, create key and value
+    // Key not found
     else
     {
       accounts_states.emplace(get_self(), [&](auto& a) {
@@ -150,24 +154,6 @@ namespace eosio_evm {
     // Key not found
     else {
       return 0;
-    }
-  }
-
-  void evm::removekv(const uint64_t& address_index, const uint256_t& key) {
-    // Get scoped state table for account state
-    account_state_table accounts_states(get_self(), address_index);
-    auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
-    auto checksum_key          = toChecksum256(key);
-    auto account_state         = accounts_states_bykey.find(checksum_key);
-
-    // eosio::print("\n\nRemove KV for address ", intx::hex(address),
-    //              "\nKey: ", to_string(key, 10),
-    //              "\Address Index: ", addresskey,
-    //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
-
-    // Remove key value
-    if (account_state != accounts_states_bykey.end()){
-      accounts_states_bykey.erase(account_state);
     }
   }
 } // namespace eosio_evm

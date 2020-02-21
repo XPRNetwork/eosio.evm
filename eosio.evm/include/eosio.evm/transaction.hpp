@@ -33,6 +33,26 @@ namespace eosio_evm
     return rec_id;
   }
 
+  enum class StateModificationType {
+    NONE = 0,
+    STORE_KV,
+    CREATE_ACCOUNT,
+    SET_CODE,
+    INCREMENT_NONCE,
+    TRANSFER,
+    LOG,
+    SELF_DESTRUCT
+  };
+  using SMT = StateModificationType;
+
+  struct StateModification {
+    StateModificationType type;
+    uint64_t index;
+    uint256_t key;
+    uint256_t oldvalue;
+    int64_t amount;
+  };
+
   struct EthereumTransaction {
     uint256_t nonce;           // A scalar value equal to the number of transactions sent by the sender;
     uint256_t gas_price;       // A scalar value equal to the number of Wei to be paid per unit of gas for all computation costs incurred as a result of the execution of this transaction;
@@ -48,23 +68,21 @@ namespace eosio_evm
     LogHandler log_handler = {};              // Log handler for transaction
     eosio::checksum256 hash = {};             // Log handler for transaction
 
-    uint256_t gas_used;  // Gas used in transaction
+    uint256_t gas_used;     // Gas used in transaction
     uint256_t gas_refunds;  // Refunds processed in transaction
     std::map<uint256_t, uint256_t> original_storage; // Cache for SSTORE
+    std::vector<StateModification> state_modifications;   // State modifications
 
     // Signature data
-    uint8_t v;
-    uint256_t r;
-    uint256_t s;
+    uint8_t v;   // Recovery ID
+    uint256_t r; // Output
+    uint256_t s; // Output
 
     // RLP constructor
     EthereumTransaction(const std::vector<int8_t>& encoded)
     {
       // Max Transaction size
       eosio::check(encoded.size() < MAX_TX_SIZE, "Invalid Transaction: Max size of a transaction is 128 KB");
-
-      // Encoded
-      // eosio::print("Encoded: ", bin2hex(encoded));
 
       // Decode
       auto rlp = rlp::decode(encoded);
@@ -103,6 +121,7 @@ namespace eosio_evm
     bool is_create() const { return !to_address.has_value(); }
     uint256_t gas_left() const { return gas_limit - gas_used; }
     std::string encode() const { return rlp::encode(nonce, gas_price, gas_limit, to, value, data, v, r, s); }
+    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
 
     void initialize_base_gas () {
       gas_used = GP_TRANSACTION;
@@ -185,18 +204,21 @@ namespace eosio_evm
 
     uint256_t from_big_endian(const uint8_t* begin, size_t size = 32u)
     {
-        // Size validation
-        eosio::check(size <= 32, "Invalid Transaction: Calling from_big_endian with oversized array");
+      // Size validation
+      eosio::check(size <= 32, "Invalid Transaction: Calling from_big_endian with oversized array");
 
-        if (size == 32) {
-            return intx::be::unsafe::load<uint256_t>(begin);
-        } else {
-            uint8_t tmp[32] = {};
-            const auto offset = 32 - size;
-            memcpy(tmp + offset, begin, size);
+      if (size == 32)
+      {
+        return intx::be::unsafe::load<uint256_t>(begin);
+      }
+      else
+      {
+        uint8_t tmp[32] = {};
+        const auto offset = 32 - size;
+        memcpy(tmp + offset, begin, size);
 
-            return intx::be::load<uint256_t>(tmp);
-        }
+        return intx::be::load<uint256_t>(tmp);
+      }
     }
 
     void print() const

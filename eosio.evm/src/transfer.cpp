@@ -104,11 +104,4 @@ namespace eosio_evm {
       a.balance.amount -= amount;
     });
   }
-
-  void evm::transfer_internal(const Address& from, const Address& to, const int64_t amount) {
-    if (amount == 0) return;
-
-    sub_balance(from, amount);
-    add_balance(to, amount);
-  }
 }

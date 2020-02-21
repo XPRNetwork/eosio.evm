@@ -14,7 +14,6 @@ namespace eosio_evm {
   class evm;
 
   using ReturnHandler    = std::function<void(std::vector<uint8_t>)>;
-  using HaltHandler      = std::function<void()>;
   using ExceptionHandler = std::function<void(const Exception&, std::vector<uint8_t>)>;
 
   /**

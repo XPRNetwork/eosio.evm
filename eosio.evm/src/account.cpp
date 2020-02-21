@@ -5,13 +5,36 @@
 #include <eosio.evm/eosio.evm.hpp>
 
 namespace eosio_evm {
+  // Internal transfers only
+  void evm::transfer_internal(const Address& from, const Address& to, const int64_t amount) {
+    if (amount == 0) return;
+
+    sub_balance(from, amount);
+    add_balance(to, amount);
+
+    transaction.add_modification({ SMT::TRANSFER, 0, from, to, amount });
+  }
+
   // Only used by CREATE instruction to increment nonce of contract
-  void evm::increment_nonce(const Address& address) {
+  void evm::increment_nonce(EthereumTransaction& transaction, const Address& address) {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
       accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
         a.nonce += 1;
+      });
+
+      transaction.add_modification({ SMT::INCREMENT_NONCE, 0, address, 0, 0 });
+    }
+  }
+
+  // Only used for reverting
+  void evm::decrement_nonce(const Address& address) {
+    auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
+    auto existing_address = accounts_byaddress.find(toChecksum256(address));
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
+        a.nonce -= 1;
       });
     }
   }
@@ -20,12 +43,20 @@ namespace eosio_evm {
   void evm::set_code(const Address& address, const std::vector<uint8_t>& code) {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
-    eosio::print("Searching for ", intx::hex(address));
-    eosio::print("Searching for ", toChecksum256(address));
-    eosio::print("Found for ", existing_address != accounts_byaddress.end());
     if (existing_address != accounts_byaddress.end()) {
       accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
         a.code = code;
+      });
+    }
+  }
+
+  // Only used while reverting
+  void evm::remove_code(const Address& address) {
+    auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
+    auto existing_address = accounts_byaddress.find(toChecksum256(address));
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.modify(existing_address, get_self(), [&](auto& a) {
+        a.code = {};
       });
     }
   }
@@ -49,6 +80,7 @@ namespace eosio_evm {
 
   // Returns [account, error], error is true if account already exists
   evm::AccountResult evm::create_account(
+    EthereumTransaction&,
     const Address& address,
     const int64_t& balance,
     const bool& is_contract // default false
@@ -60,8 +92,9 @@ namespace eosio_evm {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address   = accounts_byaddress.find(address_256);
 
-    // ERROR
-    if (existing_address != accounts_byaddress.end()) {
+    // ERROR if nonce > 0
+    if (existing_address != accounts_byaddress.end() && existing_address->get_nonce() > 0)
+    {
       static const auto empty_account = Account(address);
       return { empty_account, true };
     }
@@ -77,7 +110,24 @@ namespace eosio_evm {
       a.balance = eosio::asset(balance, TOKEN_SYMBOL);
     });
 
+    // Add modification record
+    transaction.add_modification({ SMT::CREATE_ACCOUNT, 0, address, 0, 0 });
+
     return { *new_address, false };
+  }
+
+  // Only used when reverting
+  void evm::remove_account(const Address& address)
+  {
+    // Find address
+    auto address_160        = addressToChecksum160(address);
+    auto address_256        = pad160(address_160);
+    auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
+    auto existing_address   = accounts_byaddress.find(address_256);
+
+    if (existing_address != accounts_byaddress.end()) {
+      accounts_byaddress.erase(existing_address);
+    }
   }
 
   /**
@@ -92,7 +142,7 @@ namespace eosio_evm {
       accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.nonce = 0;
         a.balance.amount = 0;
-        a.code = std::vector<uint8_t>{};
+        a.code = {};
       });
     }
   }
@@ -114,17 +164,24 @@ namespace eosio_evm {
     // Key found
     if (account_state != accounts_states_bykey.end())
     {
-      if (value == 0) {
+      transaction.add_modification({ SMT::STORE_KV, address_index, key, account_state->value, 0 });
+
+      if (value == 0)
+      {
         accounts_states_bykey.erase(account_state);
-      } else {
+      }
+      else
+      {
         accounts_states_bykey.modify(account_state, eosio::same_payer, [&](auto& a) {
           a.value = value;
         });
       }
     }
-    // Key not found
-    else
+    // Key not found and new value exists
+    else if (value != 0)
     {
+      transaction.add_modification({ SMT::STORE_KV, address_index, key, 0, 0 });
+
       accounts_states.emplace(get_self(), [&](auto& a) {
         a.index   = accounts_states.available_primary_key();
         a.key     = checksum_key;

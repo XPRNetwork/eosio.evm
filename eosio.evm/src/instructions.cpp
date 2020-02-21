@@ -629,7 +629,6 @@ namespace eosio_evm
 
     if (s - copy_size > 0)
         std::memset(&ctx->mem[dst + copy_size], 0, s - copy_size);
-
   }
 
   void Processor::gasprice()
@@ -878,6 +877,7 @@ namespace eosio_evm
       copy_from_mem(offset, size),
       topics
     });
+    transaction.add_modification({ SMT::LOG, 0, 0, 0, 0 });
   }
 
   void Processor::invalid() {
@@ -893,7 +893,7 @@ namespace eosio_evm
     auto init_code = copy_from_mem(offset, size);
 
     // For contract accounts, the nonce counts the number of contract-creations by this account
-    contract->increment_nonce(ctx->callee.get_address());
+    contract->increment_nonce(transaction, ctx->callee.get_address());
 
     // Create account using new address
     auto [new_account, error] = contract->create_account(new_address, 0, true);
@@ -926,15 +926,16 @@ namespace eosio_evm
 
       ctx->s.push(new_account_address);
 
-      // TODO should we push 0 on stack here in case of halt?
+      // TODO should we push 0 on stack here in case of halt (not error)?
+    }
+    else if (result.ex == ET::revert)
+    {
+      last_return_data = move(result.output);
+      ctx->s.push(0);
     }
     else
     {
       ctx->s.push(0);
-
-      if (result.ex == ET::revert) {
-        last_return_data = move(result.output);
-      }
     }
   }
 
@@ -1038,26 +1039,6 @@ namespace eosio_evm
     // Prepare memory for output and handlers
     prepare_mem_access(offOut, sizeOut);
 
-    auto parentContext = ctx;
-    auto result_cb = [offOut, sizeOut, parentContext, this](const vector<uint8_t>& output) {
-      if (!output.empty()) {
-        // Memory
-        copy_mem_raw(offOut, 0, sizeOut, parentContext->mem, output);
-
-        // Return data
-        copy_mem_raw(offOut, 0, sizeOut, last_return_data, output);
-      }
-
-      parentContext->s.push(1);
-    };
-    auto error_cb = [parentContext, this](const Exception& ex, const vector<uint8_t>& output) {
-      parentContext->s.push(0);
-
-      if (ex.type == ET::revert) {
-        last_return_data = move(output);
-      }
-    };
-
     // Address, callee and value are variable amongst call ops
     auto new_caller = ctx->callee;
     auto new_value  = value;
@@ -1087,6 +1068,23 @@ namespace eosio_evm
       new_callee.get_code(),
       new_value
     );
+
+    if (result.er == ExitReason::returned) {
+      if (!result.output.empty()) {
+        // Memory
+        copy_mem_raw(offOut, 0, sizeOut, ctx->mem, result.output);
+
+        // Return data
+        copy_mem_raw(offOut, 0, sizeOut, last_return_data, result.output);
+      }
+
+      ctx->s.push(1);
+    } else if (result.ex == ET::revert) {
+      last_return_data = move(result.output);
+      ctx->s.push(0);
+    } else {
+      ctx->s.push(0);
+    }
   }
 
   void Processor::return_()
@@ -1146,6 +1144,9 @@ namespace eosio_evm
 
     // Add to list for later
     transaction.selfdestruct_list.push_back(contract_address);
+    transaction.add_modification({ SMT::SELF_DESTRUCT, 0, contract_address, 0, 0 });
+
+    // Stop execution
     stop();
   }
 } // namespace eosio_evm

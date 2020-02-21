@@ -65,32 +65,10 @@ namespace eosio_evm {
       const int64_t& call_value
     );
 
-    void increment_nonce(const uint256_t& address);
-    void store_account(const uint256_t& address, const Account& account);
-    Account load_account(const uint256_t& address);
-
-    inline constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
-    {
-      return (static_cast<int64_t>(size_in_bytes) + (ProcessorConsts::WORD_SIZE - 1)) / ProcessorConsts::WORD_SIZE;
-    }
-
-    inline uint256_t pop_addr(Stack& stack)
-    {
-      static const uint256_t MASK_160 = (uint256_t(1) << 160) - 1;
-      return stack.pop() & MASK_160;
-    }
-
     uint16_t get_call_depth() const;
     Opcode get_op() const;
+    void revert(const uint64_t revert_to);
     void pop_context();
-
-    template <typename T>
-    static T shrink(uint256_t i)
-    {
-      return static_cast<T>(i & std::numeric_limits<T>::max());
-    }
-
-
     void throw_error(const Exception& exception, const std::vector<uint8_t>& output);
     void use_gas(uint256_t amount);
     void refund_gas(uint256_t amount);
@@ -187,5 +165,24 @@ namespace eosio_evm {
     void selfdestruct();
     void invalid();
     void illegal();
+
+    // Util
+    inline uint256_t pop_addr(Stack& stack)
+    {
+      static const uint256_t MASK_160 = (uint256_t(1) << 160) - 1;
+      return stack.pop() & MASK_160;
+    }
+
+    template <typename T>
+    static T shrink(uint256_t i)
+    {
+      return static_cast<T>(i & std::numeric_limits<T>::max());
+    }
+
+    inline constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
+    {
+      return (static_cast<int64_t>(size_in_bytes) + (ProcessorConsts::WORD_SIZE - 1)) / ProcessorConsts::WORD_SIZE;
+    }
+
   };
 }

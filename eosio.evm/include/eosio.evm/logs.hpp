@@ -22,6 +22,7 @@ namespace eosio_evm
   {
     std::vector<LogEntry> logs = {};
     inline void add(LogEntry&& e) { logs.emplace_back(e); }
+    inline void pop() { if(!logs.empty()) { logs.pop_back(); } }
   };
 
   /**

@@ -27,7 +27,6 @@
 #include "processor.hpp"
 #include "program.hpp"
 #include "tables.hpp"
-// #include "account.hpp"
 
 namespace eosio_evm {
   class [[eosio::contract("eosio.evm")]] evm : public eosio::contract {
@@ -102,9 +101,14 @@ namespace eosio_evm {
       const int64_t& balance = 0,
       const bool& is_contract = false
     );
-    void increment_nonce(const Address& address);
+    void increment_nonce(EthereumTransaction& transaction, const Address& address);
     void set_code(const Address& address, const std::vector<uint8_t>& code);
     void selfdestruct(const Address& addr);
+
+    // Reverting
+    void remove_code(const Address& address);
+    void remove_account(const Address& address);
+    void decrement_nonce(const Address& address);
 
     // Storage
     void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);

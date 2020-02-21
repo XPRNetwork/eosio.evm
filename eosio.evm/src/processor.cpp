@@ -124,9 +124,6 @@ namespace eosio_evm
       result.exmsg = ex_.what();
     };
 
-    // Store parent context pointer to restore after execution
-    auto parent_context = ctx;
-
     // Add new context
     auto c = make_unique<Context>(
       caller,
@@ -147,58 +144,62 @@ namespace eosio_evm
     {
       dispatch();
 
+      // Break if result was found
       if (int(result.er))
         break;
 
       ctx->step();
     }
 
-    // Restore to parent context
-    ctx = parent_context;
-
-    // Set result if not set yet
+    // If no result yet
     if (!int(result.er)) {
-      result_cb({});
+      stop();
+    }
+
+    // Restore to parent context
+    if (!ctxs.empty()) {
+      ctx = ctxs.back().get();
     }
 
     return result;
   }
 
-  /**
-   * Storage
-   */
-  // Only used by CREATE instruction to increment nonce of contract
-  void Processor::increment_nonce(const uint256_t& address) {
-    auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
-    auto existing_address = accounts_byaddress.find(toChecksum256(address));
-    if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, contract->get_self(), [&](auto& a) {
-        a.nonce += 1;
-      });
-    }
-  }
-
-  void Processor::store_account(const uint256_t& address, const Account& account)
-  {
-    ctx->local_accounts[address] = account;
-  }
-
-  Account Processor::load_account(const uint256_t& address)
-  {
-    const auto local_accounts_itr = ctx->local_accounts.find(address);
-    if (local_accounts_itr != ctx->local_accounts.end())
-    {
-      return local_accounts_itr->second;
-    }
-    else
-    {
-      // If not found, return from permanent store
-      return contract->get_account(address);
-    }
-  }
-
   uint16_t Processor::get_call_depth() const { return static_cast<uint16_t>(ctxs.size()); }
   Opcode Processor::get_op() const { return static_cast<Opcode>(ctx->prog.code[ctx->get_pc()]); }
+
+  void Processor::revert(const uint64_t revert_to) {
+    for (auto i = transaction.state_modifications.size(); i-- > revert_to; ) {
+      const auto [type, index, key, oldvalue, amount] = transaction.state_modifications[i];
+      switch (type) {
+        case SMT::STORE_KV:
+          contract->storekv(index, key, oldvalue);
+          break;
+        case SMT::CREATE_ACCOUNT:
+          contract->remove_account(key);
+          break;
+        case SMT::SET_CODE:
+          contract->remove_code(key);
+          break;
+        case SMT::INCREMENT_NONCE:
+          contract->decrement_nonce(key);
+          break;
+        case SMT::TRANSFER:
+          contract->transfer_internal(oldvalue, key, amount);
+          break;
+        case SMT::LOG:
+          transaction.log_handler.pop();
+          break;
+        case SMT::SELF_DESTRUCT:
+          transaction.selfdestruct_list.pop_back();
+          break;
+        default:
+          break;
+      }
+
+      // Remove item
+      transaction.state_modifications.pop_back();
+    }
+  }
 
   void Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
     // Consume all call gas on exception

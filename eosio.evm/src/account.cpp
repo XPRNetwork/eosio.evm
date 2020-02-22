@@ -184,6 +184,7 @@ namespace eosio_evm {
     account_state_table accounts_states(contract->get_self(), address_index);
     auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
     auto checksum_key          = toChecksum256(key);
+    auto checksum_value        = toChecksum256(value);
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
     // eosio::print("\n\nStore KV for address ", intx::hex(address),
@@ -195,7 +196,7 @@ namespace eosio_evm {
     // Key found
     if (account_state != accounts_states_bykey.end())
     {
-      transaction.add_modification({ SMT::STORE_KV, address_index, key, account_state->value, 0, value });
+      transaction.add_modification({ SMT::STORE_KV, address_index, key, checksum256ToAddress(account_state->value), 0, value });
 
       if (value == 0)
       {
@@ -204,7 +205,7 @@ namespace eosio_evm {
       else
       {
         accounts_states_bykey.modify(account_state, eosio::same_payer, [&](auto& a) {
-          a.value = value;
+          a.value = checksum_value;
         });
       }
     }
@@ -216,7 +217,7 @@ namespace eosio_evm {
       accounts_states.emplace(contract->get_self(), [&](auto& a) {
         a.index   = accounts_states.available_primary_key();
         a.key     = checksum_key;
-        a.value   = value;
+        a.value   = checksum_value;
       });
     }
   }
@@ -232,7 +233,7 @@ namespace eosio_evm {
             eosio::print("\n---A42---\n");
 
     auto checksum_key          = toChecksum256(key);
-            eosio::print("\n---A43---\n");
+            eosio::print("\n---A43---\n", checksum_key, "  ", intx::hex(key));
 
     auto account_state         = accounts_states_bykey.find(checksum_key);
         eosio::print("\n---A3---\n");
@@ -248,7 +249,7 @@ namespace eosio_evm {
               eosio::print("\n---A31---\n");
 
       // eosio::print("\nFound KV Value ", to_string(account_state->value, 10));
-      return account_state->value;
+      return checksum256ToAddress(account_state->value);
     }
     // Key not found
     else {

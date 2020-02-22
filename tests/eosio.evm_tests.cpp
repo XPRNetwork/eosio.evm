@@ -75,15 +75,92 @@ public:
       );
    }
 
+
+   transaction_trace_ptr push_transaction2( signed_transaction& trx,
+                                                        fc::time_point deadline,
+                                                        uint32_t billed_cpu_time_us,
+                                                        bool no_throw
+                                                      )
+   {
+      if( !control->is_building_block() )
+         _start_block(control->head_block_time() + fc::microseconds(config::block_interval_us));
+      auto c = packed_transaction::compression_type::none;
+
+      if( fc::raw::pack_size(trx) > 1000 ) {
+         c = packed_transaction::compression_type::zlib;
+      }
+
+      auto time_limit = deadline == fc::time_point::maximum() ?
+            fc::microseconds::maximum() :
+            fc::microseconds( deadline - fc::time_point::now() );
+      auto ptrx = std::make_shared<packed_transaction>( trx, c );
+      auto fut = transaction_metadata::start_recover_keys( ptrx, control->get_thread_pool(), control->get_chain_id(), time_limit );
+      auto r = control->push_transaction( fut.get(), deadline, billed_cpu_time_us );
+      if (no_throw) return r;
+      if( r->except_ptr ) std::rethrow_exception( r->except_ptr );
+      if( r->except)  throw *r->except;
+      return r;
+   }
+
+   transaction_trace_ptr push_action2( const account_name& code,
+                                                   const action_name& acttype,
+                                                   const account_name& actor,
+                                                   const variant_object& data,
+                                                   uint32_t expiration = 30,
+                                                   uint32_t delay_sec = 0
+                                                 )
+
+   {
+      vector<permission_level> auths;
+      auths.push_back( permission_level{actor, config::active_name} );
+      return push_action2( code, acttype, auths, data, expiration, delay_sec );
+   }
+
+   transaction_trace_ptr push_action2( const account_name& code,
+                                                   const action_name& acttype,
+                                                   const vector<account_name>& actors,
+                                                   const variant_object& data,
+                                                   uint32_t expiration,
+                                                   uint32_t delay_sec
+                                                 )
+
+   {
+      vector<permission_level> auths;
+      for (const auto& actor : actors) {
+         auths.push_back( permission_level{actor, config::active_name} );
+      }
+      return push_action2( code, acttype, auths, data, expiration, delay_sec );
+   }
+
+   transaction_trace_ptr push_action2( const account_name& code,
+                                                   const action_name& acttype,
+                                                   const vector<permission_level>& auths,
+                                                   const variant_object& data,
+                                                   uint32_t expiration,
+                                                   uint32_t delay_sec
+                                                 )
+
+   {
+      signed_transaction trx;
+      trx.actions.emplace_back( get_action( code, acttype, auths, data ) );
+      set_transaction_headers( trx, expiration, delay_sec );
+      for (const auto& auth : auths) {
+         trx.sign( get_private_key( auth.actor, auth.permission.to_string() ), control->get_chain_id() );
+      }
+
+      return push_transaction2( trx, fc::time_point::maximum(), 5000, true );
+    }
+
    abi_serializer abi_ser;
 };
 
 const bool base_enabled              = false;
-const bool erc20_enabled             = true;
+const bool erc20_enabled             = false;
 const bool erc721_enabled            = false;
 const bool transaction_tests_enabled = false;
 const bool state_tests_enabled       = false;
 const bool debugging_enabled         = false;
+const bool revert_tests_enabled      = true;
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled>())
    BOOST_FIXTURE_TEST_CASE( test_create, eosio_evm_tester ) try {
@@ -248,6 +325,46 @@ BOOST_FIXTURE_TEST_CASE( transaction_tests, eosio_evm_tester ) try {
    }
 } FC_LOG_AND_RETHROW()
 BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(eosio_evm_revert, * boost::unit_test::enable_if<revert_tests_enabled>())
+BOOST_FIXTURE_TEST_CASE( LoopCallsDepthThenRevert, eosio_evm_tester ) try {
+   try {
+      push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+         ( "address", "a000000000000000000000000000000000000000")
+         ( "balance", "0")
+         ( "code", eosio_system::HexToBytes("6001600054016000556000600060006000600073b0000000000000000000000000000000000000005af100"))
+         ( "nonce", 0)
+         ( "account", "")
+      );
+      push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+         ( "address", "a94f5374fce5edbc8e2a8697c15331677e6ebf0b")
+         ( "balance", "1000000000000000000")
+         ( "code", std::vector<uint8_t>{})
+         ( "nonce", 0)
+         ( "account", "")
+      );
+      push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+         ( "address", "b000000000000000000000000000000000000000")
+         ( "balance", "0")
+         ( "code", eosio_system::HexToBytes("6001600054016000556000600060006000600073a0000000000000000000000000000000000000005af100"))
+         ( "nonce", 0)
+         ( "account", "")
+      );
+
+      auto res = push_action2( N(eosio.evm), N(raw), N(eosio.evm), mvo()
+         ( "tx", "f86080018398968094a000000000000000000000000000000000000000808026a0d79322f44b7cf27cdd755f3a1db3cf9b7008cadcc6098424cb32630b02b7f0c9a034a4352f2f684c5a65d18214ddc002c05c88fd8d33b21846cd886dae346a07b9")
+         ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
+      );
+      std::cout << res->action_traces[0].console << std::endl;
+      std::cout << fc::json::to_pretty_string(res) << std::endl;
+   } catch(const fc::exception& e) {
+      std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
+   }
+   produce_blocks(1);
+} FC_LOG_AND_RETHROW()
+BOOST_AUTO_TEST_SUITE_END()
+
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_debug, * boost::unit_test::enable_if<debugging_enabled>())
 BOOST_FIXTURE_TEST_CASE( debugging, eosio_evm_tester ) try {

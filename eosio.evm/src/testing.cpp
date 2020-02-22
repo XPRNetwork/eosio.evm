@@ -42,8 +42,8 @@ namespace eosio_evm {
     eosio::check(existing_address != accounts_byaddress.end(), "address does not exist");
 
     // Key value
-    auto checksum_key = toChecksum256(intx::from_string<uint256_t>(key));
-    auto checksum_value = intx::from_string<uint256_t>(key);
+    auto checksum_key   = toChecksum256(intx::from_string<uint256_t>(key));
+    auto checksum_value = toChecksum256(intx::from_string<uint256_t>(key));
 
     // Store KV
     account_state_table accounts_states(get_self(), existing_address->index);
@@ -78,7 +78,7 @@ namespace eosio_evm {
       account_state_table accounts_states(get_self(), existing_address->index);
       auto itr = accounts_states.begin();
       while(itr != accounts_states.end()){
-        eosio::print(R"({"key":")", itr->key, R"(","value":")", intx::hex(itr->value), R"("})");
+        eosio::print(R"({"key":")", itr->key, R"(","value":")", itr->value, R"("})");
         itr++;
       }
     }

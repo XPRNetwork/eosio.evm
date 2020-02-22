@@ -33,6 +33,7 @@ namespace eosio_evm {
       eosio::print("\nIndex ", index);
       eosio::print("\nEOS Account " + account.to_string());
       eosio::print("\nBalance ", balance);
+      eosio::print("\nCode ", bin2hex(code));
       eosio::print("\nNonce ", nonce);
       eosio::print("\n---Acc Info End---\n");
     }
@@ -43,7 +44,7 @@ namespace eosio_evm {
   struct [[eosio::table, eosio::contract("eosio.evm")]] AccountState {
     uint64_t index;
     eosio::checksum256 key;
-    bigint::checksum256 value;
+    eosio::checksum256 value;
 
     uint64_t primary_key() const { return index; };
     eosio::checksum256 by_key() const { return key; };

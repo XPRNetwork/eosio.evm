@@ -44,7 +44,7 @@ namespace eosio_evm {
     });
 
     // Modification record
-    transaction.add_modification({ SMT::TRANSFER, 0, from, to, amount });
+    transaction.add_modification({ SMT::TRANSFER, 0, from, to, amount, 0 });
   }
 
   // Only used by CREATE instruction to increment nonce of contract
@@ -56,7 +56,7 @@ namespace eosio_evm {
         a.nonce += 1;
       });
 
-      transaction.add_modification({ SMT::INCREMENT_NONCE, 0, address, 0, 0 });
+      transaction.add_modification({ SMT::INCREMENT_NONCE, 0, address, existing_address->get_nonce() - 1, 0, existing_address->get_nonce()});
     }
   }
 
@@ -124,7 +124,7 @@ namespace eosio_evm {
     auto existing_address   = accounts_byaddress.find(address_256);
 
     // ERROR if nonce > 0
-    if (existing_address != accounts_byaddress.end() && existing_address->get_nonce() > 0)
+    if (existing_address != accounts_byaddress.end() && (existing_address->get_nonce() > 0 || !existing_address->get_code().empty()))
     {
       static const auto empty_account = Account(address);
       return { empty_account, true };
@@ -142,7 +142,7 @@ namespace eosio_evm {
     });
 
     // Add modification record
-    transaction.add_modification({ SMT::CREATE_ACCOUNT, 0, address, 0, 0 });
+    transaction.add_modification({ SMT::CREATE_ACCOUNT, 0, address, 0, 0, 0 });
 
     return { *new_address, false };
   }
@@ -195,7 +195,7 @@ namespace eosio_evm {
     // Key found
     if (account_state != accounts_states_bykey.end())
     {
-      transaction.add_modification({ SMT::STORE_KV, address_index, key, account_state->value, 0 });
+      transaction.add_modification({ SMT::STORE_KV, address_index, key, account_state->value, 0, value });
 
       if (value == 0)
       {
@@ -211,7 +211,7 @@ namespace eosio_evm {
     // Key not found and new value exists
     else if (value != 0)
     {
-      transaction.add_modification({ SMT::STORE_KV, address_index, key, 0, 0 });
+      transaction.add_modification({ SMT::STORE_KV, address_index, key, 0, 0, value });
 
       accounts_states.emplace(contract->get_self(), [&](auto& a) {
         a.index   = accounts_states.available_primary_key();
@@ -223,10 +223,19 @@ namespace eosio_evm {
 
   uint256_t Processor::loadkv(const uint64_t& address_index, const uint256_t& key) {
     // Get scoped state table for account
+            eosio::print("\n---A4---\n");
+
     account_state_table accounts_states(contract->get_self(), address_index);
+            eosio::print("\n---A41---\n");
+
     auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
+            eosio::print("\n---A42---\n");
+
     auto checksum_key          = toChecksum256(key);
+            eosio::print("\n---A43---\n");
+
     auto account_state         = accounts_states_bykey.find(checksum_key);
+        eosio::print("\n---A3---\n");
 
     // eosio::print("\n\nLoad KV for address ", intx::hex(address),
     //              "\nKey: ", key,
@@ -236,11 +245,15 @@ namespace eosio_evm {
     // Key found
     if (account_state != accounts_states_bykey.end())
     {
+              eosio::print("\n---A31---\n");
+
       // eosio::print("\nFound KV Value ", to_string(account_state->value, 10));
       return account_state->value;
     }
     // Key not found
     else {
+              eosio::print("\n---A32---\n");
+
       return 0;
     }
   }

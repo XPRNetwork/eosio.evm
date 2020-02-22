@@ -30,7 +30,6 @@ namespace eosio_evm {
   public:
     std::vector<uint8_t> mem;
     Stack s;
-    ChangeLog changelog; // TODO
 
     const Account& caller;
     const Account& callee;
@@ -74,8 +73,7 @@ namespace eosio_evm {
       }
     }
 
-    bool pc_valid() const { return pc < prog.code.size(); }
-    auto get_used_mem() const { return (mem.size() + ProcessorConsts::WORD_SIZE - 1) / ProcessorConsts::WORD_SIZE;  }
+    inline auto get_used_mem() const { return (mem.size() + ProcessorConsts::WORD_SIZE - 1) / ProcessorConsts::WORD_SIZE;  }
     PcType get_pc() const { return pc; }
 
     void set_pc(const PcType pc_)
@@ -91,6 +89,17 @@ namespace eosio_evm {
       } else {
         pc++;
       }
+    }
+
+    void print () {
+      eosio::print("\nmemory\":",  bin2hex(mem));
+      eosio::print("\nstack\":",   s.asArray());
+      eosio::print("\ncaller\":",  caller.by_address());
+      eosio::print("\ncallee\":",  callee.by_address());
+      eosio::print("\ngasLeft\":", intx::to_string(gas_left));
+      eosio::print("\nIs Static\":", is_static);
+      eosio::print("\nInput\":", bin2hex(input));
+      eosio::print("\nCall Value\":", call_value, "\n");
     }
   };
 }

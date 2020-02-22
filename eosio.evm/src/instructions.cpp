@@ -28,7 +28,7 @@ namespace eosio_evm
       "\"gasCost\":", std::to_string(OpFees::by_code[op]), ",",
       "\"stack\":",   ctx->s.asArray(), ",",
       "\"depth\":",   std::to_string(get_call_depth()), ",",
-      "\"opName\": \"",  opcodeToString(op), "\"",
+      "\"opName\": \"",  opcodeToString[op], "\""
       "}",
       ","
     );
@@ -765,22 +765,30 @@ namespace eosio_evm
 
   void Processor::sstore()
   {
+    eosio::print("\n---A1---\n");
+
     if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
+    eosio::print("\n---A2---\n");
 
     // Get items from stack
     const auto k = ctx->s.pop();
     const auto v = ctx->s.pop();
+    eosio::print("\n---A21---\n");
 
     // Store as original if first time seeing it
     uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
+        eosio::print("\n---A22---\n");
+
     if (transaction.original_storage.count(k) == 0) {
       transaction.original_storage[k] = current_value;
     }
+    eosio::print("\n---A3---\n");
 
     // Charge gas
     process_sstore_gas(transaction.original_storage[k], current_value, v);
+    eosio::print("\n---A4---\n");
 
     // Store
     storekv(ctx->callee.primary_key(), k, v);
@@ -875,7 +883,7 @@ namespace eosio_evm
       copy_from_mem(offset, size),
       topics
     });
-    transaction.add_modification({ SMT::LOG, 0, 0, 0, 0 });
+    transaction.add_modification({ SMT::LOG, 0, 0, 0, 0, 0 });
   }
 
   void Processor::invalid() {
@@ -975,7 +983,7 @@ namespace eosio_evm
   {
     const auto op = get_op();
 
-    // Pop 6 (DELEGATECALL) or 7 (REST) from stack
+    // Pop 6 (DELEGATECALL) or 7 (OTHER CALLS) from stack
     const auto _gas_limit = ctx->s.pop();
     const auto toAddress  = pop_addr(ctx->s);
     const auto value      = op == Opcode::DELEGATECALL ? 0 : ctx->s.popAmount();
@@ -989,6 +997,16 @@ namespace eosio_evm
       throw_error(Exception(ET::notImplemented, "Precompiled contracts/native extensions are not implemented."), {});
       return;
     }
+
+    eosio::print("g");
+    // eosio::print("\n\nGAS LIMIT: ", intx::to_string(_gas_limit), "\n");
+    eosio::print("\nTo Address: ", intx::hex(toAddress));
+    eosio::print("\nValue: ", value);
+    eosio::print("\noffIn: ", offIn);
+    eosio::print("\nsizeIn: ", sizeIn);
+    eosio::print("\noffOut: ", offOut);
+    eosio::print("\nsizeOut: ", sizeOut);
+    eosio::print("\nmem size: ", ctx->mem.size(), "\n");
 
     // Get new account and check not empty
     Account new_callee = get_account(toAddress);
@@ -1023,6 +1041,8 @@ namespace eosio_evm
     const auto gas_allowed = ctx->gas_left - (ctx->gas_left / 64);
     const auto gas_limit = (_gas_limit > gas_allowed) ? gas_allowed : _gas_limit;
 
+    eosio::print("GAS_ALLOWED", intx::to_string(gas_allowed));
+    eosio::print("GAS_LIMIT", intx::to_string(gas_limit));
     // Check max depth
     if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
       return throw_error(Exception(ET::outOfBounds, "Reached max call depth."), {});
@@ -1056,6 +1076,11 @@ namespace eosio_evm
       new_value  = ctx->call_value;
     }
 
+    // eosio::print("\nInitialize Sub-Call from\n");
+    // new_caller.print();
+    // eosio::print("\nInitialize Sub-Call to\n");
+    // new_callee.print();
+
     // Push call context
     auto result = run(
       new_caller,
@@ -1072,8 +1097,8 @@ namespace eosio_evm
         // Memory
         copy_mem_raw(offOut, 0, sizeOut, ctx->mem, result.output);
 
-        // Return data
-        copy_mem_raw(offOut, 0, sizeOut, last_return_data, result.output);
+        // TODO Return data
+        // copy_mem_raw(offOut, 0, sizeOut, last_return_data, result.output);
       }
 
       ctx->s.push(1);
@@ -1142,7 +1167,7 @@ namespace eosio_evm
 
     // Add to list for later
     transaction.selfdestruct_list.push_back(contract_address);
-    transaction.add_modification({ SMT::SELF_DESTRUCT, 0, contract_address, 0, 0 });
+    transaction.add_modification({ SMT::SELF_DESTRUCT, 0, contract_address, 0, 0, 0 });
 
     // Stop execution
     stop();

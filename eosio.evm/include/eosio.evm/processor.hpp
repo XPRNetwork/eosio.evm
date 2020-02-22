@@ -66,8 +66,8 @@ namespace eosio_evm {
     );
 
     uint16_t get_call_depth() const;
-    Opcode get_op() const;
-    void revert(const uint64_t revert_to);
+    const uint8_t get_op() const;
+    void revert_state(const uint64_t revert_to);
     void pop_context();
     void throw_error(const Exception& exception, const std::vector<uint8_t>& output);
     void use_gas(uint256_t amount);

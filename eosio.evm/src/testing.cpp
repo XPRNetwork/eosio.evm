@@ -26,9 +26,10 @@ namespace eosio_evm {
     _accounts.emplace(get_self(), [&](auto& a) {
       a.index   = _accounts.available_primary_key();
       a.address = address;
+      a.account = account;
       a.balance = eosio::asset(balance, TOKEN_SYMBOL);
       a.nonce   = nonce;
-      a.account = account;
+      a.code    = code;
     });
   }
 

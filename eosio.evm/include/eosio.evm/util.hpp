@@ -23,7 +23,7 @@ namespace eosio_evm
     return res;
   }
 
-  inline std::array<uint8_t, 32u> toBin(const uint256_t& address)
+  inline std::array<uint8_t, 32u> toBin(const Address& address)
   {
     std::array<uint8_t, 32> address_bytes = {};
     intx::be::unsafe::store(address_bytes.data(), address);
@@ -50,7 +50,7 @@ namespace eosio_evm
     return eosio::checksum160(output);
   }
 
-  inline eosio::checksum256 toChecksum256(const uint256_t& address)
+  inline eosio::checksum256 toChecksum256(const Address& address)
   {
     return eosio::checksum256( toBin(address) );
   }
@@ -66,6 +66,10 @@ namespace eosio_evm
   }
   static inline eosio::checksum160 addressToChecksum160(const Address& input) {
     return toChecksum160( toBin(input) );
+  }
+  static inline Address checksum256ToAddress(const eosio::checksum256& input) {
+    const std::array<uint8_t, 32u>& checksum = fromChecksum256(input);
+    return intx::be::unsafe::load<uint256_t>(checksum.data());
   }
 
   /**

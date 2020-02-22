@@ -51,6 +51,21 @@ namespace eosio_evm
     uint256_t key;
     uint256_t oldvalue;
     int64_t amount;
+    uint256_t newvalue;
+
+    void print() {
+      std::map<StateModificationType, std::string> reverseState = {
+        { SMT::STORE_KV, "STORE_KV"   },
+        { SMT::CREATE_ACCOUNT, "CREATE_ACCOUNT"    },
+        { SMT::SET_CODE, "SET_CODE"    },
+        { SMT::INCREMENT_NONCE, "INCREMENT_NONCE"    },
+        { SMT::TRANSFER, "TRANSFER"    },
+        { SMT::LOG, "LOG"    },
+        { SMT::SELF_DESTRUCT, "SELF_DESTRUCT"    }
+      };
+
+      eosio::print("\nType: ", reverseState[type], ", Index: ", index, ", Key: ", intx::to_string(key), " OldValue: ", intx::to_string(oldvalue), " NewValue: ", intx::to_string(newvalue), " Amount: ", amount);
+    }
   };
 
   struct EthereumTransaction {

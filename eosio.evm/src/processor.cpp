@@ -62,7 +62,7 @@ namespace eosio_evm
     // Error
     else
     {
-      eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+      eosio::print("\nEVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
     }
 
     // clean-up
@@ -73,8 +73,13 @@ namespace eosio_evm
 
   void Processor::initialize_call(const Account& caller)
   {
+    // eosio::print("\nInitialize Call from\n");
+    // caller.print();
+
     Address to_address = *transaction.to_address;
     const Account& callee = get_account(to_address);
+    // eosio::print("\nInitialize Call to\n");
+    // callee.print();
 
     // Transfer value
     transfer_internal(caller.get_address(), to_address, transaction.get_value());
@@ -97,9 +102,7 @@ namespace eosio_evm
     // Error
     else
     {
-      // TODO revert if there was an error
-
-      eosio::print("EVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+      eosio::print("\nEVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
     }
 
     // clean-up
@@ -120,6 +123,7 @@ namespace eosio_evm
   {
     // Create result and error callbacks
     ExecResult result;
+    uint64_t sm_checkpoint = transaction.state_modifications.size();
     auto result_cb = [&result](const std::vector<uint8_t>& output) {
       result.er = ExitReason::returned;
       result.output = move(output);
@@ -145,9 +149,13 @@ namespace eosio_evm
     ctxs.emplace_back(move(c));
     ctx = ctxs.back().get();
 
+    eosio::print("\nStart call depth: ", get_call_depth(), "\n");
+    ctx->print();
+
     // Execute code
     while(ctx->get_pc() < ctx->prog.code.size())
     {
+      // eosio::print("\ndispatch depth: ", get_call_depth(), "\n");
       dispatch();
 
       // Break if result was found
@@ -162,20 +170,53 @@ namespace eosio_evm
       stop();
     }
 
+    eosio::print("\nEnd call depth: ", get_call_depth(), "\n");
+
     // Restore to parent context
     if (!ctxs.empty()) {
+      ctxs.pop_back();
       ctx = ctxs.back().get();
+    }
+
+    // If success
+    if (result.er == ExitReason::returned)
+    {
+      eosio::print("\n----------RUN SUCEEDED---------");
+      for (auto& tsm : transaction.state_modifications) {
+        tsm.print();
+      }
+      eosio::print("\n-------------------------------\n");
+    }
+    else
+    {
+      eosio::print("\n----------RUN Errored---------");
+      if (result.ex == ET::revert) {
+        eosio::print("REVERTING NOW");
+        for (auto& tsm : transaction.state_modifications) {
+          tsm.print();
+        }
+      } else {
+        eosio::print("NOT REVERTING");
+      }
+      eosio::print("\n-------------------------------\n");
+    }
+
+    // Revert
+    if (result.ex == ET::revert) {
+      revert_state(sm_checkpoint);
     }
 
     return result;
   }
 
   uint16_t Processor::get_call_depth() const { return static_cast<uint16_t>(ctxs.size()); }
-  Opcode Processor::get_op() const { return static_cast<Opcode>(ctx->prog.code[ctx->get_pc()]); }
+  const uint8_t Processor::get_op() const {
+    return ctx->prog.code[ctx->get_pc()];
+  }
 
-  void Processor::revert(const uint64_t revert_to) {
+  void Processor::revert_state(const uint64_t revert_to) {
     for (auto i = transaction.state_modifications.size(); i-- > revert_to; ) {
-      const auto [type, index, key, oldvalue, amount] = transaction.state_modifications[i];
+      const auto [type, index, key, oldvalue, amount, newvalue] = transaction.state_modifications[i];
       switch (type) {
         case SMT::STORE_KV:
           storekv(index, key, oldvalue);
@@ -239,16 +280,20 @@ namespace eosio_evm
   // - Current value is what is currently stored in EOSIO
   // - New value is the value to be stored
   void Processor::process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
+    eosio::print("\n---A---\n");
     if (ctx->gas_left <= GP_SSTORE_MINIMUM) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
     if (current_value == new_value) {
+      eosio::print("\n---B---\n");
       return use_gas(GP_SLOAD_GAS);
     }
 
     if (original_value == current_value) {
       if (original_value == 0) {
+        eosio::print("\n---C---\n");
+
         return use_gas(GP_SSTORE_SET_GAS);
       } else {
         refund_gas(GP_SSTORE_RESET_GAS);
@@ -258,7 +303,10 @@ namespace eosio_evm
         transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
       }
     } else {
+          eosio::print("\n---E---\n");
+
       use_gas(GP_SLOAD_GAS);
+    eosio::print("\n---D---\n");
 
       if (original_value != 0) {
         if (current_value == 0 && new_value != 0) {
@@ -269,6 +317,7 @@ namespace eosio_evm
           transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
         }
       }
+    eosio::print("\n---F---\n");
 
       if (original_value == new_value) {
         if (original_value == 0) {
@@ -278,6 +327,8 @@ namespace eosio_evm
         }
       }
     }
+        eosio::print("\n---G---\n");
+
   }
 
   void Processor::copy_mem_raw(

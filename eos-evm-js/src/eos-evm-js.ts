@@ -1,23 +1,30 @@
 import { Transaction } from 'ethereumjs-tx'
+import Common from 'ethereumjs-common'
 import { EosApi } from './eos'
 const abiEncoder = require('ethereumjs-abi')
 
 export class EosEvmApi extends EosApi {
   ethPrivateKeys: any
+  chainId: any
+  chainConfig: any
   abi: any
   eth: any
 
   constructor({
     ethPrivateKeys,
     eosPrivateKeys,
-    endpoint
+    endpoint,
+    chainId = 1
   }: {
     ethPrivateKeys?: any
     eosPrivateKeys: string[]
     endpoint: string
+    chainId: number
   }) {
     super({ eosPrivateKeys, endpoint })
     this.ethPrivateKeys = ethPrivateKeys
+    this.chainId = chainId
+    this.chainConfig = Common.forCustomChain('mainnet', { chainId }, 'istanbul')
   }
 
   async loadContractFromAbi({
@@ -64,7 +71,7 @@ export class EosEvmApi extends EosApi {
         const data = `0x${params}`
         const encodedTx = await that.createEthTx({ contract, sender, data, to })
 
-        return that.raw({ contract, account, tx: encodedTx, sender })
+        // return that.raw({ contract, account, tx: encodedTx, sender })
       }
     }
 
@@ -77,7 +84,7 @@ export class EosEvmApi extends EosApi {
       const params = abiEncoder.rawEncode(internalTypes, args).toString('hex')
       const data = `0x${bytecodeObject}${params.toString('hex')}`
       const encodedTx = await that.createEthTx({ contract, sender, data, to: undefined })
-      return that.raw({ contract, account, tx: encodedTx, sender })
+      // return that.raw({ contract, account, tx: encodedTx, sender })
     }
 
     this.eth = eth
@@ -123,7 +130,7 @@ export class EosEvmApi extends EosApi {
       data
     }
 
-    const tx = new Transaction(txData)
+    const tx = new Transaction(txData, { common: this.chainConfig })
 
     if (sign) {
       if (!sender) throw new Error('Signature requested in createEthTx, but no sender provided')
@@ -131,6 +138,8 @@ export class EosEvmApi extends EosApi {
         throw new Error('No private key provided for ETH address ' + sender)
       tx.sign(this.ethPrivateKeys[sender])
     }
+    console.log(tx.toJSON(), tx)
+    return
 
     return tx.serialize().toString('hex')
   }

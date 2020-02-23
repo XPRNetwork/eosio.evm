@@ -1,4 +1,3 @@
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <eosio/chain/contract_table_objects.hpp>
 #include <eosio/chain/global_property_object.hpp>

@@ -163,6 +163,7 @@ const bool debugging_enabled         = false;
 const bool revert_tests_enabled      = true;
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled>())
+
    BOOST_FIXTURE_TEST_CASE( test_create, eosio_evm_tester ) try {
       // Create first time
       create( N(1234test1111), N(1234test1111), std::string("hi") );
@@ -209,6 +210,7 @@ BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled
       );
    } FC_LOG_AND_RETHROW()
 BOOST_AUTO_TEST_SUITE_END()
+
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_erc20, * boost::unit_test::enable_if<erc20_enabled>())
    BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {

@@ -15,6 +15,9 @@ endif()
 
 include(ExternalProject)
 
+set(eosio.cdt_DIR /usr/local/Cellar/eosio.cdt/1.7.0/lib/cmake/eosio.cdt)
+set(CC /usr/local/Cellar/eosio.cdt/1.7.0/bin)
+set(CXX /usr/local/Cellar/eosio.cdt/1.7.0/bin)
 find_package(eosio.cdt)
 
 message(STATUS "Building eosio.contracts v${VERSION_FULL}")
@@ -61,14 +64,14 @@ string(REPLACE ";" "|" TEST_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 string(REPLACE ";" "|" TEST_FRAMEWORK_PATH "${CMAKE_FRAMEWORK_PATH}")
 string(REPLACE ";" "|" TEST_MODULE_PATH "${CMAKE_MODULE_PATH}")
 
-set(BUILD_TESTS FALSE CACHE BOOL "Build unit tests")
+set(BUILD_TESTS TRUE CACHE BOOL "Build unit tests")
 
 if(BUILD_TESTS)
    message(STATUS "Building unit tests.")
    ExternalProject_Add(
      contracts_unit_tests
      LIST_SEPARATOR | # Use the alternate list separator
-     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DEOSIO_ROOT=${EOSIO_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
+     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DEOSIO_ROOT=${EOSIO_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=/Users/jafri/eosio/2.0/src/boost_1_71_0
      SOURCE_DIR ${CMAKE_SOURCE_DIR}/tests
      BINARY_DIR ${CMAKE_BINARY_DIR}/tests
      BUILD_ALWAYS 1

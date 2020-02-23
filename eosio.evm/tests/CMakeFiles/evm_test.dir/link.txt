@@ -1,1 +1,0 @@
-/Users/jafri/eosio.cdt/build/bin/eosio-ld -fnative CMakeFiles/evm_test.dir/evm_test.cpp.obj CMakeFiles/evm_test.dir/__/src/eosio.evm.cpp.obj CMakeFiles/evm_test.dir/__/src/processor.cpp.obj CMakeFiles/evm_test.dir/__/src/state.cpp.obj CMakeFiles/evm_test.dir/__/src/transfer.cpp.obj -o evm_test 

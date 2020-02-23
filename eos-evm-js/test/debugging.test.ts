@@ -1,30 +1,34 @@
-import { EosEvmApi } from "../src/eos-evm-js"
+import { api } from './common'
 
-describe("Debug", () => {
-  const api = new EosEvmApi({
-    ethPrivateKeys: {
-      '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd': Buffer.from('8dd3ec4846cecac347a830b758bf7e438c4d9b36a396b189610c90b57a70163d', 'hex')
-    },
-    eosPrivateKeys: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3', '5K93jQD9fruYKPpifxD6CrSNw1G3kUb1QjekzR3CkQaBvcq5JJq'],
-    endpoint: 'https://api.jungle.alohaeos.com'
-  })
-  const sender = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
+const compiled = require('../src/eth-contracts/compiled.json')
 
-  it("clears all (dev only, remove in prod)", async(done) => {
-    await api.clearAll({ contract: '1234test1111' })
-    expect(true).toBeTruthy()
-    done()
-  })
+const contract = '1234test1111'
+const account = 'vestvestvest'
+const contractDir = '/Users/jafri/eosio.evm/eosio.evm'
+const sender = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
+const ethContract = '0xb3e48339798967507eeda1773e824255ac7c6258'
 
-  it("Deploys ERC721", async (done) => {
-    const erc721Tx = await api.deployERC721({
-      sender,
-      name: 'Cryptokitties',
-      symbol: 'KITTIES',
-    })
-    console.log(erc721Tx)
+// [ 'nonce',
+// 'gasPrice',
+// 'gasLimit',
+// 'to',
+// 'value',
+// 'data',
+// 'v',
+// 'r',
+// 's' ],
 
-    expect(true).toBeTruthy()
-    done()
+api.loadContractFromAbi({
+  contract,
+  account,
+  sender,
+  to: ethContract,
+  abi: compiled.contracts.ERC20.Token.abi,
+  bytecodeObject: compiled.contracts.ERC20.Token.evm.bytecode.object
+})
+
+describe('Debug', () => {
+  it('test', async done => {
+    console.dir(await api.eth.decreaseAllowance(sender, 1000), { depth: null })
   })
 })

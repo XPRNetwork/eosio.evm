@@ -271,7 +271,7 @@ namespace eosio_evm
   }
 
   /**
-   * OP Code Implementations
+   * OP Code Implementations.
    */
   void Processor::stop()
   {

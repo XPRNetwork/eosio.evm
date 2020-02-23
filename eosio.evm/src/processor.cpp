@@ -73,13 +73,8 @@ namespace eosio_evm
 
   void Processor::initialize_call(const Account& caller)
   {
-    // eosio::print("\nInitialize Call from\n");
-    // caller.print();
-
     Address to_address = *transaction.to_address;
     const Account& callee = get_account(to_address);
-    // eosio::print("\nInitialize Call to\n");
-    // callee.print();
 
     // Transfer value
     transfer_internal(caller.get_address(), to_address, transaction.get_value());
@@ -149,13 +144,11 @@ namespace eosio_evm
     ctxs.emplace_back(move(c));
     ctx = ctxs.back().get();
 
-    eosio::print("\nStart call depth: ", get_call_depth(), "\n");
-    ctx->print();
+    // eosio::print("\nStart call depth: ", get_call_depth(), "\n");
 
     // Execute code
     while(ctx->get_pc() < ctx->prog.code.size())
     {
-      // eosio::print("\ndispatch depth: ", get_call_depth(), "\n");
       dispatch();
 
       // Break if result was found
@@ -185,7 +178,7 @@ namespace eosio_evm
       for (auto& tsm : transaction.state_modifications) {
         tsm.print();
       }
-      eosio::print("\n-------------------------------\n");
+      eosio::print("\n------------------------------\n");
     }
     else
     {
@@ -280,20 +273,16 @@ namespace eosio_evm
   // - Current value is what is currently stored in EOSIO
   // - New value is the value to be stored
   void Processor::process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
-    eosio::print("\n---A---\n");
     if (ctx->gas_left <= GP_SSTORE_MINIMUM) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
     if (current_value == new_value) {
-      eosio::print("\n---B---\n");
       return use_gas(GP_SLOAD_GAS);
     }
 
     if (original_value == current_value) {
       if (original_value == 0) {
-        eosio::print("\n---C---\n");
-
         return use_gas(GP_SSTORE_SET_GAS);
       } else {
         refund_gas(GP_SSTORE_RESET_GAS);
@@ -303,10 +292,7 @@ namespace eosio_evm
         transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
       }
     } else {
-          eosio::print("\n---E---\n");
-
       use_gas(GP_SLOAD_GAS);
-    eosio::print("\n---D---\n");
 
       if (original_value != 0) {
         if (current_value == 0 && new_value != 0) {
@@ -317,7 +303,6 @@ namespace eosio_evm
           transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
         }
       }
-    eosio::print("\n---F---\n");
 
       if (original_value == new_value) {
         if (original_value == 0) {
@@ -327,8 +312,6 @@ namespace eosio_evm
         }
       }
     }
-        eosio::print("\n---G---\n");
-
   }
 
   void Processor::copy_mem_raw(

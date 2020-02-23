@@ -1,2 +1,4 @@
 Replace get_self() with actual ram payer
 - Remove  eosio::check from transfer.cpp
+
+- Fix error_cb in stack, should be throw_error, ctx will likely need reference to processor or something

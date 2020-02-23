@@ -44,7 +44,7 @@ namespace eosio_evm {
   struct [[eosio::table, eosio::contract("eosio.evm")]] AccountState {
     uint64_t index;
     eosio::checksum256 key;
-    eosio::checksum256 value;
+    bigint::checksum256 value;
 
     uint64_t primary_key() const { return index; };
     eosio::checksum256 by_key() const { return key; };

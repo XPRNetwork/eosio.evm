@@ -359,7 +359,7 @@ BOOST_FIXTURE_TEST_CASE( LoopCallsDepthThenRevert, eosio_evm_tester ) try {
          ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
       );
       std::cout << res->action_traces[0].console << std::endl;
-      std::cout << fc::json::to_pretty_string(res) << std::endl;
+      // std::cout << fc::json::to_pretty_string(res) << std::endl;
    } catch(const fc::exception& e) {
       std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
    }

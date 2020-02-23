@@ -68,6 +68,7 @@ namespace eosio_evm {
       s(this)
     {
       // Reserve 4 KB of memory if code
+      // TODO needed?
       if (!prog.code.empty()) {
         mem.reserve(4096);
       }
@@ -91,7 +92,7 @@ namespace eosio_evm {
       }
     }
 
-    void print () {
+    void print() {
       eosio::print("\nmemory\":",  bin2hex(mem));
       eosio::print("\nstack\":",   s.asArray());
       eosio::print("\ncaller\":",  caller.by_address());

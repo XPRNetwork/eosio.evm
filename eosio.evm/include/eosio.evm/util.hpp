@@ -67,10 +67,10 @@ namespace eosio_evm
   static inline eosio::checksum160 addressToChecksum160(const Address& input) {
     return toChecksum160( toBin(input) );
   }
-  static inline Address checksum256ToAddress(const eosio::checksum256& input) {
-    const std::array<uint8_t, 32u>& checksum = fromChecksum256(input);
-    return intx::be::unsafe::load<uint256_t>(checksum.data());
-  }
+  // static inline Address checksum256ToAddress(const eosio::checksum256& input) {
+  //   const std::array<uint8_t, 32u>& checksum = fromChecksum256(input);
+  //   return intx::be::unsafe::load<uint256_t>(checksum.data());
+  // }
 
   /**
    * Keccak (SHA3) Functions

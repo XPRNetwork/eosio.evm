@@ -765,30 +765,22 @@ namespace eosio_evm
 
   void Processor::sstore()
   {
-    eosio::print("\n---A1---\n");
-
     if (ctx->is_static) {
       return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
     }
-    eosio::print("\n---A2---\n");
 
     // Get items from stack
     const auto k = ctx->s.pop();
     const auto v = ctx->s.pop();
-    eosio::print("\n---A21---\n");
 
     // Store as original if first time seeing it
     uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
-        eosio::print("\n---A22---\n");
-
     if (transaction.original_storage.count(k) == 0) {
       transaction.original_storage[k] = current_value;
     }
-    eosio::print("\n---A3---\n");
 
     // Charge gas
     process_sstore_gas(transaction.original_storage[k], current_value, v);
-    eosio::print("\n---A4---\n");
 
     // Store
     storekv(ctx->callee.primary_key(), k, v);
@@ -998,15 +990,14 @@ namespace eosio_evm
       return;
     }
 
-    eosio::print("g");
     // eosio::print("\n\nGAS LIMIT: ", intx::to_string(_gas_limit), "\n");
-    eosio::print("\nTo Address: ", intx::hex(toAddress));
-    eosio::print("\nValue: ", value);
-    eosio::print("\noffIn: ", offIn);
-    eosio::print("\nsizeIn: ", sizeIn);
-    eosio::print("\noffOut: ", offOut);
-    eosio::print("\nsizeOut: ", sizeOut);
-    eosio::print("\nmem size: ", ctx->mem.size(), "\n");
+    // eosio::print("\nTo Address: ", intx::hex(toAddress));
+    // eosio::print("\nValue: ", value);
+    // eosio::print("\noffIn: ", offIn);
+    // eosio::print("\nsizeIn: ", sizeIn);
+    // eosio::print("\noffOut: ", offOut);
+    // eosio::print("\nsizeOut: ", sizeOut);
+    // eosio::print("\nmem size: ", ctx->mem.size(), "\n");
 
     // Get new account and check not empty
     Account new_callee = get_account(toAddress);
@@ -1041,8 +1032,10 @@ namespace eosio_evm
     const auto gas_allowed = ctx->gas_left - (ctx->gas_left / 64);
     const auto gas_limit = (_gas_limit > gas_allowed) ? gas_allowed : _gas_limit;
 
-    eosio::print("GAS_ALLOWED", intx::to_string(gas_allowed));
-    eosio::print("GAS_LIMIT", intx::to_string(gas_limit));
+    // eosio::print("\nGAS_LEFT: ", intx::to_string(ctx->gas_left));
+    // eosio::print("\nGAS_ALLOWED: ", intx::to_string(gas_allowed));
+    // eosio::print("\nGAS_LIMIT: ", intx::to_string(gas_limit));
+
     // Check max depth
     if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
       return throw_error(Exception(ET::outOfBounds, "Reached max call depth."), {});

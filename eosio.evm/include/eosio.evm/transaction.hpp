@@ -237,6 +237,24 @@ namespace eosio_evm
       }
     }
 
+    /**
+     * State Modifications and original storage
+     */
+    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
+    inline uint256_t find_original(const uint64_t& address_index, const uint256_t& key) {
+      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
+        return 0;
+      } else {
+        return original_storage[address_index][key];
+      }
+    }
+    inline void emplace_original(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
+      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
+        original_storage[address_index][key] = value;
+      }
+    }
+
+    #ifdef TESTING
     void print() const
     {
       eosio::print(
@@ -277,22 +295,7 @@ namespace eosio_evm
     {
       eosio::print("\n", encode() );
     }
+    #endif /* TESTING */
 
-    /**
-     * State Modifications and original storage
-     */
-    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
-    inline uint256_t find_original(const uint64_t& address_index, const uint256_t& key) {
-      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
-        return 0;
-      } else {
-        return original_storage[address_index][key];
-      }
-    }
-    inline void emplace_original(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
-      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
-        original_storage[address_index][key] = value;
-      }
-    }
   };
 } // namespace eosio_evm

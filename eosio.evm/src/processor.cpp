@@ -244,8 +244,6 @@ namespace eosio_evm
 
   // Returns true if error
   bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
-    eosio::print("\nException: ", exception.what(), "\n");
-
     // Consume all call gas on exception
     if (exception.type != ET::revert) {
       ctx->gas_left = 0;

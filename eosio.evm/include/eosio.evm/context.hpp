@@ -94,6 +94,7 @@ namespace eosio_evm {
       }
     }
 
+    #ifdef TESTING
     void print() {
       eosio::print("\nmemory\":",  bin2hex(mem));
       eosio::print("\nstack\":",   s.asArray());
@@ -104,5 +105,6 @@ namespace eosio_evm {
       eosio::print("\nInput\":", bin2hex(input));
       eosio::print("\nCall Value\":", call_value, "\n");
     }
+    #endif /* TESTING */
   };
 }

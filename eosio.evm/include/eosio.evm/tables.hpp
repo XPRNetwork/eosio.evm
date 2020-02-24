@@ -27,16 +27,19 @@ namespace eosio_evm {
 
     eosio::checksum256 by_address() const { return pad160(address); };
 
+
+    #ifdef TESTING
     void print() const {
-      // eosio::print("\n---Acc Info Start-----");
-      // eosio::print("\nAddress ", address);
-      // eosio::print("\nIndex ", index);
-      // eosio::print("\nEOS Account " + account.to_string());
-      // eosio::print("\nBalance ", balance);
-      // eosio::print("\nCode ", bin2hex(code));
-      // eosio::print("\nNonce ", nonce);
-      // eosio::print("\n---Acc Info End---\n");
+      eosio::print("\n---Acc Info Start-----");
+      eosio::print("\nAddress ", address);
+      eosio::print("\nIndex ", index);
+      eosio::print("\nEOS Account " + account.to_string());
+      eosio::print("\nBalance ", balance);
+      eosio::print("\nCode ", bin2hex(code));
+      eosio::print("\nNonce ", nonce);
+      eosio::print("\n---Acc Info End---\n");
     }
+    #endif /* TESTING */
 
     EOSLIB_SERIALIZE(Account, (index)(address)(account)(balance)(nonce)(code));
   };

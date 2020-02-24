@@ -5,8 +5,8 @@
 #pragma once
 
 // Testing
-#define TESTING true
-#define OPTRACE true
+#define TESTING false
+#define OPTRACE false
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"

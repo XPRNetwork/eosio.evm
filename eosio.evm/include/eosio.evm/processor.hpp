@@ -28,6 +28,7 @@ namespace eosio_evm {
     std::vector<uint8_t> output = {};
     uint256_t gas_used = 0;
 
+    #ifdef TESTING
     void print() {
       eosio::print("\n-------------Exec Result------------\n");
       eosio::print("\nExitReason: ", (uint8_t) er);
@@ -36,6 +37,7 @@ namespace eosio_evm {
       eosio::print("\nOutput:", bin2hex(output));
       eosio::print("\n-------------End Exec Result------------\n");
     }
+    #endif /* TESTING */
   };
 
   class Processor

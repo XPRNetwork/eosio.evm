@@ -85,7 +85,7 @@ namespace eosio_evm
 
     uint256_t gas_used;     // Gas used in transaction
     uint256_t gas_refunds;  // Refunds processed in transaction
-    std::map<uint256_t, uint256_t> original_storage; // Cache for SSTORE
+    std::map<uint64_t, std::map<uint256_t, uint256_t>> original_storage; // Cache for SSTORE
     std::vector<StateModification> state_modifications;   // State modifications
 
     // Signature data
@@ -136,7 +136,6 @@ namespace eosio_evm
     bool is_create() const { return !to_address.has_value(); }
     uint256_t gas_left() const { return gas_limit - gas_used; }
     std::string encode() const { return rlp::encode(nonce, gas_price, gas_limit, to, value, data, v, r, s); }
-    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
 
     void initialize_base_gas () {
       gas_used = GP_TRANSACTION;
@@ -146,6 +145,8 @@ namespace eosio_evm
           ? GP_TXDATAZERO
           : GP_TXDATANONZERO;
       }
+      eosio::print("GAS USED:", intx::to_string(gas_used));
+      eosio::print("\nData length:",data.size());
       if (is_create()) {
         gas_used += GP_TXCREATE;
       }
@@ -275,6 +276,23 @@ namespace eosio_evm
     void printEncoded() const
     {
       eosio::print("\n", encode() );
+    }
+
+    /**
+     * State Modifications and original storage
+     */
+    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
+    inline uint256_t find_original(const uint64_t& address_index, const uint256_t& key) {
+      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
+        return 0;
+      } else {
+        return original_storage[address_index][key];
+      }
+    }
+    inline void emplace_original(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
+      if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
+        original_storage[address_index][key] = value;
+      }
     }
   };
 } // namespace eosio_evm

@@ -26,8 +26,9 @@ namespace eosio_evm {
     Exception::Type ex = {};
     std::string exmsg = {};
     std::vector<uint8_t> output = {};
+    uint256_t gas_used = 0;
 
-    void print () {
+    void print() {
       eosio::print("\n-------------Exec Result------------\n");
       eosio::print("\nExitReason: ", (uint8_t) er);
       eosio::print("\nException Type:", (uint8_t) ex);
@@ -52,29 +53,31 @@ namespace eosio_evm {
         contract(contract)
     {}
 
-    void initialize_create (const Account& caller);
-    void initialize_call (const Account& caller);
-
-    ExecResult run(
-      const Account& caller,
-      const Account& callee,
-      uint256_t gas_limit,
-      const bool& is_static,
-      const std::vector<uint8_t>& data,
-      const std::vector<uint8_t>& code,
-      const int64_t& call_value
-    );
+    void initialize_create(const Account& caller);
+    void initialize_call(const Account& caller);
+    void run();
 
     uint16_t get_call_depth() const;
     const uint8_t get_op() const;
-    void revert_state(const uint64_t revert_to);
+    void revert_state(const size_t& revert_to);
     void pop_context();
-    void throw_error(const Exception& exception, const std::vector<uint8_t>& output);
-    void use_gas(uint256_t amount);
     void refund_gas(uint256_t amount);
-    void process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value);
+    void push_context(
+      const size_t sm_checkpoint,
+      const Account& caller,
+      const Account& callee,
+      uint256_t gas_left,
+      const bool is_static,
+      const int64_t call_value,
+      std::vector<uint8_t>&& input,
+      Program&& prog,
+      SuccessHandler&& success_cb,
+      ErrorHandler&& error_cb
+    );
+    void dispatch();
 
-    void copy_mem_raw(
+    // Can throw errors
+    bool copy_mem_raw(
       const uint64_t offDst,
       const uint64_t offSrc,
       const uint64_t size,
@@ -82,11 +85,12 @@ namespace eosio_evm {
       const std::vector<uint8_t>& src,
       const uint8_t pad = 0
     );
-    void copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad);
-    void prepare_mem_access(const uint64_t offset, const uint64_t size);
-    std::vector<uint8_t> copy_from_mem(const uint64_t offset, const uint64_t size);
-    void jump_to(const uint64_t newPc);
-    void dispatch();
+    bool copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad);
+    bool prepare_mem_access(const uint64_t offset, const uint64_t size);
+    bool jump_to(const uint64_t newPc);
+    bool use_gas(uint256_t amount);
+    bool process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value);
+    bool throw_error(const Exception& exception, const std::vector<uint8_t>& output);
 
     // State
     struct AccountResult {
@@ -102,7 +106,7 @@ namespace eosio_evm {
     void increment_nonce(const Address& address);
     void set_code(const Address& address, const std::vector<uint8_t>& code);
     void selfdestruct(const Address& addr);
-    void transfer_internal(const Address& from, const Address& to, const int64_t amount);
+    bool transfer_internal(const Address& from, const Address& to, const int64_t amount);
 
     // Reverting
     void remove_code(const Address& address);

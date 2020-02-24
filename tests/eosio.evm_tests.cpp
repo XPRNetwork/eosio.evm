@@ -335,7 +335,7 @@ BOOST_FIXTURE_TEST_CASE( LoopCallsDepthThenRevert, eosio_evm_tester ) try {
       push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
          ( "address", "a000000000000000000000000000000000000000")
          ( "balance", "0")
-         ( "code", eosio_system::HexToBytes("6001600054016000556000600060006000600073b0000000000000000000000000000000000000005af100"))
+         ( "code", eosio_system::HexToBytes("600160005401600055600060006000600073b0000000000000000000000000000000000000005af400"))
          ( "nonce", 0)
          ( "account", "")
       );
@@ -349,17 +349,27 @@ BOOST_FIXTURE_TEST_CASE( LoopCallsDepthThenRevert, eosio_evm_tester ) try {
       push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
          ( "address", "b000000000000000000000000000000000000000")
          ( "balance", "0")
-         ( "code", eosio_system::HexToBytes("6001600054016000556000600060006000600073a0000000000000000000000000000000000000005af100"))
+         ( "code", eosio_system::HexToBytes("600160005401600055600060006000600073a0000000000000000000000000000000000000005af400"))
          ( "nonce", 0)
          ( "account", "")
       );
+
+      // push_action2( N(eosio.evm), N(devnewstore), N(eosio.evm), mvo()
+      //    ( "address", "a000000000000000000000000000000000000000")
+      //    ( "key", "0")
+      //    ( "value", "0x0352")
+      // );
+
+      // push_action2( N(eosio.evm), N(printstate), N(eosio.evm), mvo()
+      //    ( "address", "a000000000000000000000000000000000000000")
+      // );
 
       auto res = push_action2( N(eosio.evm), N(raw), N(eosio.evm), mvo()
          ( "tx", "f86080018398968094a000000000000000000000000000000000000000808026a0d79322f44b7cf27cdd755f3a1db3cf9b7008cadcc6098424cb32630b02b7f0c9a034a4352f2f684c5a65d18214ddc002c05c88fd8d33b21846cd886dae346a07b9")
          ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
       );
       std::cout << res->action_traces[0].console << std::endl;
-      // std::cout << fc::json::to_pretty_string(res) << std::endl;
+      std::cout << fc::json::to_pretty_string(res) << std::endl;
    } catch(const fc::exception& e) {
       std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
    }

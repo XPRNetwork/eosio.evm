@@ -14,28 +14,28 @@ namespace eosio_evm
   {
     const auto op = get_op();
 
-    // Clear return data and clear memory.
+    // Clear return data
     last_return_data.clear();
-    last_return_data.shrink_to_fit();
 
     // Debug
     #if (OPTRACE == true)
     eosio::print(
-      "\n",
+     "\n",
       "{",
       "\"pc\":",      ctx->get_pc(), ",",
-      "\"gasLeft\":", intx::to_string(ctx->gas_left), ",",
+      "\"gasLeft\":", ctx->gas_left > 0 ? intx::to_string(ctx->gas_left) : 0, ",",
       "\"gasCost\":", std::to_string(OpFees::by_code[op]), ",",
       "\"stack\":",   ctx->s.asArray(), ",",
       "\"depth\":",   std::to_string(get_call_depth()), ",",
-      "\"opName\": \"",  opcodeToString[op], "\""
+      "\"opName\": \"",  opcodeToString[op], "\"",
       "}",
       ","
     );
     #endif /* OPTRACE */
 
     // Charge gas
-    use_gas(OpFees::by_code[op]);
+    bool error = use_gas(OpFees::by_code[op]);
+    if (error) return;
 
     switch (op)
     {
@@ -275,7 +275,10 @@ namespace eosio_evm
    */
   void Processor::stop()
   {
-    ctx->result_cb({});
+    auto success_cb = ctx->success_cb;
+    auto gas_used = ctx->gas_used();
+    pop_context();
+    success_cb({}, gas_used);
   }
 
   void Processor::add()
@@ -385,7 +388,8 @@ namespace eosio_evm
 
     // Gas
     const auto sig_bytes = static_cast<int>(intx::count_significant_words<uint8_t>(e));
-    use_gas(sig_bytes * GP_EXP_BYTE);
+    bool error = use_gas(sig_bytes * GP_EXP_BYTE);
+    if (error) return;
 
     // Push result
     const auto res = intx::exp(b, uint256_t(e));
@@ -530,10 +534,12 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.popu64();
     const auto size = ctx->s.popu64();
-    prepare_mem_access(offset, size);
+    bool memory_error = prepare_mem_access(offset, size);
+    if (memory_error) return;
 
     // Update gas (ceiling)
-    use_gas(((size + 31) / 32) * GP_SHA3_WORD);
+    bool gas_error = use_gas(((size + 31) / 32) * GP_SHA3_WORD);
+    if (gas_error) return;
 
     // Find keccak 256 hash
     uint8_t h[32];
@@ -611,7 +617,8 @@ namespace eosio_evm
     const auto input_index = ctx->s.popu64();
     const auto size = ctx->s.popu64();
 
-    prepare_mem_access(mem_index, size);
+    bool memory_error = prepare_mem_access(mem_index, size);
+    if (memory_error) return;
 
     const auto code_size = ctx->prog.code.size();
     auto dst = static_cast<size_t>(mem_index);
@@ -620,7 +627,8 @@ namespace eosio_evm
     auto copy_size = std::min(s, code_size - src);
 
     // Gas cost
-    use_gas(num_words(s) * GP_COPY);
+    bool gas_error = use_gas((num_words(s) * GP_COPY));
+    if (gas_error) return;
 
     if (copy_size > 0)
         std::memcpy(&ctx->mem[dst], &ctx->prog.code[src], copy_size);
@@ -735,7 +743,8 @@ namespace eosio_evm
   void Processor::mload()
   {
     const auto offset = ctx->s.popu64();
-    prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+    bool error = prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+    if (error) return;
     auto res = intx::be::unsafe::load<uint256_t>(&ctx->mem[offset]);
     ctx->s.push(res);
   }
@@ -744,7 +753,8 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.popu64();
     const auto word = ctx->s.pop();
-    prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+    bool error = prepare_mem_access(offset, ProcessorConsts::WORD_SIZE);
+    if (error) return;
     intx::be::unsafe::store(ctx->mem.data() + offset, word);
   }
 
@@ -752,7 +762,8 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.popu64();
     const auto b = shrink<uint8_t>(ctx->s.pop());
-    prepare_mem_access(offset, sizeof(b));
+    bool error = prepare_mem_access(offset, sizeof(b));
+    if (error) return;
     ctx->mem[offset] = b;
   }
 
@@ -766,21 +777,21 @@ namespace eosio_evm
   void Processor::sstore()
   {
     if (ctx->is_static) {
-      return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      return;
     }
 
     // Get items from stack
     const auto k = ctx->s.pop();
     const auto v = ctx->s.pop();
 
-    // Store as original if first time seeing it
+    // Load current value
     uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
-    if (transaction.original_storage.count(k) == 0) {
-      transaction.original_storage[k] = current_value;
-    }
 
     // Charge gas
-    process_sstore_gas(transaction.original_storage[k], current_value, v);
+    auto original_value = transaction.find_original(ctx->callee.primary_key(), k);
+    bool error = process_sstore_gas(original_value, current_value, v);
+    if (error) return;
 
     // Store
     storekv(ctx->callee.primary_key(), k, v);
@@ -789,15 +800,18 @@ namespace eosio_evm
   void Processor::jump()
   {
     const auto newPc = ctx->s.popu64();
-    jump_to(newPc);
+    bool error = jump_to(newPc);
+    if (error) return;
   }
 
   void Processor::jumpi()
   {
     const auto newPc = ctx->s.popu64();
     const auto cond = ctx->s.pop();
-    if (cond)
-      jump_to(newPc);
+    if (cond) {
+      bool error = jump_to(newPc);
+      if (error) return;
+    }
   }
 
   void Processor::pc()
@@ -823,10 +837,12 @@ namespace eosio_evm
     const auto end = ctx->get_pc() + bytes;
 
     if (end < ctx->get_pc()) {
-      return throw_error(Exception(ET::outOfBounds, "Integer overflow in push"), {});
+      throw_error(Exception(ET::outOfBounds, "Integer overflow in push"), {});
+      return;
     }
     if (end >= ctx->prog.code.size()) {
-      return throw_error(Exception(ET::outOfBounds, "Push immediate exceeds size of program "), {});
+      throw_error(Exception(ET::outOfBounds, "Push immediate exceeds size of program "), {});
+      return;
     }
 
     // TODO: parse immediate once and not every time
@@ -853,7 +869,8 @@ namespace eosio_evm
   void Processor::log()
   {
     if (ctx->is_static) {
-      return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      return;
     }
 
     const auto offset = ctx->s.popu64();
@@ -867,28 +884,41 @@ namespace eosio_evm
     }
 
     // Gas
-    use_gas((size * GP_LOG_DATA) + (number_of_logs * GP_EXTRA_PER_LOG));
+    bool gas_error = use_gas((size * GP_LOG_DATA) + (number_of_logs * GP_EXTRA_PER_LOG));
+    if (gas_error) return;
 
     // TODO implement printing log table in transaction receipt
-    transaction.log_handler.add({
-      ctx->callee.get_address(),
-      copy_from_mem(offset, size),
-      topics
-    });
+    bool memory_error = prepare_mem_access(offset, size);
+    if (memory_error) return;
+    std::vector<uint8_t> outputs = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
+
+    transaction.log_handler.add({ ctx->callee.get_address(), outputs, topics });
     transaction.add_modification({ SMT::LOG, 0, 0, 0, 0, 0 });
   }
 
   void Processor::invalid() {
     throw_error(Exception(ET::illegalInstruction, "Invalid Instruction"), {});
+    return;
   }
 
   void Processor::illegal() {
     throw_error(Exception(ET::illegalInstruction, "Illegal Instruction"), {});
+    return;
   }
 
   // Common for both CREATE and CREATE2
   void Processor::_create(const uint64_t& contract_value, const uint64_t& offset, const int64_t& size, const Address& new_address) {
-    auto init_code = copy_from_mem(offset, size);
+    bool memory_error = prepare_mem_access(offset, size);
+    if (memory_error) return;
+    std::vector<uint8_t> init_code = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
+
+    // Depth and balance Validation
+    bool max_call_depth = get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH;
+    bool insufficient_balance = ctx->callee.get_balance() < contract_value;
+    if (max_call_depth || insufficient_balance) {
+      ctx->s.push(0);
+      return;
+    }
 
     // For contract accounts, the nonce counts the number of contract-creations by this account
     increment_nonce(ctx->callee.get_address());
@@ -896,51 +926,59 @@ namespace eosio_evm
     // Create account using new address
     auto [new_account, error] = create_account(new_address, 0, true);
     if (error) {
-      return throw_error(Exception(ET::outOfBounds, "Cannot CREATE contract address as it already exists"), {});
+      throw_error(Exception(ET::outOfBounds, "Cannot CREATE contract address as it already exists"), {});
+      return;
     }
 
     // In contract creation, the transaction value is an endowment for the newly created account
-    transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
+    bool transfer_error = transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
+    if (transfer_error) return;
+
+    // Gas limit (63/64)
+    const auto gas_limit = ctx->gas_left - (ctx->gas_left / 64);
 
     // Execute new account's code
-    auto result = run(
+    auto parent_context = ctx;
+    auto new_account_address = new_account.get_address();
+    auto success_cb = [&, parent_context, new_account_address](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      // Sub execution gas
+      bool sub_gas_error = use_gas(sub_gas_used);
+      if (sub_gas_error) return;
+
+      // Create data gas
+      bool create_gas_error = use_gas(output.size() * GP_CREATE_DATA);
+      if (create_gas_error) return;
+
+      // Set code
+      set_code(new_account_address, move(output));
+
+      // Push created address on stack
+      parent_context->s.push(new_account_address);
+    };
+    auto error_cb = [&, parent_context](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      parent_context->s.push(0);
+      bool gas_error = use_gas(sub_gas_used);
+      if (gas_error) return;
+    };
+    push_context(
+      transaction.state_modifications.size(),
       ctx->callee.get_address(),
       new_account,
-      transaction.gas_left(),
-      false, // CREATE and CREATE2 cannot be called statically
-      {}, // Data
+      gas_limit,
+      false,
+      0, // Value
+      std::move(std::vector<uint8_t>{}), // Data is empty
       std::move(init_code),
-      0
+      std::move(success_cb),
+      std::move(error_cb)
     );
-
-    // Success
-    if (result.er == ExitReason::returned)
-    {
-      // Set code from output
-      auto new_account_address = new_account.get_address();
-      if (!result.output.empty()) {
-        set_code(new_account_address, move(result.output));
-      }
-
-      ctx->s.push(new_account_address);
-
-      // TODO should we push 0 on stack here in case of halt (not error)?
-    }
-    else if (result.ex == ET::revert)
-    {
-      last_return_data = move(result.output);
-      ctx->s.push(0);
-    }
-    else
-    {
-      ctx->s.push(0);
-    }
   }
 
   void Processor::create()
   {
     if (ctx->is_static) {
-      return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      return;
     }
 
     const auto contract_value = ctx->s.popAmount();
@@ -955,7 +993,8 @@ namespace eosio_evm
   void Processor::create2()
   {
     if (ctx->is_static) {
-      return throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      throw_error(Exception(ET::staticStateChange, "Invalid static state change"), {});
+      return;
     }
 
     const auto contract_value = ctx->s.popAmount();
@@ -965,7 +1004,8 @@ namespace eosio_evm
 
     // Gas cost for hashing new address
     const auto arbitrary_size = static_cast<int>(intx::count_significant_words<uint8_t>(arbitrary));
-    use_gas(GP_SHA3_WORD * ((arbitrary_size + 31) / 32));
+    bool error = use_gas(GP_SHA3_WORD * ((arbitrary_size + 31) / 32));
+    if (error) return;
 
     auto new_address = generate_address(ctx->callee.get_address(), arbitrary);
     _create(contract_value, offset, size, new_address);
@@ -984,24 +1024,33 @@ namespace eosio_evm
     const auto offOut     = ctx->s.popu64();
     const auto sizeOut    = ctx->s.popu64();
 
-    // TODO: implement precompiled contracts
-    if (toAddress >= 1 && toAddress <= 8) {
-      throw_error(Exception(ET::notImplemented, "Precompiled contracts/native extensions are not implemented."), {});
+    // Check call depth
+    if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
+      ctx->s.push(0);
       return;
     }
 
-    // eosio::print("\n\nGAS LIMIT: ", intx::to_string(_gas_limit), "\n");
-    // eosio::print("\nTo Address: ", intx::hex(toAddress));
-    // eosio::print("\nValue: ", value);
-    // eosio::print("\noffIn: ", offIn);
-    // eosio::print("\nsizeIn: ", sizeIn);
-    // eosio::print("\noffOut: ", offOut);
-    // eosio::print("\nsizeOut: ", sizeOut);
-    // eosio::print("\nmem size: ", ctx->mem.size(), "\n");
+    // TODO: implement precompiled contracts
+    if (toAddress >= 1 && toAddress <= 8) {
+      return (void) throw_error(Exception(ET::notImplemented, "Precompiled contracts/native extensions are not implemented."), {});
+    }
 
-    // Get new account and check not empty
-    Account new_callee = get_account(toAddress);
-    if (new_callee.get_code().empty()) {
+    // Get new to account and check not empty
+    const Account& to_account = get_account(toAddress);
+
+    // Dynamically determine parameters
+    const bool     is_static  = op == Opcode::STATICCALL;
+    const int64_t& new_value  = op == Opcode::DELEGATECALL ? ctx->call_value : value;
+    const Account& new_caller = op == Opcode::DELEGATECALL ? ctx->caller : ctx->callee;
+    const Account& new_callee = op == Opcode::DELEGATECALL ||op ==  Opcode::CALLCODE
+                                  ? ctx->callee
+                                  : to_account;
+    std::vector<uint8_t> new_code = op == Opcode::DELEGATECALL || op == Opcode::CALLCODE
+                                      ? to_account.get_code()
+                                      : ctx->callee.get_code();
+
+    // Validate new code
+    if (new_code.empty()) {
       ctx->s.push(1);
       return;
     }
@@ -1012,95 +1061,75 @@ namespace eosio_evm
       if (op == Opcode::CALL || op == Opcode::CALLCODE) {
         // Check not static
         if (ctx->is_static) {
-          return throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
+          return (void) throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
         }
 
         // Gas change
-        use_gas(GP_CALL_VALUE_TRANSFER - GP_CALL_STIPEND);
+        bool error = use_gas(GP_CALL_VALUE_TRANSFER - GP_CALL_STIPEND);
+        if (error) return;
       }
 
       // callnew_accountount
       if (!new_callee.is_empty()) {
-        use_gas(GP_NEW_ACCOUNT);
+        bool error = use_gas(GP_NEW_ACCOUNT);
+        if (error) return;
       }
 
       // Transfer value
-      transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
+      bool error = transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
+      if (error) return;
     }
 
     // 63/64 gas
     const auto gas_allowed = ctx->gas_left - (ctx->gas_left / 64);
     const auto gas_limit = (_gas_limit > gas_allowed) ? gas_allowed : _gas_limit;
 
-    // eosio::print("\nGAS_LEFT: ", intx::to_string(ctx->gas_left));
-    // eosio::print("\nGAS_ALLOWED: ", intx::to_string(gas_allowed));
-    // eosio::print("\nGAS_LIMIT: ", intx::to_string(gas_limit));
-
-    // Check max depth
-    if (get_call_depth() >= ProcessorConsts::MAX_CALL_DEPTH) {
-      return throw_error(Exception(ET::outOfBounds, "Reached max call depth."), {});
-    }
-
     // Fetch input if available
     std::vector<uint8_t> input = {};
     if (sizeIn > 0) {
-      input = copy_from_mem(offIn, sizeIn);
+      bool error = prepare_mem_access(offIn, sizeIn);
+      if (error) return;
+      std::vector<uint8_t> input = {ctx->mem.begin() + offIn, ctx->mem.begin() + offIn + sizeIn};
     }
 
     // Prepare memory for output and handlers
-    prepare_mem_access(offOut, sizeOut);
-
-    // Address, callee and value are variable amongst call ops
-    auto new_caller = ctx->callee;
-    auto new_value  = value;
-    auto is_static  = ctx->is_static;
-
-    if (op == Opcode::STATICCALL) {
-      is_static = true;
-    }
-
-    if (op == Opcode::CALLCODE) {
-      new_callee = ctx->callee;
-    }
-
-    if (op == Opcode::DELEGATECALL) {
-      new_callee = ctx->callee;
-      new_caller = ctx->caller;
-      new_value  = ctx->call_value;
-    }
-
-    // eosio::print("\nInitialize Sub-Call from\n");
-    // new_caller.print();
-    // eosio::print("\nInitialize Sub-Call to\n");
-    // new_callee.print();
+    bool error = prepare_mem_access(offOut, sizeOut);
+    if (error) return;
 
     // Push call context
-    auto result = run(
+    auto parent_context = ctx;
+    auto success_cb = [&, parent_context](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      if (!output.empty()) {
+        // Memory
+        bool error = copy_mem_raw(offOut, 0, sizeOut, parent_context->mem, output);
+        if (error) return;
+
+        // TODO Return data
+        // error = copy_mem_raw(offOut, 0, sizeOut, last_return_data, output);
+        // if (error) return;
+      }
+
+      parent_context->s.push(1);
+      bool error = use_gas(sub_gas_used);
+      if (error) return;
+    };
+    auto error_cb = [&, parent_context](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      parent_context->s.push(0);
+      bool error = use_gas(sub_gas_used);
+      if (error) return;
+    };
+    push_context(
+      transaction.state_modifications.size(),
       new_caller,
       new_callee,
       gas_limit,
       is_static,
-      move(input),
-      new_callee.get_code(),
-      new_value
+      new_value,
+      std::move(input),
+      std::move(new_code),
+      std::move(success_cb),
+      std::move(error_cb)
     );
-
-    if (result.er == ExitReason::returned) {
-      if (!result.output.empty()) {
-        // Memory
-        copy_mem_raw(offOut, 0, sizeOut, ctx->mem, result.output);
-
-        // TODO Return data
-        // copy_mem_raw(offOut, 0, sizeOut, last_return_data, result.output);
-      }
-
-      ctx->s.push(1);
-    } else if (result.ex == ET::revert) {
-      last_return_data = move(result.output);
-      ctx->s.push(0);
-    } else {
-      ctx->s.push(0);
-    }
   }
 
   void Processor::return_()
@@ -1108,8 +1137,16 @@ namespace eosio_evm
     const auto offset = ctx->s.popu64();
     const auto size = ctx->s.popu64();
 
+    // Output
+    bool error = prepare_mem_access(offset, size);
+    if (error) return;
+    std::vector<uint8_t> output = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
+
     // invoke caller's return handler
-    ctx->result_cb(copy_from_mem(offset, size));
+    auto success_cb = ctx->success_cb;
+    auto gas_used = ctx->gas_used();
+    pop_context();
+    success_cb(output, gas_used);
   }
 
   void Processor::revert()
@@ -1117,10 +1154,17 @@ namespace eosio_evm
     const auto offset = ctx->s.popu64();
     const auto size = ctx->s.popu64();
 
+    // Revert state
+    revert_state(ctx->sm_checkpoint);
+
     // invoke caller's return handler
+    bool error = prepare_mem_access(offset, size);
+    if (error) return;
+    std::vector<uint8_t> output = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
+
     throw_error(
       Exception(ET::revert, "The transaction has been reverted to it's initial state. Likely issue: A non-payable function was called with value, or your balance is too low."),
-      copy_from_mem(offset, size)
+      output
     );
   }
 
@@ -1128,7 +1172,7 @@ namespace eosio_evm
   {
     // Check not static
     if (ctx->is_static) {
-      return throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
+      return (void) throw_error(Exception(ET::staticStateChange, "Invalid static state change."), {});
     }
 
     // Pop Stack
@@ -1151,11 +1195,13 @@ namespace eosio_evm
     if (balance > 0) {
       // New Account gas fee
       if (recipient.is_empty()) {
-        use_gas(GP_NEW_ACCOUNT);
+        bool gas_error = use_gas(GP_NEW_ACCOUNT);
+        if (gas_error) return;
       }
 
       // Transfer all balance
-      transfer_internal(contract_address, recipient_address, balance);
+      bool transfer_error = transfer_internal(contract_address, recipient_address, balance);
+      if (transfer_error) return;
     }
 
     // Add to list for later

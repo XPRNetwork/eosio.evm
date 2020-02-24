@@ -9,10 +9,10 @@ namespace eosio_evm
   class Program
   {
   public:
-    const std::vector<uint8_t>& code;
+    const std::vector<uint8_t> code;
     const std::set<uint64_t> jump_dests;
 
-    Program(const std::vector<uint8_t>& c)
+    Program(std::vector<uint8_t>&& c)
       : code(c),
         jump_dests(compute_jump_dests(code)) {}
 

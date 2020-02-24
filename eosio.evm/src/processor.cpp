@@ -22,23 +22,42 @@ namespace eosio_evm
     }
 
     // Transfer value
-    transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    bool transfer_error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    if (transfer_error) return;
 
-    // Run
-    const ExecResult exec_result = run(
+    // Push initial context
+    ExecResult result;
+    auto success_cb = [&result](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      result.er = ExitReason::returned;
+      result.output = move(output);
+      result.gas_used = sub_gas_used;
+    };
+    auto error_cb = [&result](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      result.er = ExitReason::threw;
+      result.ex = ex_.type;
+      result.exmsg = ex_.what();
+      result.gas_used = sub_gas_used;
+    };
+    push_context(
+      transaction.state_modifications.size(),
       caller,
       callee,
       transaction.gas_left(),
-      false, // Is Static
-      {}, // Data is empty
-      transaction.data, // Init data used as code here
-      transaction.get_value()
+      false,
+      transaction.get_value(),
+      std::move(std::vector<uint8_t>{}), // Data is empty
+      std::move(transaction.data),  // Init data used as code here
+      std::move(success_cb),
+      std::move(error_cb)
     );
 
+    // Run
+    run();
+
     // Success
-    if (exec_result.er == ExitReason::returned) {
+    if (result.er == ExitReason::returned) {
       // Validate size
-      const auto output_size = exec_result.output.size();
+      const auto output_size = result.output.size();
       if (output_size >= MAX_CODE_SIZE) {
         eosio::print("EVM Execution Error: Code is larger than max code size, out of gas!");
         return;
@@ -51,18 +70,16 @@ namespace eosio_evm
         eosio::print("EVM Execution Error: Out of Gas");
         return;
       } else {
-        transaction.gas_used += output_size * GP_CREATE_DATA;
+        transaction.gas_used += create_gas_cost;
       }
 
-      // Set code if not empty
-      if (output_size > 0) {
-        set_code(to_address, std::move(exec_result.output));
-      }
+      // Set code
+      set_code(to_address, std::move(result.output));
     }
     // Error
     else
     {
-      eosio::print("\nEVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+      eosio::print("\nEVM Execution Error: ", int(result.er), ", ", result.exmsg);
     }
 
     // clean-up
@@ -77,27 +94,46 @@ namespace eosio_evm
     const Account& callee = get_account(to_address);
 
     // Transfer value
-    transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    bool error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    if (error) return;
 
-    // Run
-    const ExecResult exec_result = run(
+    // Push initial context
+    ExecResult result;
+    auto success_cb = [&result](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      result.er = ExitReason::returned;
+      result.output = move(output);
+      result.gas_used = sub_gas_used;
+    };
+    auto error_cb = [&result](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      result.er = ExitReason::threw;
+      result.ex = ex_.type;
+      result.exmsg = ex_.what();
+      result.gas_used = sub_gas_used;
+    };
+    push_context(
+      transaction.state_modifications.size(),
       caller,
       callee,
       transaction.gas_left(),
-      false, // Is Static
-      transaction.data,
-      callee.get_code(),
-      transaction.get_value()
+      false,
+      transaction.get_value(),
+      std::move(transaction.data),
+      std::move(callee.get_code()),
+      std::move(success_cb),
+      std::move(error_cb)
     );
 
+    // Run
+    run();
+
     // Success
-    if (exec_result.er == ExitReason::returned)
+    if (result.er == ExitReason::returned)
     {
     }
     // Error
     else
     {
-      eosio::print("\nEVM Execution Error: ", int(exec_result.er), ", ", exec_result.exmsg);
+      eosio::print("\nEVM Execution Error: ", int(result.er), ", ", result.exmsg);
     }
 
     // clean-up
@@ -106,100 +142,24 @@ namespace eosio_evm
     }
   }
 
-  ExecResult Processor::run(
-    const Account& caller,
-    const Account& callee,
-    uint256_t gas_limit,
-    const bool& is_static,
-    const std::vector<uint8_t>& data,
-    const std::vector<uint8_t>& code,
-    const int64_t& call_value
-  )
+  void Processor::run()
   {
-    // Create result and error callbacks
-    ExecResult result;
-    uint64_t sm_checkpoint = transaction.state_modifications.size();
-    auto result_cb = [&result](const std::vector<uint8_t>& output) {
-      result.er = ExitReason::returned;
-      result.output = move(output);
-    };
-    auto error_cb = [&result](const Exception& ex_, const std::vector<uint8_t>& output) {
-      result.er = ExitReason::threw;
-      result.ex = ex_.type;
-      result.exmsg = ex_.what();
-    };
-
-    // Add new context
-    auto c = std::make_unique<Context>(
-      caller,
-      callee,
-      gas_limit,
-      is_static,
-      data,
-      call_value,
-      Program(code),
-      result_cb,
-      error_cb
-    );
-    ctxs.emplace_back(move(c));
-    ctx = ctxs.back().get();
-
-    // eosio::print("\nStart call depth: ", get_call_depth(), "\n");
-
     // Execute code
-    while(ctx->get_pc() < ctx->prog.code.size())
+    while(!ctxs.empty())
     {
-      dispatch();
-
-      // Break if result was found
-      if (int(result.er))
-        break;
-
       ctx->step();
-    }
 
-    // If no result yet
-    if (!int(result.er)) {
-      stop();
-    }
-
-    eosio::print("\nEnd call depth: ", get_call_depth(), "\n");
-
-    // Restore to parent context
-    if (!ctxs.empty()) {
-      ctxs.pop_back();
-      ctx = ctxs.back().get();
-    }
-
-    // If success
-    if (result.er == ExitReason::returned)
-    {
-      eosio::print("\n----------RUN SUCEEDED---------");
-      for (auto& tsm : transaction.state_modifications) {
-        tsm.print();
+      // Execute
+      if (ctx->get_pc() < ctx->prog.code.size())
+      {
+        dispatch();
       }
-      eosio::print("\n------------------------------\n");
-    }
-    else
-    {
-      eosio::print("\n----------RUN Errored---------");
-      if (result.ex == ET::revert) {
-        eosio::print("REVERTING NOW");
-        for (auto& tsm : transaction.state_modifications) {
-          tsm.print();
-        }
-      } else {
-        eosio::print("NOT REVERTING");
+      // Stop
+      else
+      {
+        stop();
       }
-      eosio::print("\n-------------------------------\n");
     }
-
-    // Revert
-    if (result.ex == ET::revert) {
-      revert_state(sm_checkpoint);
-    }
-
-    return result;
   }
 
   uint16_t Processor::get_call_depth() const { return static_cast<uint16_t>(ctxs.size()); }
@@ -207,7 +167,7 @@ namespace eosio_evm
     return ctx->prog.code[ctx->get_pc()];
   }
 
-  void Processor::revert_state(const uint64_t revert_to) {
+  void Processor::revert_state(const size_t& revert_to) {
     for (auto i = transaction.state_modifications.size(); i-- > revert_to; ) {
       const auto [type, index, key, oldvalue, amount, newvalue] = transaction.state_modifications[i];
       switch (type) {
@@ -241,42 +201,90 @@ namespace eosio_evm
     }
   }
 
-  void Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
-    // Consume all call gas on exception
-    if (exception.type != ET::revert) {
-      use_gas(ctx->gas_left);
-    }
-
-    ctx->error_cb(exception, output);
+  void Processor::push_context(
+    const size_t sm_checkpoint,
+    const Account& caller,
+    const Account& callee,
+    uint256_t gas_left,
+    const bool is_static,
+    const int64_t call_value,
+    std::vector<uint8_t>&& input,
+    Program&& prog,
+    SuccessHandler&& success_cb,
+    ErrorHandler&& error_cb
+  ) {
+    auto c = std::make_unique<Context>(
+      sm_checkpoint,
+      caller,
+      callee,
+      gas_left,
+      is_static,
+      call_value,
+      std::move(input),
+      std::move(prog),
+      std::move(success_cb),
+      std::move(error_cb)
+    );
+    ctxs.emplace_back(move(c));
+    ctx = ctxs.back().get();
   }
 
-  // Gas
-  void Processor::use_gas(uint256_t amount) {
-    // If higher than gas limit or more than gas left
-    bool over_gas_limit = transaction.gas_used + amount > transaction.gas_limit;
-    bool not_enough_gas_left = amount > ctx->gas_left;
-    if (ctx->gas_left && (over_gas_limit || not_enough_gas_left)) {
+  void Processor::pop_context() {
+    ctxs.pop_back();
+    if (!ctxs.empty()) {
+      ctx = ctxs.back().get();
+    } else {
+      ctx = nullptr;
+    }
+  }
+
+  void Processor::refund_gas(uint256_t amount) {
+    ctx->gas_left += amount;
+  }
+
+  // Returns true if error
+  bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
+    eosio::print("\nException: ", exception.what(), "\n");
+
+    // Consume all call gas on exception
+    if (exception.type != ET::revert) {
+      ctx->gas_left = 0;
+    } else {
+      last_return_data = move(output);
+    }
+
+    auto error_cb = ctx->error_cb;
+    auto gas_used = ctx->gas_used();
+    pop_context();
+    error_cb(exception, output, gas_used);
+
+    // Always true for error
+    return true;
+  }
+
+  // Returns true if error
+  bool Processor::use_gas(uint256_t amount) {
+    if (amount > ctx->gas_left) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
     // Reflect gas changes
-    transaction.gas_used += amount;
     ctx->gas_left -= amount;
-  }
-  void Processor::refund_gas(uint256_t amount) {
-    transaction.gas_used -= amount;
-    ctx->gas_left += amount;
+    return false;
   }
 
   // Complex calculation from EIP 2200
   // - Original value is the first value at start of TX
   // - Current value is what is currently stored in EOSIO
   // - New value is the value to be stored
-  void Processor::process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
+  //
+  // Returns true if gas error
+  bool Processor::process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value) {
     if (ctx->gas_left <= GP_SSTORE_MINIMUM) {
       return throw_error(Exception(ET::outOfGas, "Out of Gas!"), {});
     }
 
+    // No-op
     if (current_value == new_value) {
       return use_gas(GP_SLOAD_GAS);
     }
@@ -285,14 +293,16 @@ namespace eosio_evm
       if (original_value == 0) {
         return use_gas(GP_SSTORE_SET_GAS);
       } else {
-        refund_gas(GP_SSTORE_RESET_GAS);
+        bool error = use_gas(GP_SSTORE_RESET_GAS);
+        if (error) return false;
       }
 
       if (new_value == 0) {
         transaction.gas_refunds += GP_SSTORE_CLEARS_SCHEDULE;
       }
     } else {
-      use_gas(GP_SLOAD_GAS);
+      bool error = use_gas(GP_SLOAD_GAS);
+      if (error) return false;
 
       if (original_value != 0) {
         if (current_value == 0 && new_value != 0) {
@@ -312,9 +322,12 @@ namespace eosio_evm
         }
       }
     }
+
+    return false;
   }
 
-  void Processor::copy_mem_raw(
+  // Return true if error
+  bool Processor::copy_mem_raw(
     const uint64_t offDst,
     const uint64_t offSrc,
     const uint64_t size,
@@ -324,7 +337,7 @@ namespace eosio_evm
   )
   {
     if (!size)
-      return;
+      return false;
 
     const auto lastDst = offDst + size;
 
@@ -349,21 +362,27 @@ namespace eosio_evm
 
     // if there are more bytes to copy than available, add padding
     fill(dst.begin() + lastDst - remaining, dst.begin() + lastDst, pad);
+
+    // Success
+    return false;
   }
 
-  void Processor::copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad)
+  // Return true if error
+  bool Processor::copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad)
   {
     const auto offDst = ctx->s.popu64();
     const auto offSrc = ctx->s.popu64();
     const auto size = ctx->s.popu64();
 
     // Gas calculation (copy cost is 3)
-    use_gas(GP_COPY * ((size + 31) / 32));
+    bool error = use_gas(GP_COPY * ((size + 31) / 32));
+    if (error) return true;
 
-    copy_mem_raw(offDst, offSrc, size, dst, src, pad);
+    return copy_mem_raw(offDst, offSrc, size, dst, src, pad);
   }
 
-  void Processor::prepare_mem_access(const uint64_t offset, const uint64_t size)
+  // Return true if error
+  bool Processor::prepare_mem_access(const uint64_t offset, const uint64_t size)
   {
     if (offset >= ProcessorConsts::MAX_BUFFER_SIZE) {
       return throw_error(Exception(ET::overflow, "overflow in buffer"), {});
@@ -381,7 +400,8 @@ namespace eosio_evm
       const auto cost = new_cost - current_cost;
 
       // Gas
-      use_gas(cost);
+      bool error = use_gas(cost);
+      if (error) return true;
 
       // Resize
       const auto end = static_cast<size_t>(new_words * ProcessorConsts::WORD_SIZE);
@@ -390,19 +410,20 @@ namespace eosio_evm
       }
       ctx->mem.resize(end);
     }
+
+    // Success
+    return false;
   }
 
-  std::vector<uint8_t> Processor::copy_from_mem(const uint64_t offset, const uint64_t size)
-  {
-    prepare_mem_access(offset, size);
-    return {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
-  }
-
-  void Processor::jump_to(const uint64_t newPc)
+  // Return true if error
+  bool Processor::jump_to(const uint64_t newPc)
   {
     if (ctx->prog.jump_dests.find(newPc) == ctx->prog.jump_dests.end()) {
       return throw_error(Exception(ET::illegalInstruction, "Invalid Jump Destination"), {});
     }
+
+    // Set PC
     ctx->set_pc(newPc);
+    return false;
   }
 } // namespace eosio_evm

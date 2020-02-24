@@ -43,7 +43,7 @@ namespace eosio_evm {
 
     // Key value
     auto checksum_key   = toChecksum256(intx::from_string<uint256_t>(key));
-    auto checksum_value = intx::from_string<uint256_t>(key);
+    auto checksum_value = intx::from_string<uint256_t>(value);
 
     // Store KV
     account_state_table accounts_states(get_self(), existing_address->index);

@@ -5,9 +5,11 @@
 #include <eosio.evm/eosio.evm.hpp>
 
 namespace eosio_evm {
-  // Internal transfers only
-  void Processor::transfer_internal(const Address& from, const Address& to, const int64_t amount) {
-    if (amount == 0) return;
+  // Internal transfers only, returns true if error
+  bool Processor::transfer_internal(const Address& from, const Address& to, const int64_t amount) {
+    if (amount == 0) {
+      return false;
+    }
 
     // Index
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
@@ -19,11 +21,17 @@ namespace eosio_evm {
     auto to_account   = accounts_byaddress.find(to_256);
 
     // Amount verification
-    if (amount < 0) return throw_error(Exception(ET::outOfFunds, "transfer amount must not be negative"), {});
+    if (amount < 0) {
+      return throw_error(Exception(ET::outOfFunds, "transfer amount must not be negative"), {});
+    }
 
     // From balance verification
-    if (from_account == accounts_byaddress.end()) return throw_error(Exception(ET::outOfFunds, "account does not have a balance"), {});
-    if (from_account->get_balance() < amount) return throw_error(Exception(ET::outOfFunds, "account balance too low"), {});
+    if (from_account == accounts_byaddress.end()) {
+      return throw_error(Exception(ET::outOfFunds, "account does not have a balance"), {});
+    }
+    if (from_account->get_balance() < amount) {
+      return throw_error(Exception(ET::outOfFunds, "account balance too low"), {});
+    }
 
     // Create To account if it does not exist
     if (to_account == accounts_byaddress.end()) {
@@ -45,6 +53,9 @@ namespace eosio_evm {
 
     // Modification record
     transaction.add_modification({ SMT::TRANSFER, 0, from, to, amount, 0 });
+
+    // Return false for no error
+    return false;
   }
 
   // Only used by CREATE instruction to increment nonce of contract
@@ -73,6 +84,8 @@ namespace eosio_evm {
 
   // Used to push result of top level create and instruction CREATE
   void Processor::set_code(const Address& address, const std::vector<uint8_t>& code) {
+    if (code.empty()) return;
+
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
@@ -186,11 +199,10 @@ namespace eosio_evm {
     auto checksum_key          = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
-    // eosio::print("\n\nStore KV for address ", intx::hex(address),
-    //              "\nKey: ", to_string(key, 10),
-    //              "\nValue ", to_string(value, 10),
-    //              "\nAddress Index: ", to_string(address_index),
-    //              "\nFound: ", account_state != accounts_states_byaddress.end(), "\n");
+    // eosio::print("\n\nStore KV for address index ", address_index,
+    //              "\nKey: ", intx::to_string(key, 10),
+    //              "\nValue ", intx::to_string(value, 10),
+    //              "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
 
     // Key found
     if (account_state != accounts_states_bykey.end())
@@ -228,19 +240,16 @@ namespace eosio_evm {
     const auto checksum_key    = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
-    // eosio::print("\n\nLoad KV for address ", intx::hex(address),
-    //              "\nKey: ", key,
-    //              "\nAddress Index: ", to_string(address_index),
+    // eosio::print("\n\nLoad KV for address index ", address_index,
+    //              "\nKey: ", intx::to_string(key),
     //              "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
 
-    // Key found
-    if (account_state != accounts_states_bykey.end())
-    {
-      return account_state->value;
-    }
-    // Key not found
-    else {
-      return 0;
-    }
+    // Value
+    auto current_value = account_state != accounts_states_bykey.end() ? account_state->value : 0;
+
+    // Place into original storage
+    transaction.emplace_original(address_index, key, current_value);
+
+    return current_value;
   }
 } // namespace eosio_evm

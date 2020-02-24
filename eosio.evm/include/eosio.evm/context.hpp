@@ -13,8 +13,8 @@
 namespace eosio_evm {
   class evm;
 
-  using ReturnHandler    = std::function<void(std::vector<uint8_t>)>;
-  using ExceptionHandler = std::function<void(const Exception&, std::vector<uint8_t>)>;
+  using SuccessHandler = std::function<void(const std::vector<uint8_t>&, const uint256_t&)>;
+  using ErrorHandler   = std::function<void(const Exception&, const std::vector<uint8_t>&, const uint256_t&)>;
 
   /**
    * execution context of a call
@@ -30,40 +30,41 @@ namespace eosio_evm {
   public:
     std::vector<uint8_t> mem;
     Stack s;
+    uint256_t gas_left;
 
+    const size_t sm_checkpoint;
     const Account& caller;
     const Account& callee;
-    uint256_t gas_left;
-    const bool& is_static;
-    const std::vector<uint8_t>& input;
-    const int64_t& call_value;
-    const Program& prog;
-    const ReturnHandler& result_cb;
-    const ExceptionHandler& error_cb;
-
-    // Local storage
-    std::map<uint64_t, std::map<uint256_t, uint256_t>> local_account_states;
-    std::map<uint256_t, Account> local_accounts;
+    uint256_t gas_limit;
+    const bool is_static;
+    const int64_t call_value;
+    const std::vector<uint8_t> input;
+    const Program prog;
+    SuccessHandler success_cb;
+    ErrorHandler error_cb;
 
     Context(
+      const size_t sm_checkpoint,
       const Account& caller,
       const Account& callee,
-      uint256_t gas_left,
-      const bool& is_static,
-      const std::vector<uint8_t>& input,
-      const int64_t& call_value,
-      const Program& prog,
-      const ReturnHandler& result_cb,
-      const ExceptionHandler& error_cb
+      uint256_t gas_limit,
+      const bool is_static,
+      const int64_t call_value,
+      std::vector<uint8_t>&& input,
+      Program&& prog,
+      SuccessHandler&& success_cb,
+      ErrorHandler&& error_cb
     ) noexcept :
+      sm_checkpoint(sm_checkpoint),
       caller(caller),
       callee(callee),
-      gas_left(gas_left),
+      gas_limit(gas_limit),
+      gas_left(gas_limit),
       is_static(is_static),
-      input(input),
       call_value(call_value),
+      input(input),
       prog(prog),
-      result_cb(result_cb),
+      success_cb(success_cb),
       error_cb(error_cb),
       s(this)
     {
@@ -75,6 +76,7 @@ namespace eosio_evm {
     }
 
     inline auto get_used_mem() const { return (mem.size() + ProcessorConsts::WORD_SIZE - 1) / ProcessorConsts::WORD_SIZE;  }
+    inline uint256_t gas_used() const { return gas_limit - gas_left; }
     PcType get_pc() const { return pc; }
 
     void set_pc(const PcType pc_)

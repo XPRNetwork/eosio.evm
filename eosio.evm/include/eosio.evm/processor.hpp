@@ -28,7 +28,7 @@ namespace eosio_evm {
     std::vector<uint8_t> output = {};
     uint256_t gas_used = 0;
 
-    #ifdef TESTING
+    #if (TESTING == true)
     void print() {
       eosio::print("\n-------------Exec Result------------\n");
       eosio::print("\nExitReason: ", (uint8_t) er);
@@ -87,7 +87,7 @@ namespace eosio_evm {
       const std::vector<uint8_t>& src,
       const uint8_t pad = 0
     );
-    bool copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad);
+    bool copy_to_mem(const std::vector<uint8_t>& src, const uint8_t pad);
     bool prepare_mem_access(const uint64_t offset, const uint64_t size);
     bool jump_to(const uint64_t newPc);
     bool use_gas(uint256_t amount);
@@ -196,13 +196,6 @@ namespace eosio_evm {
     void selfdestruct();
     void invalid();
     void illegal();
-
-    // Util
-    inline uint256_t pop_addr(Stack& stack)
-    {
-      static const uint256_t MASK_160 = (uint256_t(1) << 160) - 1;
-      return stack.pop() & MASK_160;
-    }
 
     template <typename T>
     static T shrink(uint256_t i)

@@ -19,6 +19,7 @@ namespace eosio_evm {
 
     uint256_t pop();
     uint64_t popu64();
+    uint256_t pop_addr();
     int64_t popAmount();
     void push(const uint256_t& val);
     uint64_t size() const;

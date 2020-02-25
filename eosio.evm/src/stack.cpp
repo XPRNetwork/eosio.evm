@@ -12,6 +12,12 @@ namespace eosio_evm {
     return val;
   }
 
+  uint256_t Stack::pop_addr()
+  {
+    static const uint256_t MASK_160 = (uint256_t(1) << 160) - 1;
+    return pop() & MASK_160;
+  }
+
   uint64_t Stack::popu64()
   {
     const auto val = pop();

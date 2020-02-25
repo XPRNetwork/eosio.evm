@@ -28,7 +28,7 @@ namespace eosio_evm {
     eosio::checksum256 by_address() const { return pad160(address); };
 
 
-    #ifdef TESTING
+    #if (TESTING == true)
     void print() const {
       eosio::print("\n---Acc Info Start-----");
       eosio::print("\nAddress ", address);

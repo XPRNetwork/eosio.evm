@@ -57,7 +57,7 @@ namespace eosio_evm {
     // Define account table
     account_table _accounts;
 
-    #ifdef TESTING
+    #if (TESTING == true)
     ACTION teststatetx(const std::vector<int8_t>& tx, const Env& env);
     ACTION devnewstore(const eosio::checksum160& address, const std::string& key, const std::string value);
     ACTION devnewacct(const eosio::checksum160& address, const uint64_t balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account);

@@ -466,8 +466,8 @@ namespace eosio_evm
     };
   }
 
-  // TODO remove in production
-  inline static std::map<uint8_t, std::string> opcodeToString = {
+  #if (OPTRACE == true)
+  static std::map<uint8_t, std::string> opcodeToString = {
       // 0s: Stop and Arithmetic Operations
       { 0x00, "STOP"   }, // Halts execution
       { 0x01, "ADD"    }, // Addition operation
@@ -632,6 +632,5 @@ namespace eosio_evm
       { 0xfe, "INVALID" }, // Designated invalid instruction
       { 0xff, "SELFDESTRUCT" }
     };
-
-
+    #endif /** OPTRACE **/
 } // namespace eosio_evm

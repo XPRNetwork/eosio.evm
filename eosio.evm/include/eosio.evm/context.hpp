@@ -94,7 +94,7 @@ namespace eosio_evm {
       }
     }
 
-    #ifdef TESTING
+    #if (TESTING == true)
     void print() {
       eosio::print("\nmemory\":",  bin2hex(mem));
       eosio::print("\nstack\":",   s.asArray());

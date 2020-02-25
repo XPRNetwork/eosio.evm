@@ -18,7 +18,7 @@ namespace eosio_evm
   inline const Block get_current_block() { return current_block; };
   inline uint256_t get_block_hash(uint8_t offset) { return 0; };
 
-  #ifdef TESTING
+  #if (TESTING == true)
   struct Env
   {
     std::string currentCoinbase;

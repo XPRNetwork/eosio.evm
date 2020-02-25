@@ -53,6 +53,7 @@ namespace eosio_evm
     int64_t amount;
     uint256_t newvalue;
 
+    #if (TESTING == true)
     void print() {
       std::map<StateModificationType, std::string> reverseState = {
         { SMT::STORE_KV, "STORE_KV"   },
@@ -66,6 +67,7 @@ namespace eosio_evm
 
       eosio::print("\nType: ", reverseState[type], ", Index: ", index, ", Key: ", intx::to_string(key), " OldValue: ", intx::to_string(oldvalue), " NewValue: ", intx::to_string(newvalue), " Amount: ", amount);
     }
+    #endif /** Testing **/
   };
 
   struct EthereumTransaction {
@@ -145,8 +147,7 @@ namespace eosio_evm
           ? GP_TXDATAZERO
           : GP_TXDATANONZERO;
       }
-      eosio::print("GAS USED:", intx::to_string(gas_used));
-      eosio::print("\nData length:",data.size());
+
       if (is_create()) {
         gas_used += GP_TXCREATE;
       }
@@ -254,7 +255,7 @@ namespace eosio_evm
       }
     }
 
-    #ifdef TESTING
+    #if (TESTING == true)
     void print() const
     {
       eosio::print(

@@ -4,7 +4,7 @@
 // Licensed under the MIT License..
 // evmone: Fast Ethereum Virtual Machine implementation
 // Copyright 2019 Pawel Bylica.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the Apache License, Version 2.0..
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -170,6 +170,7 @@ namespace eosio_evm
   void Processor::revert_state(const size_t& revert_to) {
     for (auto i = transaction.state_modifications.size(); i-- > revert_to; ) {
       const auto [type, index, key, oldvalue, amount, newvalue] = transaction.state_modifications[i];
+
       switch (type) {
         case SMT::STORE_KV:
           storekv(index, key, oldvalue);
@@ -244,11 +245,11 @@ namespace eosio_evm
 
   // Returns true if error
   bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
+    // eosio::print("\nEXception: ", exception.what());
+
     // Consume all call gas on exception
     if (exception.type != ET::revert) {
       ctx->gas_left = 0;
-    } else {
-      last_return_data = move(output);
     }
 
     auto error_cb = ctx->error_cb;
@@ -366,7 +367,7 @@ namespace eosio_evm
   }
 
   // Return true if error
-  bool Processor::copy_mem(std::vector<uint8_t>& dst, const std::vector<uint8_t>& src, const uint8_t pad)
+  bool Processor::copy_to_mem(const std::vector<uint8_t>& src, const uint8_t pad)
   {
     const auto offDst = ctx->s.popu64();
     const auto offSrc = ctx->s.popu64();
@@ -376,7 +377,11 @@ namespace eosio_evm
     bool error = use_gas(GP_COPY * ((size + 31) / 32));
     if (error) return true;
 
-    return copy_mem_raw(offDst, offSrc, size, dst, src, pad);
+    // Memory cost
+    bool memory_error = prepare_mem_access(offDst, size);
+    if (memory_error) return true;
+
+    return copy_mem_raw(offDst, offSrc, size, ctx->mem, src, pad);
   }
 
   // Return true if error

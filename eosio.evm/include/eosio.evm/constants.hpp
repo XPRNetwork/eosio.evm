@@ -5,8 +5,8 @@
 #pragma once
 
 // Testing
-#define TESTING false
-#define OPTRACE false
+#define TESTING true
+#define OPTRACE true
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
@@ -52,7 +52,7 @@ namespace eosio_evm
   static constexpr size_t POST_155_V_START = 35;
 
   // Gas
-  static constexpr uint256_t GAS_PRICE              = 1;
+  static constexpr uint256_t GAS_PRICE                 = 1;
 
   static constexpr uint256_t GP_TRANSACTION            = 21000;
   static constexpr uint256_t GP_TXDATAZERO             = 4;

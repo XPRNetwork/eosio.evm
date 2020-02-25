@@ -1,6 +1,6 @@
 #include <eosio.evm/eosio.evm.hpp>
 
-#ifdef TESTING
+#if (TESTING == true)
 namespace eosio_evm {
   void evm::testtx(const std::vector<int8_t>& tx) {
     require_auth(get_self());

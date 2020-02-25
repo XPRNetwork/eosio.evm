@@ -8,3 +8,4 @@ Replace get_self() with actual ram payer
 CONTEXT GAS LEFT IS GOING INTO NEGATIVES!!!
 
 execute_create and execute_call don't currently revert properly
+- Fix REVERT - > only reverting in revert op call, when we should probably do it in throw_error

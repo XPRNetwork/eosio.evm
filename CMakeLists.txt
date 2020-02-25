@@ -15,9 +15,6 @@ endif()
 
 include(ExternalProject)
 
-set(eosio.cdt_DIR /usr/local/Cellar/eosio.cdt/1.7.0/lib/cmake/eosio.cdt)
-set(CC /usr/local/Cellar/eosio.cdt/1.7.0/bin)
-set(CXX /usr/local/Cellar/eosio.cdt/1.7.0/bin)
 find_package(eosio.cdt)
 
 message(STATUS "Building eosio.contracts v${VERSION_FULL}")

@@ -332,44 +332,49 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(eosio_evm_revert, * boost::unit_test::enable_if<revert_tests_enabled>())
 BOOST_FIXTURE_TEST_CASE( LoopCallsDepthThenRevert, eosio_evm_tester ) try {
    try {
+      // push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
+      //    ( "address", "6295ee1b4f6dd65047762f924ecd367c17eabf8f")
+      //    ( "balance", "0")
+      //    ( "code", eosio_system::HexToBytes("61223260005260206000fd00"))
+      //    ( "nonce", 0)
+      //    ( "account", "")
+      // );
+
       push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
-         ( "address", "a000000000000000000000000000000000000000")
+         ( "address", "6295ee1b4f6dd65047762f924ecd367c17eabf8f")
          ( "balance", "0")
-         ( "code", eosio_system::HexToBytes("600160005401600055600060006000600073b0000000000000000000000000000000000000005af400"))
-         ( "nonce", 0)
-         ( "account", "")
-      );
-      push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
-         ( "address", "a94f5374fce5edbc8e2a8697c15331677e6ebf0b")
-         ( "balance", "1000000000000000000")
          ( "code", std::vector<uint8_t>{})
          ( "nonce", 0)
          ( "account", "")
       );
+
       push_action2( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()
-         ( "address", "b000000000000000000000000000000000000000")
-         ( "balance", "0")
-         ( "code", eosio_system::HexToBytes("600160005401600055600060006000600073a0000000000000000000000000000000000000005af400"))
+         ( "address", "a94f5374fce5edbc8e2a8697c15331677e6ebf0b")
+         ( "balance", "429496729600")
+         ( "code", std::vector<uint8_t>{})
          ( "nonce", 0)
          ( "account", "")
       );
 
-      // push_action2( N(eosio.evm), N(devnewstore), N(eosio.evm), mvo()
-      //    ( "address", "a000000000000000000000000000000000000000")
-      //    ( "key", "0")
-      //    ( "value", "0x0352")
-      // );
-
-      // push_action2( N(eosio.evm), N(printstate), N(eosio.evm), mvo()
-      //    ( "address", "a000000000000000000000000000000000000000")
-      // );
+      push_action2( N(eosio.evm), N(devnewstore), N(eosio.evm), mvo()
+         ( "address", "6295ee1b4f6dd65047762f924ecd367c17eabf8f")
+         ( "key", "0x00")
+         ( "value", "0x01")
+      );
 
       auto res = push_action2( N(eosio.evm), N(raw), N(eosio.evm), mvo()
-         ( "tx", "f86080018398968094a000000000000000000000000000000000000000808026a0d79322f44b7cf27cdd755f3a1db3cf9b7008cadcc6098424cb32630b02b7f0c9a034a4352f2f684c5a65d18214ddc002c05c88fd8d33b21846cd886dae346a07b9")
+         ( "tx", "f87f80018509fd8000018080b13050600d80602460003960006000f0503d6000556020600060003e6000516001550000fe6211223360005260206000fd0026a0e2575fffa66f5f10a89380461af70d9648038e324f6a8a80bbbda75a5980f8faa05b9ac092441aa1d1c69007353be3b686017a490ae3de1301795992cb493e6c79")
          ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
       );
       std::cout << res->action_traces[0].console << std::endl;
-      std::cout << fc::json::to_pretty_string(res) << std::endl;
+      // std::cout << fc::json::to_pretty_string(res) << std::endl;
+
+      // Check table
+      auto table = push_action2( N(eosio.evm), N(printstate), N(eosio.evm), mvo()
+         ( "address", "6295ee1b4f6dd65047762f924ecd367c17eabf8f")
+      );
+      std::cout << table->action_traces[0].console << std::endl;
+
    } catch(const fc::exception& e) {
       std::cout << "\033[1;31m" << e.to_string() << "\033[0m" << std::endl;
    }

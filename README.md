@@ -61,12 +61,12 @@ struct Account {
   std::vector<uint8_t> code;
 }
 ```
-`index` - auto-incremented counter for accounts, also used as scope index for AccountStates
-`address` - Ethereum 160 bit address
-`account` - EOSIO account associated with Ethereum account
-`balance` - EOSIO asset balance associated with Ethereum account
-`nonce` - Current nonce of the account
-`code` - Contract code for Ethereum account if present
+- `index` - auto-incremented counter for accounts, also used as scope index for AccountStates
+- `address` - Ethereum 160 bit address
+- `account` - EOSIO account associated with Ethereum account
+- `balance` - EOSIO asset balance associated with Ethereum account
+- `nonce` - Current nonce of the account
+- `code` - Contract code for Ethereum account if present
 
 ```c++
 struct AccountState {
@@ -75,9 +75,9 @@ struct AccountState {
   bigint::checksum256 value;
 }
 ```
-`index` - auto-incremented counter for account states, only used as primary key
-`key` - big-endian encoded key for storage
-`value` - big-endian encoded value for storage
+- `index` - auto-incremented counter for account states, only used as primary key
+- `key` - big-endian encoded key for storage
+- `value` - big-endian encoded value for storage
 
 # EVM Notes
 - We assume that maximum "value" of a transaction is within the limits of a int64_t. Any transaction with a "value" greater than 2^62 - 1 will be considered invalid.

@@ -27,28 +27,33 @@ make -j4
 - truffle: ERC20 and ERC721 contracts
 
 # Contract Public Actions
-ACTION raw      ( const std::vector<int8_t>& tx,
-                  const std::optional<eosio::checksum160>& sender);
+```
+ACTION raw ( const std::vector<int8_t>& tx,
+             const std::optional<eosio::checksum160>& sender);
+```
+- `tx` will take a raw Ethereum transaction RLP hex encoded without the '0x' prefix
+- `sender` is an optional parameter used when the `tx` is not signed
 
-`tx` will take a raw Ethereum transaction RLP hex encoded without the '0x' prefix
-`sender` is an optional parameter used when the `tx` is not signed
+```
+ACTION create ( const eosio::name& account,
+                const std::string& data);
+```
+- `account` is the EOSIO account creating the new Ethereum account
+- `data` is an arbitrary string used as a salt to create the new Ethereum account
 
-ACTION create   ( const eosio::name& account,
-                  const std::string& data);
-`account` is the EOSIO account creating the new Ethereum account
-`data` is an arbitrary string used as a salt to create the new Ethereum account
-
+```
 ACTION withdraw ( const eosio::name& to,
                   const eosio::asset& quantity);
-`account` is the EOSIO account associated with an Ethereum account with a balance
-`quantity` is an EOSIO asset like "4.0000 SYS" for the amount to withdraw
+```
+- `account` is the EOSIO account associated with an Ethereum account with a balance
+- `quantity` is an EOSIO asset like "4.0000 SYS" for the amount to withdraw
 
 [[eosio::on_notify("eosio.token::transfer")]]
 void transfer( const eosio::name& from,
                 const eosio::name& to,
                 const eosio::asset& quantity,
                 const std::string& memo );
-Standard transfer function used to deposit balance into associated Ethereum account. If the depositor does not have an EVM account associated, the transaction will fail to execute.
+- Standard transfer function used to deposit balance into associated Ethereum account. If the depositor does not have an EVM account associated, the transaction will fail to execute.
 
 # Contract Tables
 ```c++

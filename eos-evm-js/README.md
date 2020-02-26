@@ -7,9 +7,13 @@ Requires nodejs and npm installed
 npm install eos-evm-js
 ```
 
-### ERC-20 Tutorial
-```ts
-import { EosEvmApi } from 'eos-evm-js'
+### How to setup EVM and deploy ERC-20 Token on EOSIO in 5 minutes
+```js
+const { EosEvmApi } = require('eos-evm-js')
+
+const evmContractAccount = 'evmcontract1'
+const evmNormalAccount = 'evmaccount11'
+const SYSTEM_SYMBOL = 'EOS'
 
 const api = new EosEvmApi({
   // Ensure the API has console printing enabled
@@ -18,30 +22,31 @@ const api = new EosEvmApi({
   // Must match the chain ID the contract is compiled with (1 by default)
   chainId: 1,
 
-  // Enter your own private keys (examples provided)
+  // Enter your own private keys if you wish to sign transaction (examples provided)
   ethPrivateKeys: [
     // Public Key: 0xf79b834a37f3143f4a73fc3934edac67fd3a01cd
     '0x8dd3ec4846cecac347a830b758bf7e438c4d9b36a396b189610c90b57a70163d',
-    // Public Key: 0xab21f17d0c3e30be30e115508643817b297ae8d6
-    '0x206cbcc0ccbb96a0df7ba079d25866bd0d52f4248861a0a38bc9bfd58c00556a'
   ],
 
-  // Enter EOS account that contract is at / will be deployed to
-  eosContract: '1234test1111',
+  // Enter EOS account that EVM is at / will be deployed to
+  eosContract: evmContractAccount,
 
   // Enter your own private keys (examples provided)
   eosPrivateKeys: [
-    '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+    // evmcontract1 (EOS7DJzWuEr1Zu36ZX8GXwGsvNNqdGqx8QRs7KPkqCMTxG6MBT1Eu)
+    '5JACk8gJ98x3AkypbicNQviXzkqAM2wbbE3FtA79icT2Ks4bWws',
+    // evmaccount11 (EOS8Z9y2b1GfAkFUQxBTsiu9DJSLebVoU8cpwLAfXcgWDRWg9aM2Q)
+    '5JhwbcHTVk16Pv7fCgitNSHgwGwjAPEgEJbiaCcXaza1PKrbCns'
   ]
 })
 
 // Import contract compiled with solc (check eos-evm-js/src/eth-contracts/compile.ts to compile your own)
 // We provide compiled ERC20 and ERC721 contracts
-const compiledErc20AndErc721 = require('eos-evm-js/dist/lib/eth-contracts/compiled.json')
+const compiledErc20AndErc721 = require('eos-evm-js/dist/eth-contracts/compiled.json')
 
 // Load ETH contracts with abi and bytecode, plus the TX sending EOS account
 api.loadContractFromAbi({
-  account: 'vestvestvest', // Example EOS account
+  account: evmNormalAccount, // Example EOS account
   abi: compiledErc20AndErc721.contracts.ERC20.Token.abi,
   bytecodeObject: compiledErc20AndErc721.contracts.ERC20.Token.evm.bytecode.object
 })
@@ -51,36 +56,63 @@ async function main () {
   await api.eos.setupEvmContract()
 
   // For development (if TESTING is enabled in contract), clears all data in contract
-  // await api.eos.clearAll()
+  await api.eos.clearAll()
 
   // Creates new address based on RLP(eosaccount, arbitrarydata)
-  await api.eos.create({ account: '1234test1111', data: 'test' })
+  await api.eos.create({ account: evmNormalAccount, data: 'test' })
 
   // Transfer EOS to contract to deposit to address
-  await api.eos.deposit({ from: 'vestvestvest', quantity: '0.0001 EOS' })
+  await api.eos.deposit({ from: evmNormalAccount, quantity: `0.0002 ${SYSTEM_SYMBOL}` })
 
-  // Create new contract account with ERC20 contract deployed (Name, Symbol, Decimals, Total Supply)
-  await api.eth.deploy('Syed Token', 'SYED', 4, 1000000)
+  // Get all data for new address (address, account, nonce, balance, code)
+  const sender = await api.eos.getEthAccountByEosAccount(evmNormalAccount)
+  console.log(`${sender.address} (${evmNormalAccount}) Balance:`, sender.balance) // 0.0001 EOS
+  console.log(`${sender.address} (${evmNormalAccount}) Nonce:`, sender.nonce) // 0
 
-  // Transfer ERC20 tokens
+  // Deploy ERC20 contract (Name, Symbol, Decimals, Total Supply)
   // The returned response "eth" is the EVM transaction receipt, and "eos" is the EOS transaction receipt
-  const { eth, eos } = await api.eth.transfer(receiver, 1000)
+  const { eth, eos } = await api.eth.deploy('FIRE Token', 'FIRE', 4, 1000000, { sender: sender.address })
+
+  // Set the created address as the EVM contract to interact with
+  api.setEthereumContract(eth.createdAddress)
 
   // Query ERC20 balance using "view" function calls
-  console.log(+await api.eth.balanceOf(sender).toString(10)) // 999,000
-  console.log(+await api.eth.balanceOf(receiver).toString(10)) // 1,000
+  console.log(`${sender.address} FIRE Balance: `, +(await api.eth.balanceOf(sender.address)).toString(10)) // 1,000,000
+
+  // New receiver address to send tokens to
+  const receiver = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
+
+  // Transfer system tokens to address to create it
+  await api.transfer({ account: evmNormalAccount, sender: sender.address, to: receiver, quantity: `0.0001 ${SYSTEM_SYMBOL}` })
+
+  // Transfer 1000 FIRE ERC20 tokens
+  await api.eth.transfer(receiver, 1000, { sender: sender.address })
+
+  // Query ERC20 FIRE balance using "view" function calls
+  console.log(`${sender.address} Balance:`, +(await api.eth.balanceOf(sender.address)).toString(10), 'FIRE') // 999,000
+  console.log(`${receiver} Balance:`,       +(await api.eth.balanceOf(receiver)).toString(10)), 'FIRE'       //   1,000
 
   // Set allowance, and modify it
-  await api.eth.approve(receiver, 100)
-  await api.eth.increaseAllowance(receiver, 1000)
-  await api.eth.decreaseAllowance(receiver, 600)
+  await api.eth.approve(receiver, 100, { sender: sender.address })
+  await api.eth.increaseAllowance(receiver, 1000, { sender: sender.address })
+  await api.eth.decreaseAllowance(receiver, 600, { sender: sender.address })
 
-  // Query it (another example of using non-state modifying calls)
-  const allowance = await api.eth.allowance(sender, allowanceAddress)
-  console.log(+allowance.toString(10)) // 500
+  // Query allowance (another example of using non-state modifying calls)
+  const allowance = await api.eth.allowance(sender.address, receiver, { sender: receiver })
+  console.log(`Allowance for ${sender.address}->${receiver}:`, +allowance.toString(10), 'FIRE') // 500
 
   // Use the allowance to transfer
-  await api.eth.transferFrom(sender, receiver, 500, { sender: receiver })
+  // rawSign uses ethereum private key to sign instead of EOSIO account permissions
+  await api.eth.transferFrom(sender.address, receiver, 500, { sender: receiver, rawSign: true })
+
+  // Withdraw tokens
+  await api.eos.withdraw({ account: evmNormalAccount, quantity: `0.0001 ${SYSTEM_SYMBOL}` })
+
+  // Other available functions, check docs
+  // await getStorageAt(address, key)
+  // await createEthTx({ sender, data, gasLimit, value, to, rawSign = false })
+  // async getNonce(address)
+  // async getEthAccount(address)
 }
 
 main()

@@ -1,9 +1,11 @@
 ## eosio.evm - Fast Ethereum Virtual Machine for EOSIO
 ### Benchmarks
-- ERC20 Transfer: 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)
-- ERC20 Deployment: 764µs [(TX)](https://jungle.bloks.io/transaction/074f2cb4435173293243e4350a9a3faa12e5fb639780aaabb79ad68fb2c813e8)
-- EVM transfer: 325µs [(TX)](https://jungle.bloks.io/transaction/640c061cbd717b08b8af1c28129be1ef7365d1810fc285313a55d44f2271e312)
-- EVM create account: 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)
+| Action         | CPU Cost      |
+| -------------  |:-------------:|
+| ERC20 Transfer | 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)|
+| ERC20 Deploy   | 764µs [(TX)](https://jungle.bloks.io/transaction/074f2cb4435173293243e4350a9a3faa12e5fb639780aaabb79ad68fb2c813e8)      |
+| EVM Transfer   | 325µs [(TX)](https://jungle.bloks.io/transaction/640c061cbd717b08b8af1c28129be1ef7365d1810fc285313a55d44f2271e312)      |
+| EVM New Address   | 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)     |
 
 ### Achievements
 - 100% Success on Ethereum Transaction Tests
@@ -49,6 +51,7 @@ ACTION raw ( const std::vector<int8_t>& tx,
 ```
 - `tx` will take a raw Ethereum transaction RLP hex encoded without the '0x' prefix
 - `sender` is an optional parameter used when the `tx` is not signed
+&nbsp;
 
 ```c++
 ACTION create ( const eosio::name& account,
@@ -56,6 +59,7 @@ ACTION create ( const eosio::name& account,
 ```
 - `account` is the EOSIO account creating the new Ethereum account
 - `data` is an arbitrary string used as a salt to create the new Ethereum account
+&nbsp;
 
 ```c++
 ACTION withdraw ( const eosio::name& to,
@@ -63,6 +67,7 @@ ACTION withdraw ( const eosio::name& to,
 ```
 - `account` is the EOSIO account associated with an Ethereum account with a balance
 - `quantity` is an EOSIO asset like "4.0000 SYS" for the amount to withdraw
+&nbsp;
 
 ```c++
 [[eosio::on_notify("eosio.token::transfer")]]
@@ -72,6 +77,14 @@ void transfer( const eosio::name& from,
                 const std::string& memo );
 ```
 - Standard transfer function used to deposit balance into associated Ethereum account. If the depositor does not have an EVM account associated, the transaction will fail to execute.
+&nbsp;
+```c++
+
+ACTION call( const std::vector<int8_t>& tx,
+             const std::optional<eosio::checksum160>& sender );
+```
+- Function to mock execute and view result (no state modifications are persisted), similiar to Web3 call()
+&nbsp;
 
 ### Contract Tables
 ```c++

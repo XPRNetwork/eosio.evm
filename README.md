@@ -1,4 +1,4 @@
-# eosio.evm - Fast Ethereum Virtual Machine Implementation on EOS
+## eosio.evm - Fast Ethereum Virtual Machine for EOSIO
 ### Benchmarks
 - ERC20 Transfer: 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)
 - ERC20 Deployment: 764µs [(TX)](https://jungle.bloks.io/transaction/074f2cb4435173293243e4350a9a3faa12e5fb639780aaabb79ad68fb2c813e8)

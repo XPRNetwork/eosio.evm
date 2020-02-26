@@ -17,7 +17,7 @@ export default {
     { file: pkg.module, format: 'es', sourcemap: true },
   ],
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-  external: [],
+  external: ['ethereumjs-util', 'ethereumjs-tx', 'ethereumjs-abi', 'ethereumjs-common'],
   watch: {
     include: 'src/**',
   },
@@ -25,8 +25,8 @@ export default {
   plugins: [
     copy({
       targets: [
-        { src: 'src/eos-contracts/**/*', dest: 'dist/lib/eos-contracts' },
-        { src: 'src/eth-contracts/**/*', dest: 'dist/lib/eth-contracts' }
+        { src: 'src/eos-contracts/**/*', dest: 'dist/eos-contracts' },
+        { src: 'src/eth-contracts/**/*', dest: 'dist/eth-contracts' }
       ]
     }),
 
@@ -35,7 +35,11 @@ export default {
     // Compile TypeScript files
     typescript({ useTsconfigDeclarationDir: true }),
     // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-    commonjs(),
+    commonjs({
+      namedExports: {
+        'ethereumjs-util': ['privateToAddress']
+      }
+    }),
     // Allow node_modules resolution, so you can use 'external' to control
     // which external modules to include in the bundle
     // https://github.com/rollup/rollup-plugin-node-resolve#usage

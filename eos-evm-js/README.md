@@ -1,12 +1,14 @@
-# EOS EVM JS SDK
+# EOSIO EVM JS SDK
 
 ### Installation
+Requires nodejs and npm installed
+
 ```bash
 npm install eos-evm-js
 ```
 
 ### ERC-20 Tutorial
-```js
+```ts
 import { EosEvmApi } from 'eos-evm-js'
 
 const api = new EosEvmApi({
@@ -33,15 +35,15 @@ const api = new EosEvmApi({
   ]
 })
 
-// Import your contract
-// We provide compiled ERC20 and ERC721
+// Import contract compiled with solc (check eos-evm-js/src/eth-contracts/compile.ts to compile your own)
+// We provide compiled ERC20 and ERC721 contracts
 const compiledErc20AndErc721 = require('eos-evm-js/dist/lib/eth-contracts/compiled.json')
 
 // Load ETH contracts with abi and bytecode, plus the TX sending EOS account
 api.loadContractFromAbi({
   account: 'vestvestvest', // Example EOS account
-  abi: compiled.contracts.ERC20.Token.abi,
-  bytecodeObject: compiled.contracts.ERC20.Token.evm.bytecode.object
+  abi: compiledErc20AndErc721.contracts.ERC20.Token.abi,
+  bytecodeObject: compiledErc20AndErc721.contracts.ERC20.Token.evm.bytecode.object
 })
 
 async function main () {

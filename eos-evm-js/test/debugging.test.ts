@@ -3,9 +3,6 @@ import { allowanceAddress, api, sender, ethContractAddress } from './common'
 
 describe('Debug Test', () => {
   it(`transfer from`, async () => {
-    const { eth, eos } = await api.eth.transferFrom(sender, allowanceAddress, 500, {
-      sender: allowanceAddress
-    })
-    console.log(eth)
+    console.log(await api.eos.getEthAccountByEosAccount('vestvestvest'))
   })
 })

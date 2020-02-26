@@ -56,7 +56,7 @@ void evm::raw(
     eosio::check(caller != accounts_byaddress.end(), "Invalid Transaction: sender address does not exist (without signature).");
 
     // Ensure EOSIO account is associated
-    eosio::check(caller->get_account_value() != 0, "Invalid Transaction: no EOSIO account is associated with sender's address.");
+    eosio::check(caller->get_account_value() != 0, "Invalid Transaction: no EOSIO account is associated with the address 0x s" + intx::hex(caller->get_address()));
 
     // Check authorization of associated EOSIO account
     eosio::require_auth(caller->account);

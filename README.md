@@ -18,7 +18,10 @@
 - Web3-similar call support (query view functions with no state modifications)
 - Total size less than 200KB (~2MB on-chain)
 
-### Build instructions
+### Usage instructions
+Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+
+### Build/Manual Deployment instructions
 Requires latest eosio.cdt with latest eosio 2 with EOSVM
 
 Change the token symbol in eosio.evm/include/eosio.evm/constants.hpp to reflect your chain
@@ -28,8 +31,7 @@ cmake .
 make -j4
 ```
 
-### Usage instructions
-Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+No special instructions needed for manual deployment, simply deploy the WASM and ABI from eosio.evm/eosio.evm/ directory
 
 ### Directory structure
 - eosio.evm: contains all contract code
@@ -123,6 +125,11 @@ struct AccountState {
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
 - Precompiled contracts are not currently supported, many like ec_mul and ec_add are due to be added to EOSIO soon
+
+### Special Mentions
+- Eddy Ashton for his work on [enclave-ready EVM (eEVM)](https://github.com/microsoft/eEVM)
+- Pawel Bylica for his work on pushing the speed limits of EVMs with [evmone](https://github.com/ethereum/evmone)
+- winsvega for his continous work maintaining [Ethereum Tests](https://github.com/ethereum/tests)
 
 ### Disclosure
 Note that this repository is still in a highly iterative state, if you find any bugs, please open an issue or a pull request.

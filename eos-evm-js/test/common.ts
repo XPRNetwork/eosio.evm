@@ -11,7 +11,7 @@ export const sender = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
 export const allowanceAddress = '0xab21f17d0c3e30be30e115508643817b297ae8d6'
 export const initialAccount = {
   account,
-  address: '10d10ef03ef3316b750d2544bae8c96309aa4360',
+  address: '0x10d10ef03ef3316b750d2544bae8c96309aa4360',
   balance: '0.0000 EOS',
   code: [],
   index: 0,
@@ -35,7 +35,6 @@ export const api = new EosEvmApi({
 
 api.loadContractFromAbi({
   account,
-  sender,
   abi: compiled.contracts.ERC20.Token.abi,
   bytecodeObject: compiled.contracts.ERC20.Token.evm.bytecode.object
 })

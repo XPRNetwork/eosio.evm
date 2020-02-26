@@ -22,7 +22,7 @@ describe('Full ERC20 Test', () => {
 
     it(`setups contract at ${contract}`, async () => {
       jest.setTimeout(30000)
-      await api.eos.setupEvmContract({ contractDir })
+      await api.eos.setupEvmContract(contractDir)
       expect(await api.eos.rpc.getRawAbi(contract)).toBeTruthy()
     })
   })
@@ -44,13 +44,13 @@ describe('Full ERC20 Test', () => {
     it('transfer in EVM from new address to other addresses', async () => {
       await api.transfer({
         account,
-        sender: `0x${initialAccount.address}`,
+        sender: initialAccount.address,
         to: sender,
         quantity: '0.0001 EOS'
       })
       await api.transfer({
         account,
-        sender: `0x${initialAccount.address}`,
+        sender: initialAccount.address,
         to: allowanceAddress,
         quantity: '0.0001 EOS'
       })
@@ -66,7 +66,7 @@ describe('Full ERC20 Test', () => {
         },
         {
           account: '',
-          address: sender.substring(2),
+          address: sender,
           balance: '0.0001 EOS',
           code: [],
           index: 1,
@@ -74,7 +74,7 @@ describe('Full ERC20 Test', () => {
         },
         {
           account: '',
-          address: allowanceAddress.substring(2),
+          address: allowanceAddress,
           balance: '0.0001 EOS',
           code: [],
           index: 2,
@@ -84,56 +84,67 @@ describe('Full ERC20 Test', () => {
     })
   })
 
-  describe('Create Syed Token', () => {
-    it('Calls ERC20 constructor', async () => {
-      await api.eth.deploy('Syed Token', 'SYED', 8, 1000000)
-      const balance = await api.eth.balanceOf(sender)
-      expect(+balance.toString(10)).toEqual(1000000)
-    })
-  })
-
-  describe('Transfer', () => {
-    it('Transfers SYED tokens', async () => {
-      const receiver = `0x${initialAccount.address}`
-      const { eth, eos } = await api.eth.transfer(receiver, 1000)
-
-      // Validate
-      const senderBalance = await api.eth.balanceOf(sender)
-      expect(+senderBalance.toString(10)).toEqual(1000000 - 1000)
-      const receiverBalance = await api.eth.balanceOf(receiver)
-      expect(+receiverBalance.toString(10)).toEqual(1000)
-    })
-  })
-
-  describe('Allow', () => {
-    it(`Allow ${allowanceAddress} 100 SYED`, async () => {
-      const { eth, eos } = await api.eth.approve(allowanceAddress, 100)
-      const allowance = await api.eth.allowance(sender, allowanceAddress)
-      expect(+allowance.toString(10)).toEqual(100)
+  describe('ERC20 Functions', () => {
+    describe('Create Syed Token', () => {
+      it('Deploy ERC20 (constructor)', async () => {
+        await api.eth.deploy('Syed Token', 'SYED', 8, 1000000, { sender, rawSign: true })
+        const balance = await api.eth.balanceOf(sender)
+        expect(+balance.toString(10)).toEqual(1000000)
+      })
     })
 
-    it('Increase Allowance', async () => {
-      const { eth, eos } = await api.eth.increaseAllowance(allowanceAddress, 1000)
-      const allowance = await api.eth.allowance(sender, allowanceAddress)
-      expect(+allowance.toString(10)).toEqual(1100)
+    describe('Transfer', () => {
+      it('Transfers SYED tokens', async () => {
+        const { eth, eos } = await api.eth.transfer(initialAccount.address, 1000, {
+          sender,
+          rawSign: true
+        })
+
+        // Validate
+        const senderBalance = await api.eth.balanceOf(sender)
+        expect(+senderBalance.toString(10)).toEqual(1000000 - 1000)
+        const receiverBalance = await api.eth.balanceOf(initialAccount.address)
+        expect(+receiverBalance.toString(10)).toEqual(1000)
+      })
     })
 
-    it('Decrease Allowance', async () => {
-      const { eth, eos } = await api.eth.decreaseAllowance(allowanceAddress, 600)
-      const allowance = await api.eth.allowance(sender, allowanceAddress)
-      expect(+allowance.toString(10)).toEqual(500)
-    })
-
-    it('TransferFrom Allowed', async () => {
-      const { eth, eos } = await api.eth.transferFrom(sender, allowanceAddress, 500, {
-        sender: allowanceAddress
+    describe('Allow', () => {
+      it(`Allow ${allowanceAddress} 100 SYED`, async () => {
+        const { eth, eos } = await api.eth.approve(allowanceAddress, 100, { sender, rawSign: true })
+        const allowance = await api.eth.allowance(sender, allowanceAddress)
+        expect(+allowance.toString(10)).toEqual(100)
       })
 
-      // Validate
-      const senderBalance = await api.eth.balanceOf(sender)
-      expect(+senderBalance.toString(10)).toEqual(1000000 - 1000 - 500)
-      const receiverBalance = await api.eth.balanceOf(allowanceAddress)
-      expect(+receiverBalance.toString(10)).toEqual(500)
+      it('Increase Allowance', async () => {
+        const { eth, eos } = await api.eth.increaseAllowance(allowanceAddress, 1000, {
+          sender,
+          rawSign: true
+        })
+        const allowance = await api.eth.allowance(sender, allowanceAddress)
+        expect(+allowance.toString(10)).toEqual(1100)
+      })
+
+      it('Decrease Allowance', async () => {
+        const { eth, eos } = await api.eth.decreaseAllowance(allowanceAddress, 600, {
+          sender,
+          rawSign: true
+        })
+        const allowance = await api.eth.allowance(sender, allowanceAddress)
+        expect(+allowance.toString(10)).toEqual(500)
+      })
+
+      it('TransferFrom Allowed', async () => {
+        const { eth, eos } = await api.eth.transferFrom(sender, allowanceAddress, 500, {
+          sender: allowanceAddress,
+          rawSign: true
+        })
+
+        // Validate
+        const senderBalance = await api.eth.balanceOf(sender)
+        expect(+senderBalance.toString(10)).toEqual(1000000 - 1000 - 500)
+        const receiverBalance = await api.eth.balanceOf(allowanceAddress)
+        expect(+receiverBalance.toString(10)).toEqual(500)
+      })
     })
   })
 })

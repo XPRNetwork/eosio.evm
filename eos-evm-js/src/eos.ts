@@ -5,6 +5,12 @@ import { TextEncoder, TextDecoder } from 'text-encoding'
 import { readFileSync } from 'fs'
 import { getDeployableFilesFromDir } from './deploy'
 import { EOSIO_TOKEN, EOSIO_SYSTEM } from './constants'
+import { Account } from './interfaces'
+
+const transformEthAccount = (account: Account) => {
+  account.address = `0x${account.address}`
+  return account
+}
 
 export class EosApi {
   eosPrivateKeys: string[]
@@ -69,8 +75,8 @@ export class EosApi {
    * @param sender The ETH address of an account if tx is not signed
    */
   async raw({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
-    if (tx && tx.startsWith('0x')) tx = tx.substr(2)
-    if (sender && sender.startsWith('0x')) sender = sender.substr(2)
+    if (tx && tx.startsWith('0x')) tx = tx.substring(2)
+    if (sender && sender.startsWith('0x')) sender = sender.substring(2)
 
     let response: any = {}
     response.eos = await this.transact([
@@ -107,8 +113,8 @@ export class EosApi {
    * @param sender The ETH address of an account if tx is not signed
    */
   async call({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
-    if (tx && tx.startsWith('0x')) tx = tx.substr(2)
-    if (sender && sender.startsWith('0x')) sender = sender.substr(2)
+    if (tx && tx.startsWith('0x')) tx = tx.substring(2)
+    if (sender && sender.startsWith('0x')) sender = sender.substring(2)
 
     try {
       await this.transact([
@@ -246,7 +252,7 @@ export class EosApi {
       index_position: 1,
       limit: -1
     })
-    return rows
+    return rows.map(transformEthAccount)
   }
 
   /**
@@ -257,9 +263,9 @@ export class EosApi {
    *
    * @returns Full EOS table row
    */
-  async getAddress(address: string) {
-    if (!address) return {}
-    if (address && address.startsWith('0x')) address = address.substr(2)
+  async getEthAccount(address: string): Promise<Account> {
+    if (!address) throw new Error('No address provided')
+    if (address.startsWith('0x')) address = address.substring(2)
 
     const padded = '0'.repeat(12 * 2) + address
 
@@ -273,7 +279,12 @@ export class EosApi {
       upper_bound: padded,
       limit: 1
     })
-    return (rows.length && rows[0].address === address && rows[0]) || undefined
+
+    if (rows.length && rows[0].address === address) {
+      return transformEthAccount(rows[0])
+    } else {
+      throw new Error(`Account with address ${address} not found`)
+    }
   }
 
   /**
@@ -288,7 +299,7 @@ export class EosApi {
     if (!address) return '0x0'
 
     let nonce = ''
-    const account = await this.getAddress(address)
+    const account = await this.getEthAccount(address)
 
     if (account) {
       nonce = `0x${account.nonce}`
@@ -300,30 +311,63 @@ export class EosApi {
   }
 
   /**
-   * Gets the on-chain account
+   * Gets the on-chain state value
    *
-   * @param contract The EOS contract with EVM deplyoed
+   * @param address The EOS contract with EVM deplyoed
    * @param address The ETH address in contract
    *
    * @returns Full EOS table row
    */
   async getStorageAt(address: string, key: string) {
-    if (address && address.startsWith('0x')) address = address.substr(2)
-    if (key && key.startsWith('0x')) key = key.substr(2)
+    if (!address || !key) throw new Error('Both address and key are required')
+    if (address && address.startsWith('0x')) address = address.substring(2)
 
-    const padded = '0'.repeat(12 * 2) + address
+    if (key && key.startsWith('0x')) key = key.substring(2)
+    const paddedKey = '0'.repeat(64 - key.length) + key
 
+    const { index } = await this.getEthAccount(address)
+    const { rows } = await this.getTable({
+      code: this.eosContract,
+      scope: index,
+      table: 'accountstate',
+      key_type: 'sha256',
+      index_position: 2,
+      lower_bound: paddedKey,
+      upper_bound: paddedKey,
+      limit: 1
+    })
+
+    if (rows.length && rows[0].address) {
+      return rows[0]
+    } else {
+      throw new Error(`No storage for address ${address} with key ${key}`)
+    }
+  }
+
+  /**
+   * Gets the on-chain account by eos account
+   *
+   * @param account The EOS contract linked to ETH address
+   *
+   * @returns Full EOS Account table row
+   */
+  async getEthAccountByEosAccount(account: string) {
     const { rows } = await this.getTable({
       code: this.eosContract,
       scope: this.eosContract,
       table: 'account',
-      key_type: 'sha256',
-      index_position: 2,
-      lower_bound: padded,
-      upper_bound: padded,
+      key_type: 'i64',
+      index_position: 3,
+      lower_bound: account,
+      upper_bound: account,
       limit: 1
     })
-    return (rows.length && rows[0].address === address && rows[0]) || {}
+
+    if (rows.length && rows[0].account === account) {
+      return transformEthAccount(rows[0])
+    } else {
+      throw new Error(`No address associated with ${account}`)
+    }
   }
 
   /**
@@ -333,7 +377,7 @@ export class EosApi {
    * @param contractDir The directory which contains the ABI and WASM
    *
    */
-  async setupEvmContract({ contractDir = './eos-contracts' }: { contractDir: string }) {
+  async setupEvmContract(contractDir: string = `${__dirname}/eos-contracts`) {
     const { wasmPath, abiPath } = getDeployableFilesFromDir(contractDir)
 
     // 1. Prepare SETCODE
@@ -378,7 +422,7 @@ export class EosApi {
         }
       ])
     } catch (e) {
-      console.log('Set code failed')
+      console.log('Same code already exists.')
     }
 
     // 4. Set ABI

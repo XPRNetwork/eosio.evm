@@ -38,7 +38,7 @@ describe('Full Test', () => {
 
   it(`setups contract at ${contract}`, async () => {
     jest.setTimeout(30000)
-    await api.eos.setupEvmContract({ account: contract, contractDir })
+    await api.eos.setupEvmContract(contractDir)
     expect(await api.eos.rpc.getRawAbi(contract)).toBeTruthy()
   })
 

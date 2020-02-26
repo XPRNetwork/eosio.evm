@@ -1,6 +1,6 @@
 import { Transaction } from 'ethereumjs-tx'
 import Common from 'ethereumjs-common'
-import { privateToAddress } from 'ethereumjs-util'
+import util from 'ethereumjs-util'
 import { EosApi } from './eos'
 import {
   ETH_CHAIN,
@@ -47,7 +47,7 @@ export class EosEvmApi {
         privateKey = privateKey.substring(2)
       }
       const privateBuffer = Buffer.from(privateKey, 'hex')
-      const address = `0x${privateToAddress(privateBuffer).toString('hex')}`
+      const address = `0x${util.privateToAddress(privateBuffer).toString('hex')}`
       acc[address] = privateBuffer
       return acc
     }, {})

@@ -1,6 +1,6 @@
 {
   "name": "eos-evm-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "keywords": [],
   "main": "dist/eos-evm-js.umd.js",
@@ -89,7 +89,6 @@
     "@openzeppelin/contracts": "^3.0.0-beta.0",
     "@types/elliptic": "^6.4.12",
     "@types/jest": "^23.3.14",
-    "@types/mocha": "^7.0.1",
     "@types/node": "^10.11.0",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "0.0.35",

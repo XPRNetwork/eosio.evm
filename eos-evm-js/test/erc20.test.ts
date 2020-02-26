@@ -123,12 +123,17 @@ describe('Full ERC20 Test', () => {
       const allowance = await api.eth.allowance(sender, allowanceAddress)
       expect(+allowance.toString(10)).toEqual(500)
     })
-  })
 
-  // describe('Transfer from', () => {
-  //   it('Transfer to 0xab21f17d0c3e30be30e115508643817b297ae8d6 500 SYED', async () => {
-  //     const { eth, eos } = await api.eth.transferFrom('0xf79b834a37f3143f4a73fc3934edac67fd3a01cd', '0xab21f17d0c3e30be30e115508643817b297ae8d6', 500)
-  //     expect(true).toBeTruthy()
-  //   })
-  // })
+    it('TransferFrom Allowed', async () => {
+      const { eth, eos } = await api.eth.transferFrom(sender, allowanceAddress, 500, {
+        sender: allowanceAddress
+      })
+
+      // Validate
+      const senderBalance = await api.eth.balanceOf(sender)
+      expect(+senderBalance.toString(10)).toEqual(1000000 - 1000 - 500)
+      const receiverBalance = await api.eth.balanceOf(allowanceAddress)
+      expect(+receiverBalance.toString(10)).toEqual(500)
+    })
+  })
 })

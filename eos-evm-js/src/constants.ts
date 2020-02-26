@@ -12,3 +12,11 @@ export const ENDPOINTS: any = {
 
 export const EOSIO_TOKEN = 'eosio.token'
 export const EOSIO_SYSTEM = 'eosio'
+export const ETH_CHAIN = 'mainnet'
+export const FORK = 'istanbul'
+export const EOSIO_TOKEN_PRECISION = 4
+export const DEFAULT_GAS_PRICE = '0x01'
+export const DEFAULT_GAS_LIMIT = '0x1E8480'
+export const DEFAULT_VALUE = '0x0'
+export const DEFAULT_CHAIN_ID = 1
+export const DEFAULT_SYMBOL = 'EOS'

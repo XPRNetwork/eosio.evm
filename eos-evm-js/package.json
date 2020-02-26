@@ -1,6 +1,6 @@
 {
   "name": "eos-evm-js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "keywords": [],
   "main": "dist/eos-evm-js.umd.js",
@@ -87,6 +87,7 @@
     "@commitlint/cli": "^7.1.2",
     "@commitlint/config-conventional": "^7.1.2",
     "@openzeppelin/contracts": "^3.0.0-beta.0",
+    "@types/elliptic": "^6.4.12",
     "@types/jest": "^23.3.14",
     "@types/mocha": "^7.0.1",
     "@types/node": "^10.11.0",
@@ -108,10 +109,11 @@
     "rimraf": "^2.6.2",
     "rollup": "^0.67.0",
     "rollup-plugin-commonjs": "^9.1.8",
+    "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.18.0",
+    "rollup-plugin-typescript2": "^0.26.0",
     "semantic-release": "^15.9.16",
     "shelljs": "^0.8.3",
     "solc": "^0.6.3",
@@ -122,7 +124,7 @@
     "tslint-config-prettier": "^1.15.0",
     "tslint-config-standard": "^8.0.1",
     "typedoc": "^0.12.0",
-    "typescript": "^3.0.3"
+    "typescript": "^3.8.2"
   },
   "dependencies": {
     "@jafri/eosjs2": "^21.0.0-rc.8",

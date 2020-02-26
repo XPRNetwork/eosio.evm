@@ -11,3 +11,6 @@ npm install eos-evm-js
 import { EosEvmApi } from 'eos-evm-js'
 
 ```
+
+### Disclosure
+This repository is in a highly iterative state, please use at your own risk.

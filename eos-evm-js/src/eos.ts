@@ -11,8 +11,17 @@ export class EosApi {
   signatureProvider: any
   rpc: any
   eos: any
+  eosContract: string
 
-  constructor({ eosPrivateKeys, endpoint }: { eosPrivateKeys: string[]; endpoint: string }) {
+  constructor({
+    eosPrivateKeys,
+    endpoint,
+    eosContract
+  }: {
+    eosPrivateKeys: string[]
+    endpoint: string
+    eosContract: string
+  }) {
     this.eosPrivateKeys = eosPrivateKeys
     this.signatureProvider = new JsSignatureProvider(this.eosPrivateKeys)
     this.rpc = new JsonRpc(endpoint, { fetch: fetch as any })
@@ -22,6 +31,7 @@ export class EosApi {
       textEncoder: new TextEncoder() as any,
       textDecoder: new TextDecoder() as any
     })
+    this.eosContract = eosContract
   }
 
   /**
@@ -42,32 +52,30 @@ export class EosApi {
       )
       return result
     } catch (e) {
-      if (e.json) {
-        console.log(e.json.error.details[0].message)
-      } else {
-        console.dir(e, { depth: null })
-      }
+      // if (e.json) {
+      //   console.log(e.json.error.details[0].message)
+      // } else {
+      //   console.dir(e, { depth: null })
+      // }
       throw e
     }
   }
 
-  async raw({
-    contract,
-    account,
-    tx,
-    sender
-  }: {
-    contract: string
-    account: string
-    tx: string
-    sender: string | undefined
-  }) {
+  /**
+   * Sends a ETH TX to EVM
+   *
+   * @param account EOSIO account to interact with EVM
+   * @param tx Raw RLP encoded hex string
+   * @param sender The ETH address of an account if tx is not signed
+   */
+  async raw({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
     if (tx && tx.startsWith('0x')) tx = tx.substr(2)
     if (sender && sender.startsWith('0x')) sender = sender.substr(2)
 
-    return await this.transact([
+    let response: any = {}
+    response.eos = await this.transact([
       {
-        account: contract,
+        account: this.eosContract,
         name: 'raw',
         data: {
           tx,
@@ -76,12 +84,65 @@ export class EosApi {
         authorization: [{ actor: account, permission: 'active' }]
       }
     ])
+
+    try {
+      response.eth = JSON.parse(response.eos.processed.action_traces[0].console)
+    } catch (e) {
+      response.eth = ''
+      console.log('Could not parse', response.eos.processed.action_traces[0].console)
+    }
+
+    if (response.eth === '') {
+      console.warn('Warning: This node may have console printing disabled')
+    }
+
+    return response
   }
 
-  async create({ contract, account, data }: { contract: string; account: string; data: string }) {
+  /**
+   * Sends a non state modifying call to EVM
+   *
+   * @param account EOSIO account to interact with EVM
+   * @param tx Raw RLP encoded hex string
+   * @param sender The ETH address of an account if tx is not signed
+   */
+  async call({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
+    if (tx && tx.startsWith('0x')) tx = tx.substr(2)
+    if (sender && sender.startsWith('0x')) sender = sender.substr(2)
+
+    try {
+      await this.transact([
+        {
+          account: this.eosContract,
+          name: 'call',
+          data: {
+            tx,
+            sender
+          },
+          authorization: [{ actor: account, permission: 'active' }]
+        }
+      ])
+    } catch (e) {
+      const error = e.json.error
+      if (error.code !== 3050003) {
+        throw new Error('This node does not have console printing enabled')
+      }
+      const message = error.details[1].message
+      const result = message.replace('pending console output: ', '')
+      return result
+    }
+  }
+
+  /**
+   * Creates EVM address from EOS account
+   *
+   * @param account EOSIO account to interact with EVM
+   * @param data Arbitrary string used as salt
+   */
+  async create({ account, data }: { account: string; data: string }) {
     return await this.transact([
       {
-        account: contract,
+        account: this.eosContract,
         name: 'create',
         data: {
           account,
@@ -92,18 +153,16 @@ export class EosApi {
     ])
   }
 
-  async withdraw({
-    contract,
-    account,
-    quantity
-  }: {
-    contract: string
-    account: string
-    quantity: string
-  }) {
+  /**
+   * Withdraws core token from the balance of an account
+   *
+   * @param account EOSIO account to withdraw to
+   * @param data EOSIO asset type quantity to withdraw (0.0001 EOS)
+   */
+  async withdraw({ account, quantity }: { account: string; quantity: string }) {
     return await this.transact([
       {
-        account: contract,
+        account: this.eosContract,
         name: 'withdraw',
         data: {
           to: account,
@@ -114,24 +173,21 @@ export class EosApi {
     ])
   }
 
-  async transfer({
-    from,
-    to,
-    quantity,
-    memo
-  }: {
-    from: string
-    to: string
-    quantity: string
-    memo: string
-  }) {
+  /**
+   * Deposits token into EVM
+   *
+   * @param from EOSIO account to send from
+   * @param quantity EOSIO asset type quantity to withdraw (0.0001 EOS)
+   * @param memo Memo to transfer
+   */
+  async deposit({ from, quantity, memo = '' }: { from: string; quantity: string; memo?: string }) {
     return await this.transact([
       {
         account: EOSIO_TOKEN,
         name: 'transfer',
         data: {
           from,
-          to,
+          to: this.eosContract,
           quantity,
           memo
         },
@@ -143,13 +199,13 @@ export class EosApi {
   /**
    * Testing
    */
-  async clearAll({ contract }: { contract: string }) {
+  async clearAll() {
     return await this.transact([
       {
-        account: contract,
+        account: this.eosContract,
         name: 'clearall',
         data: {},
-        authorization: [{ actor: contract, permission: 'active' }]
+        authorization: [{ actor: this.eosContract, permission: 'active' }]
       }
     ])
   }
@@ -181,14 +237,14 @@ export class EosApi {
    *
    * @returns Full EOS table row
    */
-  async getAllAddresses(contract: string) {
+  async getAllAddresses() {
     const { rows } = await this.getTable({
-      code: contract,
-      scope: contract,
+      code: this.eosContract,
+      scope: this.eosContract,
       table: 'account',
       key_type: 'i64',
       index_position: 1,
-      limit: 100
+      limit: -1
     })
     return rows
   }
@@ -201,14 +257,15 @@ export class EosApi {
    *
    * @returns Full EOS table row
    */
-  async getAddress(contract: string, address: string) {
+  async getAddress(address: string) {
     if (!address) return {}
     if (address && address.startsWith('0x')) address = address.substr(2)
+
     const padded = '0'.repeat(12 * 2) + address
 
     const { rows } = await this.getTable({
-      code: contract,
-      scope: contract,
+      code: this.eosContract,
+      scope: this.eosContract,
       table: 'account',
       key_type: 'sha256',
       index_position: 2,
@@ -227,11 +284,11 @@ export class EosApi {
    *
    * @returns Hex-encoded nonce
    */
-  async getNonce(contract: string, address: string | undefined) {
+  async getNonce(address: any) {
     if (!address) return '0x0'
 
     let nonce = ''
-    const account = await this.getAddress(contract, address)
+    const account = await this.getAddress(address)
 
     if (account) {
       nonce = `0x${account.nonce}`
@@ -250,15 +307,15 @@ export class EosApi {
    *
    * @returns Full EOS table row
    */
-  async getKey(contract: string, address: string, key: string) {
+  async getStorageAt(address: string, key: string) {
     if (address && address.startsWith('0x')) address = address.substr(2)
     if (key && key.startsWith('0x')) key = key.substr(2)
 
     const padded = '0'.repeat(12 * 2) + address
 
     const { rows } = await this.getTable({
-      code: contract,
-      scope: contract,
+      code: this.eosContract,
+      scope: this.eosContract,
       table: 'account',
       key_type: 'sha256',
       index_position: 2,
@@ -276,7 +333,7 @@ export class EosApi {
    * @param contractDir The directory which contains the ABI and WASM
    *
    */
-  async setupEvmContract({ account, contractDir }: { account: string; contractDir: string }) {
+  async setupEvmContract({ contractDir = './eos-contracts' }: { contractDir: string }) {
     const { wasmPath, abiPath } = getDeployableFilesFromDir(contractDir)
 
     // 1. Prepare SETCODE
@@ -308,12 +365,12 @@ export class EosApi {
           name: 'setcode',
           authorization: [
             {
-              actor: account,
+              actor: this.eosContract,
               permission: 'active'
             }
           ],
           data: {
-            account: account,
+            account: this.eosContract,
             vmtype: 0,
             vmversion: 0,
             code: wasm
@@ -332,12 +389,12 @@ export class EosApi {
           name: 'setabi',
           authorization: [
             {
-              actor: account,
+              actor: this.eosContract,
               permission: 'active'
             }
           ],
           data: {
-            account: account,
+            account: this.eosContract,
             abi: Buffer.from(buffer.asUint8Array()).toString(`hex`)
           }
         }
@@ -347,16 +404,17 @@ export class EosApi {
     }
 
     // 5. Set eosio.code permission
-    const account_full = await this.rpc.get_account(account)
+    const account_full = await this.rpc.get_account(this.eosContract)
     let active_perm: any = account_full.permissions.find((p: any) => p.perm_name === 'active')
     if (
       !active_perm.required_auth.accounts.find(
-        (a: any) => a.permission.actor === account && a.permission.permission === 'eosio.code'
+        (a: any) =>
+          a.permission.actor === this.eosContract && a.permission.permission === 'eosio.code'
       )
     ) {
       active_perm.required_auth.accounts.push({
         permission: {
-          actor: account,
+          actor: this.eosContract,
           permission: 'eosio.code'
         },
         weight: 1
@@ -367,12 +425,12 @@ export class EosApi {
           account: EOSIO_SYSTEM,
           name: 'updateauth',
           data: {
-            account,
+            account: this.eosContract,
             permission: 'active',
             parent: active_perm.parent,
             auth: active_perm.required_auth
           },
-          authorization: [{ actor: account, permission: 'active' }]
+          authorization: [{ actor: this.eosContract, permission: 'active' }]
         }
       ])
     }

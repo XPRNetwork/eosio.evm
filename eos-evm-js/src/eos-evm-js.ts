@@ -1,45 +1,85 @@
 import { Transaction } from 'ethereumjs-tx'
 import Common from 'ethereumjs-common'
+import { privateToAddress } from 'ethereumjs-util'
 import { EosApi } from './eos'
+import {
+  ETH_CHAIN,
+  FORK,
+  EOSIO_TOKEN_PRECISION,
+  DEFAULT_GAS_PRICE,
+  DEFAULT_GAS_LIMIT,
+  DEFAULT_CHAIN_ID,
+  DEFAULT_VALUE,
+  DEFAULT_SYMBOL
+} from './constants'
 const abiEncoder = require('ethereumjs-abi')
-
-export class EosEvmApi extends EosApi {
+export class EosEvmApi {
   ethPrivateKeys: any
   chainId: any
   chainConfig: any
   abi: any
   eth: any
+  ethContract: string | undefined
+  eos: EosApi
 
   constructor({
     ethPrivateKeys,
     eosPrivateKeys,
     endpoint,
-    chainId = 1
+    eosContract,
+    ethContract,
+    chainId = DEFAULT_CHAIN_ID
   }: {
     ethPrivateKeys?: any
     eosPrivateKeys: string[]
     endpoint: string
+    eosContract: string
+    ethContract?: string
     chainId: number
   }) {
-    super({ eosPrivateKeys, endpoint })
-    this.ethPrivateKeys = ethPrivateKeys
+    this.eos = new EosApi({ eosPrivateKeys, endpoint, eosContract })
     this.chainId = chainId
-    this.chainConfig = Common.forCustomChain('mainnet', { chainId }, 'istanbul')
+    this.ethContract = ethContract
+    this.chainConfig = Common.forCustomChain(ETH_CHAIN, { chainId }, FORK)
+
+    this.ethPrivateKeys = ethPrivateKeys.reduce((acc: any, privateKey: string) => {
+      if (privateKey.substr(0, 2) === '0x') {
+        privateKey = privateKey.substring(2)
+      }
+      const privateBuffer = Buffer.from(privateKey, 'hex')
+      const address = `0x${privateToAddress(privateBuffer).toString('hex')}`
+      acc[address] = privateBuffer
+      return acc
+    }, {})
   }
 
+  /**
+   * Sets the address for ethereum contract
+   *
+   * @param address ethereum contract address
+   */
+  async setEthereumContract({ address }: { address: string }) {
+    this.ethContract = address
+  }
+
+  /**
+   * Initializes Web3 like interface to send actions to EVM
+   *
+   * @param account EOSIO account to interact with EVM
+   * @param sender The EVM address sending the transaction
+   * @param to The EVM address with the contract
+   * @param abi ABI object
+   * @param bytecode Bytecode object
+   */
   async loadContractFromAbi({
-    contract,
     account,
-    sender,
-    to,
+    sender = '',
     abi,
     bytecodeObject
   }: {
-    contract: string
     account: string
-    sender: string
+    sender?: string
     abi: any
-    to: string
     bytecodeObject: string
   }) {
     // Load interface
@@ -59,41 +99,135 @@ export class EosEvmApi extends EosApi {
     // Populate functions
     for (const action of abiInterface.function) {
       eth[action.name] = async function(...args: any[]) {
-        const internalTypes = action.inputs.map((i: any) => i.internalType)
-        const names = action.inputs.map((i: any) => i.name)
         const types = action.inputs.map((i: any) => i.type)
-        if (args.length != internalTypes.length)
+        const names = action.inputs.map((i: any) => i.name)
+        const outputTypes = action.outputs.map((i: any) => i.type)
+
+        // Default
+        let overrides = {}
+
+        // Validation
+        if (args.length === types.length + 1 && typeof args[args.length - 1] === 'object') {
+          overrides = args[args.length - 1]
+          args.pop()
+        }
+        if (args.length !== types.length) {
           throw new Error(
-            `${internalTypes.length} arguments expected for function ${action.name}: ${names}`
+            `${types.length} arguments expected for function ${action.name}: ${names}`
           )
+        }
+        if (!that.ethContract) {
+          throw new Error(
+            'Please initialize loadContractFromAbi with ethContract or deploy() to insert automatically'
+          )
+        }
 
-        const params = abiEncoder.rawEncode(internalTypes, args).toString('hex')
-        const data = `0x${params}`
-        const encodedTx = await that.createEthTx({ contract, sender, data, to })
+        // Encode
+        const methodID = abiEncoder.methodID(action.name, types).toString('hex')
+        const params = abiEncoder.rawEncode(types, args).toString('hex')
+        const input = `0x${methodID}${params}`
 
-        // return that.raw({ contract, account, tx: encodedTx, sender })
+        // If call (non state modifying)
+        if (action.stateMutability && action.stateMutability === 'view') {
+          // Create call object
+          const txParams = Object.assign(
+            { sender, data: input, to: that.ethContract, sign: false },
+            overrides
+          )
+          const encodedTx = await that.createEthTx(txParams)
+
+          // Get output from call and aprse it
+          const output = await that.eos.call({ account, tx: encodedTx, sender })
+          const parsed = abiEncoder.rawDecode(outputTypes, Buffer.from(output, 'hex'))
+          return parsed
+        }
+        // If transaction (standard transaction)
+        else {
+          // Create transaction object
+          const txParams = Object.assign({ sender, data: input, to: that.ethContract }, overrides)
+          const encodedTx = await that.createEthTx(txParams)
+
+          // Send transaction
+          return that.eos.raw({ account, tx: encodedTx, sender })
+        }
       }
     }
 
     eth['deploy'] = async function(...args: any[]) {
-      const internalTypes = abiInterface.constructor[0].inputs.map((i: any) => i.internalType)
+      const types = abiInterface.constructor[0].inputs.map((i: any) => i.type)
       const names = abiInterface.constructor[0].inputs.map((i: any) => i.name)
-      if (args.length != internalTypes.length)
-        throw new Error(`${internalTypes.length} arguments expected for deploy: ${names}`)
 
-      const params = abiEncoder.rawEncode(internalTypes, args).toString('hex')
+      // Default
+      let overrides = {}
+
+      // Validation
+      if (args.length === types.length + 1 && typeof args[args.length - 1] === 'object') {
+        overrides = args[args.length - 1]
+        args.pop()
+      }
+      if (args.length != types.length) {
+        throw new Error(`${types.length} arguments expected for deploy: ${names}`)
+      }
+
+      // Encode params
+      const params = abiEncoder.rawEncode(types, args).toString('hex')
       const data = `0x${bytecodeObject}${params.toString('hex')}`
-      const encodedTx = await that.createEthTx({ contract, sender, data, to: undefined })
-      // return that.raw({ contract, account, tx: encodedTx, sender })
+
+      // Create transaction and send it
+      const txParams = Object.assign({ sender, data, to: undefined }, overrides)
+      const encodedTx = await that.createEthTx(txParams)
+      const result = await that.eos.raw({ account, tx: encodedTx, sender })
+
+      // Set current contract address to the newly created address
+      if (result.eth && result.eth.createdAddress) {
+        that.ethContract = `0x${result.eth.createdAddress}`
+        console.warn('The contract was deployed to address: ', that.ethContract)
+      }
+      return result
     }
 
     this.eth = eth
   }
 
   /**
-   * Generates RLP encoded transaction from parameters
+   * Transfers value inside EVM
    *
-   * @param contract The EOS account where the EVM contract is deployed
+   * @param account The EOS account associated to ETH address
+   * @param sender The ETH address sending the TX
+   * @param to The ETH address sending the transaction (nonce is fetched on-chain for this address)
+   * @param quantity EOSIO quantity
+   * @param ethSign Whether to sign transaction with ethereum private key
+   *
+   */
+  async transfer({
+    account,
+    sender,
+    to,
+    quantity,
+    ethSign = false
+  }: {
+    account: string
+    sender: string
+    to: string
+    quantity: string
+    ethSign?: boolean
+  }) {
+    const [amount, symbol] = quantity.split(' ')
+    if (symbol !== DEFAULT_SYMBOL)
+      throw new Error('Must provide asset as quantity to transfer like 0.0001 SYS')
+
+    const tx = await this.createEthTx({
+      sender,
+      to,
+      value: +amount * Math.pow(10, EOSIO_TOKEN_PRECISION),
+      sign: ethSign
+    })
+    return this.eos.raw({ account, tx, sender })
+  }
+
+  /**
+   * Generates RLP encoded transaction sender parameters
+   *
    * @param sender The ETH address sending the transaction (nonce is fetched on-chain for this address)
    * @param data The data in transaction
    * @param gasLimit The gas limit of the transaction
@@ -104,7 +238,6 @@ export class EosEvmApi extends EosApi {
    * @returns RLP encoded transaction
    */
   async createEthTx({
-    contract,
     sender,
     data,
     gasLimit,
@@ -112,20 +245,19 @@ export class EosEvmApi extends EosApi {
     to,
     sign = true
   }: {
-    contract: string
     sender?: string
     data?: string
-    gasLimit?: string
-    value?: string
+    gasLimit?: string | Buffer
+    value?: number | Buffer
     to?: string
     sign?: boolean
   }) {
-    const nonce = await this.getNonce(contract, sender)
+    const nonce = await this.eos.getNonce(sender)
     const txData = {
       nonce,
-      gasPrice: '0x01',
-      gasLimit: gasLimit || '0x1E8480',
-      value: value || '0x0',
+      gasPrice: DEFAULT_GAS_PRICE,
+      gasLimit: gasLimit !== undefined ? `0x${(gasLimit as any).toString(16)}` : DEFAULT_GAS_LIMIT,
+      value: value !== undefined ? `0x${(value as any).toString(16)}` : DEFAULT_VALUE,
       to,
       data
     }
@@ -134,12 +266,12 @@ export class EosEvmApi extends EosApi {
 
     if (sign) {
       if (!sender) throw new Error('Signature requested in createEthTx, but no sender provided')
-      if (!this.ethPrivateKeys[sender])
+      if (!this.ethPrivateKeys[sender]) {
+        console.log(this.ethPrivateKeys)
         throw new Error('No private key provided for ETH address ' + sender)
+      }
       tx.sign(this.ethPrivateKeys[sender])
     }
-    console.log(tx.toJSON(), tx)
-    return
 
     return tx.serialize().toString('hex')
   }

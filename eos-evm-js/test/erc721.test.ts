@@ -32,22 +32,22 @@ describe('Full Test', () => {
 
   it('clears all (dev only, remove in prod)', async () => {
     await api.clearAll({ contract })
-    const rows = await api.getAllAddresses(contract)
+    const rows = await api.eos.getAllAddresses(contract)
     expect(rows.length).toEqual(0)
   })
 
   it(`setups contract at ${contract}`, async () => {
     jest.setTimeout(30000)
-    await api.setupEvmContract({ account: contract, contractDir })
-    expect(await api.rpc.getRawAbi(contract)).toBeTruthy()
+    await api.eos.setupEvmContract({ account: contract, contractDir })
+    expect(await api.eos.rpc.getRawAbi(contract)).toBeTruthy()
   })
 
   it(`creates new address ${sender.substr(
     0,
     8
   )} based on RLP(${account}, ${arbitrary})`, async () => {
-    await api.create({ contract, account, data: arbitrary })
-    const rows = await api.getAllAddresses(contract)
+    await api.eos.create({ contract, account, data: arbitrary })
+    const rows = await api.eos.getAllAddresses(contract)
     expect(rows).toEqual([initialAccount])
   })
 
@@ -57,12 +57,12 @@ describe('Full Test', () => {
   )} (${account})`, async () => {
     const quantity = '0.0001 EOS'
     await api.transfer({ from: account, to: contract, quantity, memo: '' })
-    const rows = await api.getAllAddresses(contract)
+    const rows = await api.eos.getAllAddresses(contract)
     expect(rows).toEqual([{ ...initialAccount, balance: quantity }])
   })
 
   it(`transfer from ${sender.substr(0, 8)} to ${receiver.substr(0, 8)}`, async () => {
-    const tx = await api.createEthTx({
+    const tx = await api.eos.createEthTx({
       contract,
       sender,
       to: receiver,
@@ -71,7 +71,7 @@ describe('Full Test', () => {
     })
 
     await api.raw({ contract, account, tx, sender })
-    const rows = await api.getAllAddresses(contract)
+    const rows = await api.eos.getAllAddresses(contract)
     expect(rows).toEqual([
       { ...initialAccount, nonce: 2 },
       {

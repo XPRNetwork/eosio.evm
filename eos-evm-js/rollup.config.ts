@@ -4,6 +4,7 @@ import sourceMaps from 'rollup-plugin-sourcemaps'
 import camelCase from 'lodash.camelcase'
 import typescript from 'rollup-plugin-typescript2'
 import json from 'rollup-plugin-json'
+import copy from 'rollup-plugin-copy'
 
 const pkg = require('./package.json')
 
@@ -20,7 +21,15 @@ export default {
   watch: {
     include: 'src/**',
   },
+
   plugins: [
+    copy({
+      targets: [
+        { src: 'src/eos-contracts/**/*', dest: 'dist/lib/eos-contracts' },
+        { src: 'src/eth-contracts/**/*', dest: 'dist/lib/eth-contracts' }
+      ]
+    }),
+
     // Allow json resolution
     json(),
     // Compile TypeScript files

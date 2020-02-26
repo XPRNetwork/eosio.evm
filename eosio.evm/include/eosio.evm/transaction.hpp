@@ -65,10 +65,14 @@ namespace eosio_evm
     #if (PRINT_LOGS == true)
     std::string as_json_string() const {
       std::string output = "[";
-      for(auto& log : logs) {
-        output += R"({"address": ")" + intx::hex(log.address)     + "\"," +
-                  R"("data": ")"    + bin2hex(log.data)           + "\"," +
-                  R"("topics": )"   + log.topics_as_json_string() + "}";
+      for (auto i = 0; i < logs.size(); i++) {
+        output += R"({"address": ")" + intx::hex(logs[i].address)     + "\"," +
+                  R"("data": ")"    + bin2hex(logs[i].data)           + "\"," +
+                  R"("topics": )"   + logs[i].topics_as_json_string() + "}";
+
+        if (i < logs.size() - 1) {
+          output += ",";
+        }
       }
       output += "]";
       return output;

@@ -1,19 +1,20 @@
-## eosio.evm - Fast Ethereum Virtual Machine for EOSIO
+![eosio.evm](./evm.png)
 ### Benchmarks
 | Action         | CPU Cost      |
 | -------------  |:-------------:|
 | ERC20 Transfer | 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)|
 | ERC20 Deploy   | 764µs [(TX)](https://jungle.bloks.io/transaction/074f2cb4435173293243e4350a9a3faa12e5fb639780aaabb79ad68fb2c813e8)      |
 | EVM Transfer   | 325µs [(TX)](https://jungle.bloks.io/transaction/640c061cbd717b08b8af1c28129be1ef7365d1810fc285313a55d44f2271e312)      |
-| EVM New Address   | 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)     |
+| EVM New Address| 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)     |
 
 ### Achievements
+- Full Javascript SDK for deploying, executing and querying contracts
 - 100% Success on Ethereum Transaction Tests
 - 100% Success on Ethereum RLP Tests
-- Full REVERT support (challenging on EOS as it requires no use of eosio::check after nonce increment)
-- Full Istanbul support
-- Full transaction gas cost calculations (not billed to sender)
-- Full web3 call support (query view functions with no state modifications)
+- REVERT support (challenging on EOS as it requires no use of eosio::check after nonce increment)
+- Istanbul support
+- Full gas cost calculations (not billed to sender)
+- Web3-similar call support (query view functions with no state modifications)
 - Total size less than 200KB (~2MB on-chain)
 
 ### Build instructions
@@ -27,9 +28,7 @@ make -j4
 ```
 
 ### Usage instructions
-
-Recommended: eos-evm-js guide
-Alternate: cleos guide
+Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
 
 ### Directory structure
 - eosio.evm: contains all contract code

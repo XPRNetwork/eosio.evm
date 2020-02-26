@@ -15,7 +15,7 @@ import { EosEvmApi } from 'eos-evm-js'
 
 ```
 
-## Further documentation
+### Further documentation
 
 ### Disclosure
 This repository is in a highly iterative state, please use at your own risk.

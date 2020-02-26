@@ -30,6 +30,9 @@ void evm::create (
     a.account = account;
     a.balance = eosio::asset(0, TOKEN_SYMBOL);
   });
+
+  // Print out the address
+  eosio::print(address_160);
 }
 
 void evm::raw(
@@ -38,6 +41,7 @@ void evm::raw(
 ) {
   // Create transaction
   auto transaction = EthereumTransaction(tx);
+  // transaction.printhex();
 
   // Index by address
   auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
@@ -55,7 +59,6 @@ void evm::raw(
     eosio::check(caller->get_account_value() != 0, "Invalid Transaction: no EOSIO account is associated with sender's address.");
 
     // Check authorization of associated EOSIO account
-    // TODO maybe charge only the sending EOSIO account of the entire TX (not thereum) for RAM
     eosio::require_auth(caller->account);
 
     // Set transaction sender
@@ -88,13 +91,38 @@ void evm::raw(
    */
 
   // Execute transaction
-  auto processor = Processor(transaction, this);
+  Processor(transaction, this).process_transaction(*caller);
+}
 
-  if (transaction.is_create()) {
-    processor.initialize_create(*caller);
-  } else {
-    processor.initialize_call(*caller);
+/**
+ * Will always assert, replicates Ethereum Call functionality
+ */
+void evm::call(
+  const std::vector<int8_t>& tx,
+  const std::optional<eosio::checksum160>& sender
+) {
+  auto transaction = EthereumTransaction(tx);
+
+  // Find caller
+  auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
+  auto caller = Account();
+
+  if (sender) {
+    auto account = accounts_byaddress.find(pad160(*sender));
+    if (account == accounts_byaddress.end()) {
+      caller = *account;
+    }
   }
+
+  // Create processor and find result
+  auto processor = Processor(transaction, this);
+  auto result = processor.initialize_call(caller);
+
+  // Print Receipt
+  eosio::print(bin2hex(result.output));
+
+  // IMPORTANT, DO NOT REMOVE
+  eosio::check(false, "");
 }
 
 } // namepsace eosio_evm

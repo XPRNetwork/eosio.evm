@@ -68,8 +68,7 @@ namespace eosio_evm {
       error_cb(error_cb),
       s(this)
     {
-      // Reserve 4 KB of memory if code
-      // TODO needed?
+      // Reserve 4 KB of memory for code
       if (!prog.code.empty()) {
         mem.reserve(4096);
       }

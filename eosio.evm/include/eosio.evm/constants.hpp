@@ -6,7 +6,9 @@
 
 // Testing
 #define TESTING true
-#define OPTRACE true
+#define OPTRACE false
+#define PRINT_LOGS true
+#define PRINT_STATE false
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
@@ -17,7 +19,6 @@
 
 #define TOKEN_PRECISION 4
 #define TOKEN_SYMBOL eosio::symbol(TOKEN_SYMBOL_CODE, TOKEN_PRECISION)
-#define TOKEN_ASSET eosio::asset(0, TOKEN_SYMBOL)
 
 // Crypto
 #define MBEDTLS_ASN1_OCTET_STRING 0x04

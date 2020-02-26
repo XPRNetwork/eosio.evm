@@ -1,33 +1,16 @@
-Random number generator seeded to 1582598611
+Random number generator seeded to 1582673436
 Running 1 test case...
+gasLimit 1e8480
+gasPrice 1
+data 00000000000000000000000010d10ef03ef3316b750d2544bae8c96309aa436000000000000000000000000000000000000000000000000000000000000003e8
+nonce 1
+to 
+value 0
+v 37
+r 20e1cb44a38ac9d6d78eb86e6dd736ff22d559c58bb5c7dce8ada0c4df7eb6a8
+s 6515f6f24d1086b6f7e65595559bc2d7ea8b8af817e17b89e5d63e4d99707a3c
 
-{"pc":0,"gasLeft":42907676281,"gasCost":2,"stack":[],"depth":0,"opName": "ADDRESS","sm": 1},
-{"pc":1,"gasLeft":42907676279,"gasCost":2,"stack":["0x6295ee1b4f6dd65047762f924ecd367c17eabf8f"],"depth":0,"opName": "POP","sm": 1},
-{"pc":2,"gasLeft":42907676277,"gasCost":3,"stack":[],"depth":0,"opName": "PUSH1","sm": 1},
-{"pc":4,"gasLeft":42907676274,"gasCost":3,"stack":["0xd"],"depth":0,"opName": "DUP1","sm": 1},
-{"pc":5,"gasLeft":42907676271,"gasCost":3,"stack":["0xd","0xd"],"depth":0,"opName": "PUSH1","sm": 1},
-{"pc":7,"gasLeft":42907676268,"gasCost":3,"stack":["0xd","0xd","0x24"],"depth":0,"opName": "PUSH1","sm": 1},
-{"pc":9,"gasLeft":42907676265,"gasCost":3,"stack":["0xd","0xd","0x24","0x0"],"depth":0,"opName": "CODECOPY","sm": 1},
-{"pc":10,"gasLeft":42907676256,"gasCost":3,"stack":["0xd"],"depth":0,"opName": "PUSH1","sm": 1},
-{"pc":12,"gasLeft":42907676253,"gasCost":3,"stack":["0xd","0x0"],"depth":0,"opName": "PUSH1","sm": 1},
-{"pc":14,"gasLeft":42907676250,"gasCost":32000,"stack":["0xd","0x0","0x0"],"depth":0,"opName": "CREATE","sm": 1},
-{"pc":0,"gasLeft":42237212309,"gasCost":3,"stack":[],"depth":1,"opName": "PUSH3","sm": 3},
-{"pc":4,"gasLeft":42237212306,"gasCost":3,"stack":["0x112233"],"depth":1,"opName": "PUSH1","sm": 3},
-{"pc":6,"gasLeft":42237212303,"gasCost":3,"stack":["0x112233","0x0"],"depth":1,"opName": "MSTORE","sm": 3},
-{"pc":7,"gasLeft":42237212297,"gasCost":3,"stack":[],"depth":1,"opName": "PUSH1","sm": 3},
-{"pc":9,"gasLeft":42237212294,"gasCost":3,"stack":["0x20"],"depth":1,"opName": "PUSH1","sm": 3},
-{"pc":11,"gasLeft":42237212291,"gasCost":0,"stack":["0x20","0x0"],"depth":1,"opName": "REVERT","sm": 3},
-{"pc":15,"gasLeft":42907644232,"gasCost":2,"stack":["0x0"],"depth":0,"opName": "POP","sm": 3},
-{"pc":16,"gasLeft":42907644230,"gasCost":2,"stack":[],"depth":0,"opName": "RETURNDATASIZE","sm": 3},
-{"pc":17,"gasLeft":42907644228,"gasCost":3,"stack":["0x20"],"depth":0,"opName": "PUSH1","sm": 3},
-{"pc":19,"gasLeft":42907644225,"gasCost":0,"stack":["0x20","0x0"],"depth":0,"opName": "SSTORE","sm": 3},
-{"pc":20,"gasLeft":42907624225,"gasCost":3,"stack":[],"depth":0,"opName": "PUSH1","sm": 4},
-{"pc":22,"gasLeft":42907624222,"gasCost":3,"stack":["0x20"],"depth":0,"opName": "PUSH1","sm": 4},
-{"pc":24,"gasLeft":42907624219,"gasCost":3,"stack":["0x20","0x0"],"depth":0,"opName": "PUSH1","sm": 4},
-{"pc":26,"gasLeft":42907624216,"gasCost":3,"stack":["0x20","0x0","0x0"],"depth":0,"opName": "RETURNDATACOPY","sm": 4},
-{"pc":27,"gasLeft":42907624210,"gasCost":3,"stack":[],"depth":0,"opName": "PUSH1","sm": 4},
-{"pc":29,"gasLeft":42907624207,"gasCost":3,"stack":["0x0"],"depth":0,"opName": "MLOAD","sm": 4},
-{"pc":30,"gasLeft":42907624204,"gasCost":3,"stack":["0x112233"],"depth":0,"opName": "PUSH1","sm": 4},
-{"pc":32,"gasLeft":42907624201,"gasCost":0,"stack":["0x112233","0x1"],"depth":0,"opName": "SSTORE","sm": 4},
-{"pc":33,"gasLeft":42907604201,"gasCost":0,"stack":[],"depth":0,"opName": "STOP","sm": 5},
-[{"key":"0000000000000000000000000000000000000000000000000000000000000000","value":"1"}]
+sender 00000000003932485355500c0000000000000000
+hash 28915cca18e15583a1094af4391aee54c0eb34849e012d577ef25d8536a0c3d9
+AAAA
+{"pc":0,"gasLeft":1946480,"gasCost":0,"stack":[],"depth":0,"opName": "STOP","sm": 1},{"status": "success","from": "f79b834a37f3143f4a73fc3934edac67fd3a01cd","to": "","value": 0,"nonce": 1,"v": "37","r": "20e1cb44a38ac9d6d78eb86e6dd736ff22d559c58bb5c7dce8ada0c4df7eb6a8","s": "6515f6f24d1086b6f7e65595559bc2d7ea8b8af817e17b89e5d63e4d99707a3c","createdAddress": "53581fa3478a07bdad99b45a65a8d4e98f6485d8","gasUsed": 53520,"gasLimit": 2000000,"gasPrice": 1,"logs": [],"output": "","errors": [],"transactionHash": "28915cca18e15583a1094af4391aee54c0eb34849e012d577ef25d8536a0c3d9"}

@@ -1,19 +1,35 @@
-# Achievements
+# eosio.evm - Fast Ethereum Virtual Machine Implementation on EOS
+### Benchmarks
+- ERC20 Transfer: 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)
+- ERC20 Deployment: 764µs [(TX)](https://jungle.bloks.io/transaction/074f2cb4435173293243e4350a9a3faa12e5fb639780aaabb79ad68fb2c813e8)
+- EVM transfer: 325µs [(TX)](https://jungle.bloks.io/transaction/640c061cbd717b08b8af1c28129be1ef7365d1810fc285313a55d44f2271e312)
+- EVM create account: 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)
+
+### Achievements
 - 100% Success on Ethereum Transaction Tests
 - 100% Success on Ethereum RLP Tests
+- Full REVERT support (challenging on EOS as it requires no use of eosio::check after nonce increment)
+- Full Istanbul support
+- Full transaction gas cost calculations (not billed to sender)
+- Full web3 call support (query view functions with no state modifications)
 - Total size less than 200KB (~2MB on-chain)
-- REVERT fully supported (challenging on EOS as it required no use of eosio::check after nonce increment)
 
-# Build instructions
-Latest eosio.cdt
-Latest eosio with EOSVM2
+### Build instructions
+Requires latest eosio.cdt with latest eosio 2 with EOSVM
+
+Change the token symbol in eosio.evm/include/eosio.evm/constants.hpp to reflect your chain
 
 ```
 cmake .
 make -j4
 ```
 
-# Directory structure
+### Usage instructions
+
+Recommended: eos-evm-js guide
+Alternate: cleos guide
+
+### Directory structure
 - eosio.evm: contains all contract code
   - src: all sourcefiles
   - include/eosio.evm: all headerfiles
@@ -26,7 +42,7 @@ make -j4
   - eosio.evm_tests.cpp: testing suite
 - truffle: ERC20 and ERC721 contracts
 
-# Contract Public Actions
+### Contract Public Actions
 ```c++
 ACTION raw ( const std::vector<int8_t>& tx,
              const std::optional<eosio::checksum160>& sender);
@@ -57,7 +73,7 @@ void transfer( const eosio::name& from,
 ```
 - Standard transfer function used to deposit balance into associated Ethereum account. If the depositor does not have an EVM account associated, the transaction will fail to execute.
 
-# Contract Tables
+### Contract Tables
 ```c++
 struct Account {
   uint64_t index;
@@ -86,10 +102,14 @@ struct AccountState {
 - `key` - big-endian encoded key for storage
 - `value` - big-endian encoded value for storage
 
-# EVM Notes
+### EVM Notes
 - We assume that maximum "value" of a transaction is within the limits of a int64_t. Any transaction with a "value" greater than 2^62 - 1 will be considered invalid.
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
+- Precompiled contracts are not currently supported, many like ec_mul and ec_add are due to be added to EOSIO soon
+
+### Disclosure
+Note that this repository is still in a highly iterative state, if you find any bugs, please open an issue or a pull request.

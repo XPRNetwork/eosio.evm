@@ -29,13 +29,13 @@ namespace eosio_evm
     intx::be::unsafe::store(address_bytes.data(), address);
     return address_bytes;
   }
-  inline const std::array<uint8_t, 32u> fromChecksum256(const eosio::checksum256 input)
-  {
-    std::array<uint8_t, 32U> output = {};
-    auto input_bytes = input.extract_as_byte_array();
-    std::copy(std::begin(input_bytes), std::end(input_bytes), std::begin(output) + 12);
-    return output;
-  }
+  // inline const std::array<uint8_t, 32u> addressAsBytesFromChecksum256(const eosio::checksum256 input)
+  // {
+  //   std::array<uint8_t, 32U> output = {};
+  //   auto input_bytes = input.extract_as_byte_array();
+  //   std::copy(std::begin(input_bytes), std::end(input_bytes), std::begin(output) + 12);
+  //   return output;
+  // }
   inline const std::array<uint8_t, 32u> fromChecksum160(const eosio::checksum160 input)
   {
     std::array<uint8_t, 32U> output = {};
@@ -67,10 +67,15 @@ namespace eosio_evm
   static inline eosio::checksum160 addressToChecksum160(const Address& input) {
     return toChecksum160( toBin(input) );
   }
-  // static inline Address checksum256ToAddress(const eosio::checksum256& input) {
-  //   const std::array<uint8_t, 32u>& checksum = fromChecksum256(input);
-  //   return intx::be::unsafe::load<uint256_t>(checksum.data());
-  // }
+
+  // Do not use for addresses, only value for Account States
+  static inline uint256_t checksum256ToValue(const eosio::checksum256& input) {
+    std::array<uint8_t, 32U> output = {};
+    auto input_bytes = input.extract_as_byte_array();
+    std::copy(std::begin(input_bytes), std::end(input_bytes), std::begin(output));
+
+    return intx::be::unsafe::load<uint256_t>(output.data());
+  }
 
   /**
    * Keccak (SHA3) Functions

@@ -82,6 +82,20 @@
             ]
         },
         {
+            "name": "call",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                },
+                {
+                    "name": "sender",
+                    "type": "checksum160?"
+                }
+            ]
+        },
+        {
             "name": "clearall",
             "base": "",
             "fields": []
@@ -218,6 +232,11 @@
         }
     ],
     "actions": [
+        {
+            "name": "call",
+            "type": "call",
+            "ricardian_contract": ""
+        },
         {
             "name": "clearall",
             "type": "clearall",

@@ -7,7 +7,6 @@
 
 #include "constants.hpp"
 #include "util.hpp"
-#include "logs.hpp"
 #include "tables.hpp"
 
 namespace eosio_evm
@@ -33,6 +32,53 @@ namespace eosio_evm
     return rec_id;
   }
 
+  /**
+   * EVM Logs
+   */
+  struct LogEntry
+  {
+    Address address;
+    std::vector<uint8_t> data;
+    std::vector<uint256_t> topics;
+
+    #if (PRINT_LOGS == true)
+    std::string topics_as_json_string() const {
+      std::string output = "[";
+      for (auto i = 0; i < topics.size(); i++) {
+        output += "\"" + intx::hex(topics[i]) + "\"";
+        if (i < topics.size() - 1) {
+          output += ",";
+        }
+      }
+      output += "]";
+      return output;
+    }
+    #endif /** PRINT_LOGS **/
+  };
+
+  struct LogHandler
+  {
+    std::vector<LogEntry> logs = {};
+    inline void add(LogEntry&& e) { logs.emplace_back(e); }
+    inline void pop() { if(!logs.empty()) { logs.pop_back(); } }
+
+    #if (PRINT_LOGS == true)
+    std::string as_json_string() const {
+      std::string output = "[";
+      for(auto& log : logs) {
+        output += R"({"address": ")" + intx::hex(log.address)     + "\"," +
+                  R"("data": ")"    + bin2hex(log.data)           + "\"," +
+                  R"("topics": )"   + log.topics_as_json_string() + "}";
+      }
+      output += "]";
+      return output;
+    }
+    #endif /** PRINT_LOGS **/
+  };
+
+  /**
+   * State modifications: Stored for Reverting
+   */
   enum class StateModificationType {
     NONE = 0,
     STORE_KV,
@@ -70,6 +116,11 @@ namespace eosio_evm
     #endif /** Testing **/
   };
 
+  // enum class TransactionType {
+  //   TRANSACTION,
+  //   CALL
+  // }
+
   struct EthereumTransaction {
     uint256_t nonce;           // A scalar value equal to the number of transactions sent by the sender;
     uint256_t gas_price;       // A scalar value equal to the number of Wei to be paid per unit of gas for all computation costs incurred as a result of the execution of this transaction;
@@ -80,15 +131,17 @@ namespace eosio_evm
 
     std::optional<eosio::checksum160> sender; // Address recovered from 1) signature or 2) EOSIO Account Table (authorized by EOSIO account in case 2)
     std::optional<Address> to_address;        // Currently set as 256 bit. The 160-bit address of the message call’s recipient or, for a contract creation transaction, ∅, used here to denote the only member of B0 ;
+    std::optional<Address> created_address;   // If create transaction, the address that was created
     std::unique_ptr<Account> sender_account;  // Pointer to sender account
     std::vector<Address> selfdestruct_list;   // SELFDESTRUCT List
-    LogHandler log_handler = {};              // Log handler for transaction
-    eosio::checksum256 hash = {};             // Log handler for transaction
+    LogHandler logs = {};                     // Log handler for transaction
+    eosio::checksum256 hash = {};             // Hash of transaction
+    std::vector<std::string> errors;          // Keeps track of errors
 
     uint256_t gas_used;     // Gas used in transaction
     uint256_t gas_refunds;  // Refunds processed in transaction
+    std::vector<StateModification> state_modifications;                  // State modifications
     std::map<uint64_t, std::map<uint256_t, uint256_t>> original_storage; // Cache for SSTORE
-    std::vector<StateModification> state_modifications;   // State modifications
 
     // Signature data
     uint8_t v;   // Recovery ID
@@ -125,7 +178,6 @@ namespace eosio_evm
       eosio::check(value >= 0 && value <= eosio::asset::max_amount, "Invalid Transaction: Max Value in EOS EVM TX is 2^62 - 1, and it must be positive.");
 
       // Hash
-      // TODO do we need this in prod? how many times are we calling encode() too
       hash = keccak_256(encode());
 
       // Gas
@@ -255,32 +307,50 @@ namespace eosio_evm
       }
     }
 
-    #if (TESTING == true)
-    void print() const
+    std::string errors_as_json_string() const {
+      std::string output = "[";
+      for (auto i = 0; i < errors.size(); i++) {
+        output += "\"" + errors[i] + "\"";
+        if (i < errors.size() - 1) output += ",";
+      }
+      output += "]";
+      return output;
+    }
+
+    void print_receipt(const ExecResult& result) const
     {
+      auto status = result.er == ExitReason::returned ? "success" : "fail";
+
       eosio::print(
-        "\x1b[36m\n",
-        "sender ",   *sender,                           "\n",
-        // "data ",      bin2hex(data),                    "\n",
-        "data size: ",  data.size(),                    "\n",
-        "gasPrice ", static_cast<int128_t>(gas_price), "\n",
-        "gasLimit ", static_cast<int128_t>(gas_limit), "\n",
-        "nonce ",     intx::hex(nonce),                 "\n",
-        "to ",        bin2hex(to),                      "\n",
-        "value ",     static_cast<int64_t>(value),      "\n",
-        "v ",         v,                                "\n"
-        "r ",         intx::hex(r),                     "\n",
-        "s ",         intx::hex(s),                     "\n",
-        "hash ",      hash,                             "\n",
-        "\x1b[0m"
+        "{",
+          "\"status\": \"", status, "\",",
+          "\"from\": \"", *sender, "\",",
+          "\"to\": \"", bin2hex(to), "\",",
+          "\"value\": ", intx::to_string(value), ",",
+          "\"nonce\": ", intx::hex(nonce), ",",
+          "\"v\": \"", v, "\",",
+          "\"r\": \"", intx::hex(r), "\",",
+          "\"s\": \"", intx::hex(s), "\",",
+          "\"createdAddress\": \"", created_address ? intx::hex(*created_address) : "", "\",",
+          "\"gasUsed\": ", intx::to_string(gas_used), ",",
+          "\"gasLimit\": ", intx::to_string(gas_limit), ",",
+          "\"gasPrice\": ", static_cast<int128_t>(gas_price), ",",
+          "\"logs\": ", PRINT_LOGS ? logs.as_json_string() : "", ",",
+          "\"output\": \"", bin2hex(result.output), "\","
+          "\"errors\": ", errors_as_json_string(), ","
+          "\"transactionHash\": \"", hash, "\""
+        "}"
       );
     }
+
+    #if (TESTING == true)
     void printhex() const
     {
       eosio::print(
         // "data ",      bin2hex(data),        "\n",
         "gasLimit ",  intx::hex(gas_limit), "\n",
         "gasPrice ",  intx::hex(gas_price), "\n",
+        "data ",     bin2hex(data),     "\n",
         "nonce ",     intx::hex(nonce),     "\n",
         "to ",        bin2hex(to),          "\n",
         "value ",     intx::hex(value),     "\n",
@@ -288,9 +358,9 @@ namespace eosio_evm
         "r ",         intx::hex(r),         "\n",
         "s ",         intx::hex(s),         "\n\n",
         "sender ",    *sender,              "\n",
-        "hash ",      hash,                 "\n",
-        "rlp ",       encode(),             "\n"
+        "hash ",      hash,                 "\n"
       );
+      eosio::print("AAAA");
     }
     void printEncoded() const
     {

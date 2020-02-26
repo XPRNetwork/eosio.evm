@@ -727,7 +727,6 @@ namespace eosio_evm
     ctx->s.push(CURRENT_CHAIN_ID);
   }
 
-  // TODO check if balance of contract is correct if it changes mid operation from start
   void Processor::selfbalance()
   {
     ctx->s.push(ctx->callee.get_balance_u64());
@@ -885,12 +884,11 @@ namespace eosio_evm
     bool gas_error = use_gas((size * GP_LOG_DATA) + (number_of_logs * GP_EXTRA_PER_LOG));
     if (gas_error) return;
 
-    // TODO implement printing log table in transaction receipt
     bool memory_error = prepare_mem_access(offset, size);
     if (memory_error) return;
-    std::vector<uint8_t> outputs = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
+    std::vector<uint8_t> log_data = {ctx->mem.begin() + offset, ctx->mem.begin() + offset + size};
 
-    transaction.log_handler.add({ ctx->callee.get_address(), outputs, topics });
+    transaction.logs.add({ ctx->callee.get_address(), log_data, topics });
     transaction.add_modification({ SMT::LOG, 0, 0, 0, 0, 0 });
   }
 

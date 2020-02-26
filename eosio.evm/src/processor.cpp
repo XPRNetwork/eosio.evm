@@ -10,20 +10,32 @@
 
 namespace eosio_evm
 {
-  void Processor::initialize_create(const Account& caller) {
+  void Processor::process_transaction(const Account& caller) {
+    auto result = transaction.is_create()
+      ? initialize_create(caller)
+      : initialize_call(caller);
+
+    // Print Result
+    transaction.print_receipt(result);
+
+    // clean-up
+    for (const auto& addr : transaction.selfdestruct_list) {
+      selfdestruct(addr);
+    }
+  }
+
+  ExecResult Processor::initialize_create(const Account& caller) {
     // Nonce - 1, since the caller's nonce has been incremented in "raw" action
     const Address to_address = generate_address(caller.get_address(), caller.get_nonce() - 1);
 
     // Prevent collision
     const auto [callee, error] = create_account(to_address, 0, true);
-    if (error) {
-      eosio::print("EVM Execution Error: ", intx::hex(to_address), " already exists.");
-      return;
-    }
+    if (error) return {"EVM Execution Error: " + intx::hex(to_address) + " already exists."};
+    transaction.created_address = to_address;
 
     // Transfer value
     bool transfer_error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
-    if (transfer_error) return;
+    if (transfer_error) return {"EVM Execution Error: Unable to process value transfer, check your balance."};
 
     // Push initial context
     ExecResult result;
@@ -54,48 +66,33 @@ namespace eosio_evm
     // Run
     run();
 
-    // Success
+    // If success
     if (result.er == ExitReason::returned) {
       // Validate size
       const auto output_size = result.output.size();
-      if (output_size >= MAX_CODE_SIZE) {
-        eosio::print("EVM Execution Error: Code is larger than max code size, out of gas!");
-        return;
-      }
+      if (output_size >= MAX_CODE_SIZE) return {"EVM Execution Error: Code is larger than max code size, out of gas!"};
 
       // Charge create data gas
       const auto create_gas_cost = output_size * GP_CREATE_DATA;
       const bool out_of_gas = create_gas_cost > transaction.gas_limit;
-      if (out_of_gas) {
-        eosio::print("EVM Execution Error: Out of Gas");
-        return;
-      } else {
-        transaction.gas_used += create_gas_cost;
-      }
+      if (out_of_gas) return {"EVM Execution Error: Out of Gas"};
+      transaction.gas_used += create_gas_cost;
 
       // Set code
       set_code(to_address, std::move(result.output));
     }
-    // Error
-    else
-    {
-      eosio::print("\nEVM Execution Error: ", int(result.er), ", ", result.exmsg);
-    }
 
-    // clean-up
-    for (const auto& addr : transaction.selfdestruct_list) {
-      selfdestruct(addr);
-    }
+    return result;
   }
 
-  void Processor::initialize_call(const Account& caller)
+  ExecResult Processor::initialize_call(const Account& caller)
   {
     Address to_address = *transaction.to_address;
     const Account& callee = get_account(to_address);
 
     // Transfer value
     bool error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
-    if (error) return;
+    if (error) return {"EVM Execution Error: Unable to process value transfer, check your balance."};
 
     // Push initial context
     ExecResult result;
@@ -126,20 +123,8 @@ namespace eosio_evm
     // Run
     run();
 
-    // Success
-    if (result.er == ExitReason::returned)
-    {
-    }
-    // Error
-    else
-    {
-      eosio::print("\nEVM Execution Error: ", int(result.er), ", ", result.exmsg);
-    }
-
-    // clean-up
-    for (const auto& addr : transaction.selfdestruct_list) {
-      selfdestruct(addr);
-    }
+    // Call does nothing with result unlike create which sets code for contract
+    return result;
   }
 
   void Processor::run()
@@ -188,7 +173,7 @@ namespace eosio_evm
           transfer_internal(oldvalue, key, amount);
           break;
         case SMT::LOG:
-          transaction.log_handler.pop();
+          transaction.logs.pop();
           break;
         case SMT::SELF_DESTRUCT:
           transaction.selfdestruct_list.pop_back();
@@ -245,7 +230,8 @@ namespace eosio_evm
 
   // Returns true if error
   bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
-    // eosio::print("\nEXception: ", exception.what());
+    // Add to error log
+    transaction.errors.push_back(exception.what());
 
     // Consume all call gas on exception
     if (exception.type != ET::revert) {

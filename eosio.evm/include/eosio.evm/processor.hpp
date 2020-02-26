@@ -13,33 +13,6 @@ namespace eosio_evm {
   // Forward Declarations
   class evm;
 
-  enum class ExitReason : uint8_t
-  {
-    empty = 0,
-    returned,
-    threw
-  };
-
-  struct ExecResult
-  {
-    ExitReason er = {};
-    Exception::Type ex = {};
-    std::string exmsg = {};
-    std::vector<uint8_t> output = {};
-    uint256_t gas_used = 0;
-
-    #if (TESTING == true)
-    void print() {
-      eosio::print("\n-------------Exec Result------------\n");
-      eosio::print("\nExitReason: ", (uint8_t) er);
-      eosio::print("\nException Type:", (uint8_t) ex);
-      eosio::print("\nException message:" + exmsg);
-      eosio::print("\nOutput:", bin2hex(output));
-      eosio::print("\n-------------End Exec Result------------\n");
-    }
-    #endif /* TESTING */
-  };
-
   class Processor
   {
   private:
@@ -55,8 +28,9 @@ namespace eosio_evm {
         contract(contract)
     {}
 
-    void initialize_create(const Account& caller);
-    void initialize_call(const Account& caller);
+    void process_transaction(const Account& caller);
+    ExecResult initialize_create(const Account& caller);
+    ExecResult initialize_call(const Account& caller);
     void run();
 
     uint16_t get_call_depth() const;

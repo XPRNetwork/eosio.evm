@@ -78,7 +78,7 @@ namespace eosio_evm {
       account_state_table accounts_states(get_self(), existing_address->index);
       auto itr = accounts_states.begin();
       while(itr != accounts_states.end()){
-        eosio::print(R"({"key":")", itr->key, R"(","value":")", intx::to_string(itr->value), R"("})");
+        eosio::print(R"({"key":")", intx::hex(checksum256ToValue(itr->key)), R"(","value":")", intx::hex(itr->value), R"("})");
         itr++;
       }
     }

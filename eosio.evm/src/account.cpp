@@ -199,10 +199,12 @@ namespace eosio_evm {
     auto checksum_key          = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
+    #if (PRINT_STATE == true)
     eosio::print("\n\nStore KV for address index ", address_index,
                  "\nKey: ", intx::to_string(key, 10),
                  "\nValue ", intx::to_string(value, 10),
                  "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
+    #endif
 
     // Key found
     if (account_state != accounts_states_bykey.end())
@@ -240,9 +242,11 @@ namespace eosio_evm {
     const auto checksum_key    = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
-    // eosio::print("\n\nLoad KV for address index ", address_index,
-    //              "\nKey: ", intx::to_string(key),
-    //              "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
+    #if (PRINT_STATE == true)
+    eosio::print("\n\nLoad KV for address index ", address_index,
+                 "\nKey: ", intx::to_string(key),
+                 "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
+    #endif
 
     // Value
     auto current_value = account_state != accounts_states_bykey.end() ? account_state->value : 0;

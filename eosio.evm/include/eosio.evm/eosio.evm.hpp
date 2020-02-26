@@ -50,6 +50,12 @@ namespace eosio_evm {
                    const eosio::asset& quantity,
                    const std::string& memo );
 
+    // Extra to match ethereum functionality (calls do not modify state and will always assert)
+    ACTION call(
+      const std::vector<int8_t>& tx,
+      const std::optional<eosio::checksum160>& sender
+    );
+
     // Action wrappers
     using withdraw_action = eosio::action_wrapper<"withdraw"_n, &evm::withdraw>;
     using transfer_action = eosio::action_wrapper<"transfer"_n, &evm::transfer>;
@@ -73,7 +79,7 @@ namespace eosio_evm {
         itr = db.erase(--itr);
       }
 
-      for(int i = 0; i < 10; i++) {
+      for(int i = 0; i < 25; i++) {
         account_state_table db2(get_self(), i);
         auto itr = db2.end();
         while(db2.begin() != itr){
@@ -83,7 +89,8 @@ namespace eosio_evm {
     }
     #endif
 
-    // Transfer
+  private:
+    // EOS Transfer
     void sub_balance (const eosio::name& user, const eosio::asset& quantity);
     void add_balance (const eosio::name& user, const eosio::asset& quantity);
   };

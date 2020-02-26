@@ -1,4 +1,5 @@
-![eosio.evm](./evm.png)
+[![eosio.evm](./evm.png)](#)
+
 ### Benchmarks
 | Action         | CPU Cost      |
 | -------------  |:-------------:|

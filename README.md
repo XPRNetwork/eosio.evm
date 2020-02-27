@@ -20,6 +20,7 @@
 
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+Basic usage: [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
 
 ### Build/Manual Deployment instructions
 Requires latest eosio.cdt with latest eosio 2 with EOSVM

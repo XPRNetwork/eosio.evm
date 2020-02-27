@@ -921,6 +921,15 @@ img { max-width: 100%; }
 		<li class=" tsd-kind-interface">
 			<a href="interfaces/accountstate.html" class="tsd-kind-icon">Account<wbr>State</a>
 		</li>
+		<li class=" tsd-kind-interface">
+			<a href="interfaces/evmreceipt.html" class="tsd-kind-icon">Evm<wbr>Receipt</a>
+		</li>
+		<li class=" tsd-kind-interface">
+			<a href="interfaces/evmresponse.html" class="tsd-kind-icon">Evm<wbr>Response</a>
+		</li>
+		<li class=" tsd-kind-interface">
+			<a href="interfaces/log.html" class="tsd-kind-icon">Log</a>
+		</li>
 		<li class=" tsd-kind-variable">
 			<a href="globals.html#default_chain_id" class="tsd-kind-icon">DEFAULT_<wbr>CHAIN_<wbr>ID</a>
 		</li>
@@ -993,42 +1002,47 @@ img { max-width: 100%; }
 			<h3 id="installation">Installation</h3>
 			<p>Requires nodejs and npm installed</p>
 			<pre><code class="language-bash">npm install eos-evm-js</code></pre>
-			<h3 id="erc-20-tutorial">ERC-20 Tutorial</h3>
-			<pre><code class="language-ts"><span class="hljs-keyword">import</span> { EosEvmApi } <span class="hljs-keyword">from</span> <span class="hljs-string">'eos-evm-js'</span>
+			<h3 id="how-to-setup-evm-and-deploy-erc-20-token-on-eosio-in-5-minutes">How to setup EVM and deploy ERC-20 Token on EOSIO in 5 minutes</h3>
+			<pre><code class="language-js"><span class="hljs-keyword">const</span> { EosEvmApi } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eos-evm-js'</span>)
+
+<span class="hljs-keyword">const</span> evmContractAccount = <span class="hljs-string">'evmcontract1'</span>
+<span class="hljs-keyword">const</span> evmNormalAccount = <span class="hljs-string">'evmaccount11'</span>
+<span class="hljs-keyword">const</span> SYSTEM_SYMBOL = <span class="hljs-string">'EOS'</span>
 
 <span class="hljs-keyword">const</span> api = <span class="hljs-keyword">new</span> EosEvmApi({
   <span class="hljs-comment">// Ensure the API has console printing enabled</span>
-  endpoint: <span class="hljs-string">'https://jungle.eosdac.io'</span>,
+  <span class="hljs-attr">endpoint</span>: <span class="hljs-string">'https://jungle.eosdac.io'</span>,
 
   <span class="hljs-comment">// Must match the chain ID the contract is compiled with (1 by default)</span>
-  chainId: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">chainId</span>: <span class="hljs-number">1</span>,
 
-  <span class="hljs-comment">// Enter your own private keys (examples provided)</span>
-  ethPrivateKeys: [
+  <span class="hljs-comment">// Enter your own private keys if you wish to sign transaction (examples provided)</span>
+  <span class="hljs-attr">ethPrivateKeys</span>: [
     <span class="hljs-comment">// Public Key: 0xf79b834a37f3143f4a73fc3934edac67fd3a01cd</span>
     <span class="hljs-string">'0x8dd3ec4846cecac347a830b758bf7e438c4d9b36a396b189610c90b57a70163d'</span>,
-    <span class="hljs-comment">// Public Key: 0xab21f17d0c3e30be30e115508643817b297ae8d6</span>
-    <span class="hljs-string">'0x206cbcc0ccbb96a0df7ba079d25866bd0d52f4248861a0a38bc9bfd58c00556a'</span>
   ],
 
-  <span class="hljs-comment">// Enter EOS account that contract is at / will be deployed to</span>
-  eosContract: <span class="hljs-string">'1234test1111'</span>,
+  <span class="hljs-comment">// Enter EOS account that EVM is at / will be deployed to</span>
+  <span class="hljs-attr">eosContract</span>: evmContractAccount,
 
   <span class="hljs-comment">// Enter your own private keys (examples provided)</span>
-  eosPrivateKeys: [
-    <span class="hljs-string">'5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'</span>
+  <span class="hljs-attr">eosPrivateKeys</span>: [
+    <span class="hljs-comment">// evmcontract1 (EOS7DJzWuEr1Zu36ZX8GXwGsvNNqdGqx8QRs7KPkqCMTxG6MBT1Eu)</span>
+    <span class="hljs-string">'5JACk8gJ98x3AkypbicNQviXzkqAM2wbbE3FtA79icT2Ks4bWws'</span>,
+    <span class="hljs-comment">// evmaccount11 (EOS8Z9y2b1GfAkFUQxBTsiu9DJSLebVoU8cpwLAfXcgWDRWg9aM2Q)</span>
+    <span class="hljs-string">'5JhwbcHTVk16Pv7fCgitNSHgwGwjAPEgEJbiaCcXaza1PKrbCns'</span>
   ]
 })
 
 <span class="hljs-comment">// Import contract compiled with solc (check eos-evm-js/src/eth-contracts/compile.ts to compile your own)</span>
 <span class="hljs-comment">// We provide compiled ERC20 and ERC721 contracts</span>
-<span class="hljs-keyword">const</span> compiledErc20AndErc721 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eos-evm-js/dist/lib/eth-contracts/compiled.json'</span>)
+<span class="hljs-keyword">const</span> compiledErc20AndErc721 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'eos-evm-js/dist/eth-contracts/compiled.json'</span>)
 
 <span class="hljs-comment">// Load ETH contracts with abi and bytecode, plus the TX sending EOS account</span>
 api.loadContractFromAbi({
-  account: <span class="hljs-string">'vestvestvest'</span>, <span class="hljs-comment">// Example EOS account</span>
-  abi: compiledErc20AndErc721.contracts.ERC20.Token.abi,
-  bytecodeObject: compiledErc20AndErc721.contracts.ERC20.Token.evm.bytecode.object
+  <span class="hljs-attr">account</span>: evmNormalAccount, <span class="hljs-comment">// Example EOS account</span>
+  <span class="hljs-attr">abi</span>: compiledErc20AndErc721.contracts.ERC20.Token.abi,
+  <span class="hljs-attr">bytecodeObject</span>: compiledErc20AndErc721.contracts.ERC20.Token.evm.bytecode.object
 })
 
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">main</span> (<span class="hljs-params"></span>) </span>{
@@ -1036,42 +1050,291 @@ api.loadContractFromAbi({
   <span class="hljs-keyword">await</span> api.eos.setupEvmContract()
 
   <span class="hljs-comment">// For development (if TESTING is enabled in contract), clears all data in contract</span>
-  <span class="hljs-comment">// await api.eos.clearAll()</span>
+  <span class="hljs-keyword">await</span> api.eos.clearAll()
 
   <span class="hljs-comment">// Creates new address based on RLP(eosaccount, arbitrarydata)</span>
-  <span class="hljs-keyword">await</span> api.eos.create({ account: <span class="hljs-string">'1234test1111'</span>, data: <span class="hljs-string">'test'</span> })
+  <span class="hljs-keyword">await</span> api.eos.create({ <span class="hljs-attr">account</span>: evmNormalAccount, <span class="hljs-attr">data</span>: <span class="hljs-string">'test'</span> })
 
   <span class="hljs-comment">// Transfer EOS to contract to deposit to address</span>
-  <span class="hljs-keyword">await</span> api.eos.deposit({ <span class="hljs-keyword">from</span>: <span class="hljs-string">'vestvestvest'</span>, quantity: <span class="hljs-string">'0.0001 EOS'</span> })
+  <span class="hljs-keyword">await</span> api.eos.deposit({ <span class="hljs-attr">from</span>: evmNormalAccount, <span class="hljs-attr">quantity</span>: <span class="hljs-string">`0.0002 <span class="hljs-subst">${SYSTEM_SYMBOL}</span>`</span> })
 
-  <span class="hljs-comment">// Create new contract account with ERC20 contract deployed (Name, Symbol, Decimals, Total Supply)</span>
-  <span class="hljs-keyword">await</span> api.eth.deploy(<span class="hljs-string">'Syed Token'</span>, <span class="hljs-string">'SYED'</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1000000</span>)
+  <span class="hljs-comment">// Get all data for new address (address, account, nonce, balance, code)</span>
+  <span class="hljs-keyword">const</span> sender = <span class="hljs-keyword">await</span> api.eos.getEthAccountByEosAccount(evmNormalAccount)
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${sender.address}</span> (<span class="hljs-subst">${evmNormalAccount}</span>) Balance:`</span>, sender.balance) <span class="hljs-comment">// 0.0001 EOS</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${sender.address}</span> (<span class="hljs-subst">${evmNormalAccount}</span>) Nonce:`</span>, sender.nonce) <span class="hljs-comment">// 0</span>
 
-  <span class="hljs-comment">// Transfer ERC20 tokens</span>
+  <span class="hljs-comment">// Deploy ERC20 contract (Name, Symbol, Decimals, Total Supply)</span>
   <span class="hljs-comment">// The returned response "eth" is the EVM transaction receipt, and "eos" is the EOS transaction receipt</span>
-  <span class="hljs-keyword">const</span> { eth, eos } = <span class="hljs-keyword">await</span> api.eth.transfer(receiver, <span class="hljs-number">1000</span>)
+  <span class="hljs-keyword">const</span> { eth, eos } = <span class="hljs-keyword">await</span> api.eth.deploy(<span class="hljs-string">'FIRE Token'</span>, <span class="hljs-string">'FIRE'</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1000000</span>, { <span class="hljs-attr">sender</span>: sender.address })
+
+  <span class="hljs-comment">// Set the created address as the EVM contract to interact with</span>
+  api.setEthereumContract(eth.createdAddress)
 
   <span class="hljs-comment">// Query ERC20 balance using "view" function calls</span>
-  <span class="hljs-built_in">console</span>.log(+<span class="hljs-keyword">await</span> api.eth.balanceOf(sender).toString(<span class="hljs-number">10</span>)) <span class="hljs-comment">// 999,000</span>
-  <span class="hljs-built_in">console</span>.log(+<span class="hljs-keyword">await</span> api.eth.balanceOf(receiver).toString(<span class="hljs-number">10</span>)) <span class="hljs-comment">// 1,000</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${sender.address}</span> FIRE Balance: `</span>, +(<span class="hljs-keyword">await</span> api.eth.balanceOf(sender.address)).toString(<span class="hljs-number">10</span>)) <span class="hljs-comment">// 1,000,000</span>
+
+  <span class="hljs-comment">// New receiver address to send tokens to</span>
+  <span class="hljs-keyword">const</span> receiver = <span class="hljs-string">'0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'</span>
+
+  <span class="hljs-comment">// Transfer system tokens to address to create it</span>
+  <span class="hljs-keyword">await</span> api.transfer({ <span class="hljs-attr">account</span>: evmNormalAccount, <span class="hljs-attr">sender</span>: sender.address, <span class="hljs-attr">to</span>: receiver, <span class="hljs-attr">quantity</span>: <span class="hljs-string">`0.0001 <span class="hljs-subst">${SYSTEM_SYMBOL}</span>`</span> })
+
+  <span class="hljs-comment">// Transfer 1000 FIRE ERC20 tokens</span>
+  <span class="hljs-keyword">await</span> api.eth.transfer(receiver, <span class="hljs-number">1000</span>, { <span class="hljs-attr">sender</span>: sender.address })
+
+  <span class="hljs-comment">// Query ERC20 FIRE balance using "view" function calls</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${sender.address}</span> Balance:`</span>, +(<span class="hljs-keyword">await</span> api.eth.balanceOf(sender.address)).toString(<span class="hljs-number">10</span>), <span class="hljs-string">'FIRE'</span>) <span class="hljs-comment">// 999,000</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${receiver}</span> Balance:`</span>,       +(<span class="hljs-keyword">await</span> api.eth.balanceOf(receiver)).toString(<span class="hljs-number">10</span>)), <span class="hljs-string">'FIRE'</span>       <span class="hljs-comment">//   1,000</span>
 
   <span class="hljs-comment">// Set allowance, and modify it</span>
-  <span class="hljs-keyword">await</span> api.eth.approve(receiver, <span class="hljs-number">100</span>)
-  <span class="hljs-keyword">await</span> api.eth.increaseAllowance(receiver, <span class="hljs-number">1000</span>)
-  <span class="hljs-keyword">await</span> api.eth.decreaseAllowance(receiver, <span class="hljs-number">600</span>)
+  <span class="hljs-keyword">await</span> api.eth.approve(receiver, <span class="hljs-number">100</span>, { <span class="hljs-attr">sender</span>: sender.address })
+  <span class="hljs-keyword">await</span> api.eth.increaseAllowance(receiver, <span class="hljs-number">1000</span>, { <span class="hljs-attr">sender</span>: sender.address })
+  <span class="hljs-keyword">await</span> api.eth.decreaseAllowance(receiver, <span class="hljs-number">600</span>, { <span class="hljs-attr">sender</span>: sender.address })
 
-  <span class="hljs-comment">// Query it (another example of using non-state modifying calls)</span>
-  <span class="hljs-keyword">const</span> allowance = <span class="hljs-keyword">await</span> api.eth.allowance(sender, allowanceAddress)
-  <span class="hljs-built_in">console</span>.log(+allowance.toString(<span class="hljs-number">10</span>)) <span class="hljs-comment">// 500</span>
+  <span class="hljs-comment">// Query allowance (another example of using non-state modifying calls)</span>
+  <span class="hljs-keyword">const</span> allowance = <span class="hljs-keyword">await</span> api.eth.allowance(sender.address, receiver, { <span class="hljs-attr">sender</span>: receiver })
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Allowance for <span class="hljs-subst">${sender.address}</span>-&gt;<span class="hljs-subst">${receiver}</span>:`</span>, +allowance.toString(<span class="hljs-number">10</span>), <span class="hljs-string">'FIRE'</span>) <span class="hljs-comment">// 500</span>
 
   <span class="hljs-comment">// Use the allowance to transfer</span>
-  <span class="hljs-keyword">await</span> api.eth.transferFrom(sender, receiver, <span class="hljs-number">500</span>, { sender: receiver })
+  <span class="hljs-comment">// rawSign uses ethereum private key to sign instead of EOSIO account permissions</span>
+  <span class="hljs-keyword">await</span> api.eth.transferFrom(sender.address, receiver, <span class="hljs-number">500</span>, { <span class="hljs-attr">sender</span>: receiver, <span class="hljs-attr">rawSign</span>: <span class="hljs-literal">true</span> })
+
+  <span class="hljs-comment">// Withdraw tokens</span>
+  <span class="hljs-keyword">await</span> api.eos.withdraw({ <span class="hljs-attr">account</span>: evmNormalAccount, <span class="hljs-attr">quantity</span>: <span class="hljs-string">`0.0001 <span class="hljs-subst">${SYSTEM_SYMBOL}</span>`</span> })
+
+  <span class="hljs-comment">// Other available functions, check docs</span>
+  <span class="hljs-comment">// await getStorageAt(address, key)</span>
+  <span class="hljs-comment">// await createEthTx({ sender, data, gasLimit, value, to, rawSign = false })</span>
+  <span class="hljs-comment">// async getNonce(address)</span>
+  <span class="hljs-comment">// async getEthAccount(address)</span>
 }
 
 main()</code></pre>
-			<h3 id="further-documentation">Further documentation</h3>
-			<h3 id="disclosure">Disclosure</h3>
-			<p>This repository is in a highly iterative state, please use at your own risk.</p>
+			<h2 id="api">API</h2>
+			<!-- Generated by documentation.js. Update this documentation by updating the source code. -->
+			<h4 id="table-of-contents">Table of Contents</h4>
+			<ul>
+				<li><a href="#eosevmapi">EosEvmApi</a><ul>
+						<li><a href="#setethereumcontract">setEthereumContract</a><ul>
+								<li><a href="#parameters">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#loadcontractfromabi">loadContractFromAbi</a><ul>
+								<li><a href="#parameters-1">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#transfer">transfer</a><ul>
+								<li><a href="#parameters-2">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#createethtx">createEthTx</a><ul>
+								<li><a href="#parameters-3">Parameters</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li><a href="#eosapi">EosApi</a><ul>
+						<li><a href="#transact">transact</a><ul>
+								<li><a href="#parameters-4">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#raw">raw</a><ul>
+								<li><a href="#parameters-5">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#call">call</a><ul>
+								<li><a href="#parameters-6">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#create">create</a><ul>
+								<li><a href="#parameters-7">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#withdraw">withdraw</a><ul>
+								<li><a href="#parameters-8">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#deposit">deposit</a><ul>
+								<li><a href="#parameters-9">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#clearall">clearAll</a></li>
+						<li><a href="#gettable">getTable</a><ul>
+								<li><a href="#parameters-10">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getalladdresses">getAllAddresses</a><ul>
+								<li><a href="#parameters-11">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getethaccount">getEthAccount</a><ul>
+								<li><a href="#parameters-12">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getnonce">getNonce</a><ul>
+								<li><a href="#parameters-13">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getstorageat">getStorageAt</a><ul>
+								<li><a href="#parameters-14">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getethaccountbyeosaccount">getEthAccountByEosAccount</a><ul>
+								<li><a href="#parameters-15">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#setupevmcontract">setupEvmContract</a><ul>
+								<li><a href="#parameters-16">Parameters</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<h3 id="eosevmapi">EosEvmApi</h3>
+			<h4 id="setethereumcontract">setEthereumContract</h4>
+			<p>Sets the address for ethereum contract</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>contract</code>  </li>
+				<li><code>address</code>  ethereum contract address</li>
+			</ul>
+			<h4 id="loadcontractfromabi">loadContractFromAbi</h4>
+			<p>Initializes Web3 like interface to send actions to EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>account</code>  EOSIO account to interact with EVM</li>
+				<li><code>abi</code>  ABI object</li>
+				<li><code>bytecode</code>  Bytecode object</li>
+			</ul>
+			<h4 id="transfer">transfer</h4>
+			<p>Transfers value inside EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>overrides</code>  </li>
+				<li><code>account</code>  The EOS account associated to ETH address</li>
+				<li><code>sender</code>  The ETH address sending the TX</li>
+				<li><code>to</code>  The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
+				<li><code>quantity</code>  EOSIO quantity</li>
+				<li><code>ethSign</code>  Whether to sign transaction with ethereum private key</li>
+			</ul>
+			<h4 id="createethtx">createEthTx</h4>
+			<p>Generates RLP encoded transaction sender parameters</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>sender</code>  The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
+				<li><code>data</code>  The data in transaction</li>
+				<li><code>gasLimit</code>  The gas limit of the transaction</li>
+				<li><code>value</code>  The value in the transaction</li>
+				<li><code>to</code>  The ETH address to send transaction to</li>
+				<li><code>sign</code>  Whether to sign the transaction</li>
+			</ul>
+			<p>Returns <strong>any</strong> RLP encoded transaction</p>
+			<h3 id="eosapi">EosApi</h3>
+			<h4 id="transact">transact</h4>
+			<p>Actions</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>actions</code>  </li>
+			</ul>
+			<h4 id="raw">raw</h4>
+			<p>Sends a ETH TX to EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>account</code>  EOSIO account to interact with EVM</li>
+				<li><code>tx</code>  Raw RLP encoded hex string</li>
+				<li><code>sender</code>  The ETH address of an account if tx is not signed</li>
+			</ul>
+			<h4 id="call">call</h4>
+			<p>Sends a non state modifying call to EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>account</code>  EOSIO account to interact with EVM</li>
+				<li><code>tx</code>  Raw RLP encoded hex string</li>
+				<li><code>sender</code>  The ETH address of an account if tx is not signed</li>
+			</ul>
+			<h4 id="create">create</h4>
+			<p>Creates EVM address from EOS account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>account</code>  EOSIO account to interact with EVM</li>
+				<li><code>data</code>  Arbitrary string used as salt</li>
+			</ul>
+			<h4 id="withdraw">withdraw</h4>
+			<p>Withdraws core token from the balance of an account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>account</code>  EOSIO account to withdraw to</li>
+				<li><code>data</code>  EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
+			</ul>
+			<h4 id="deposit">deposit</h4>
+			<p>Deposits token into EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>_a</code>  </li>
+				<li><code>from</code>  EOSIO account to send from</li>
+				<li><code>quantity</code>  EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
+				<li><code>memo</code>  Memo to transfer</li>
+			</ul>
+			<h4 id="clearall">clearAll</h4>
+			<p>Testing</p>
+			<h4 id="gettable">getTable</h4>
+			<p>Fetching</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>data</code>  </li>
+			</ul>
+			<h4 id="getalladdresses">getAllAddresses</h4>
+			<p>Gets all accounts</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<h4 id="getethaccount">getEthAccount</h4>
+			<p>Gets the on-chain account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in contract</li>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<h4 id="getnonce">getNonce</h4>
+			<p>Gets nonce for given address</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in contract</li>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong>any</strong> Hex-encoded nonce</p>
+			<h4 id="getstorageat">getStorageAt</h4>
+			<p>Gets the on-chain state value</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in contract</li>
+				<li><code>key</code>  </li>
+			</ul>
+			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<h4 id="getethaccountbyeosaccount">getEthAccountByEosAccount</h4>
+			<p>Gets the on-chain account by eos account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>account</code>  The EOS contract linked to ETH address</li>
+			</ul>
+			<p>Returns <strong>any</strong> Full EOS Account table row</p>
+			<h4 id="setupevmcontract">setupEvmContract</h4>
+			<p>Deploy EVM contract to EOS account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>contractDir</code>  The directory which contains the ABI and WASM</li>
+				<li><code>contract</code>  The EOS contract to deploy EVM to</li>
+			</ul>
 		</div>
 		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
 		<section class="tsd-panel-group tsd-index-group">
@@ -1090,6 +1353,9 @@ main()</code></pre>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-interface"><a href="interfaces/account.html" class="tsd-kind-icon">Account</a></li>
 							<li class="tsd-kind-interface"><a href="interfaces/accountstate.html" class="tsd-kind-icon">Account<wbr>State</a></li>
+							<li class="tsd-kind-interface"><a href="interfaces/evmreceipt.html" class="tsd-kind-icon">Evm<wbr>Receipt</a></li>
+							<li class="tsd-kind-interface"><a href="interfaces/evmresponse.html" class="tsd-kind-icon">Evm<wbr>Response</a></li>
+							<li class="tsd-kind-interface"><a href="interfaces/log.html" class="tsd-kind-icon">Log</a></li>
 						</ul>
 					</section>
 					<section class="tsd-index-section ">
@@ -1139,7 +1405,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>CHAIN_<wbr>ID<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L21">constants.ts:21</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L21">constants.ts:21</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1149,7 +1415,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>GAS_<wbr>LIMIT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x1E8480"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x1E8480&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L19">constants.ts:19</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L19">constants.ts:19</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1159,7 +1425,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>GAS_<wbr>PRICE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x01"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x01&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L18">constants.ts:18</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L18">constants.ts:18</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1169,7 +1435,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>SYMBOL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"EOS"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EOS&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L22">constants.ts:22</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L22">constants.ts:22</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1179,7 +1445,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>VALUE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x0"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x0&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L20">constants.ts:20</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L20">constants.ts:20</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1189,7 +1455,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>SYSTEM<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"eosio"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;eosio&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L14">constants.ts:14</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L14">constants.ts:14</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1199,7 +1465,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>TOKEN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"eosio.token"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;eosio.token&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L13">constants.ts:13</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L13">constants.ts:13</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1209,7 +1475,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>TOKEN_<wbr>PRECISION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">4</span><span class="tsd-signature-symbol"> =&nbsp;4</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L17">constants.ts:17</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L17">constants.ts:17</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1219,7 +1485,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">ETH_<wbr>CHAIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"mainnet"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;mainnet&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L15">constants.ts:15</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L15">constants.ts:15</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1229,7 +1495,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">FORK<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"istanbul"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;istanbul&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L16">constants.ts:16</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L16">constants.ts:16</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1239,7 +1505,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">abi<wbr>Encoder<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;ethereumjs-abi&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eos-evm-js.ts#L15">eos-evm-js.ts:15</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eos-evm-js.ts#L15">eos-evm-js.ts:15</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1249,7 +1515,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">compiled<wbr>Contract<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;solc.compile(JSON.stringify(contractInput), { import: findImports })</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L33">eth-contracts/compile.ts:33</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L33">eth-contracts/compile.ts:33</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1259,7 +1525,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">fs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;fs&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L1">eth-contracts/compile.ts:1</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L1">eth-contracts/compile.ts:1</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1269,7 +1535,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;path&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L2">eth-contracts/compile.ts:2</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L2">eth-contracts/compile.ts:2</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1279,7 +1545,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">solc<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;solc&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L3">eth-contracts/compile.ts:3</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L3">eth-contracts/compile.ts:3</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1296,7 +1562,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L29">eth-contracts/compile.ts:29</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L29">eth-contracts/compile.ts:29</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1324,7 +1590,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/deploy.ts#L4">deploy.ts:4</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/deploy.ts#L4">deploy.ts:4</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1355,7 +1621,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eos.ts#L10">eos.ts:10</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eos.ts#L10">eos.ts:10</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1377,7 +1643,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">ENDPOINTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L8">constants.ts:8</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L8">constants.ts:8</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -1386,7 +1652,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">jungle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;https://api.jungle.alohaeos.com&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L9">constants.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L9">constants.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1396,7 +1662,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">local<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;http://0.0.0.0:8888&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L10">constants.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L10">constants.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1407,7 +1673,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">chain<wbr>Ids<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L1">constants.ts:1</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L1">constants.ts:1</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -1416,7 +1682,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">jungle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L3">constants.ts:3</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L3">constants.ts:3</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1426,7 +1692,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">kylin<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L4">constants.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L4">constants.ts:4</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1436,7 +1702,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">local<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L5">constants.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L5">constants.ts:5</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1446,7 +1712,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">mainnet<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/constants.ts#L2">constants.ts:2</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L2">constants.ts:2</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1457,7 +1723,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">contract<wbr>Input<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L5">eth-contracts/compile.ts:5</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L5">eth-contracts/compile.ts:5</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1466,7 +1732,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">language<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Solidity&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L14">eth-contracts/compile.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L14">eth-contracts/compile.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1476,7 +1742,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L15">eth-contracts/compile.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L15">eth-contracts/compile.ts:15</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1485,7 +1751,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">evm<wbr>Version<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;istanbul&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L20">eth-contracts/compile.ts:20</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L20">eth-contracts/compile.ts:20</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1495,7 +1761,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">optimizer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L16">eth-contracts/compile.ts:16</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L16">eth-contracts/compile.ts:16</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1504,7 +1770,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">enabled<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L17">eth-contracts/compile.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L17">eth-contracts/compile.ts:17</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1514,7 +1780,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">runs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;300</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L18">eth-contracts/compile.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L18">eth-contracts/compile.ts:18</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1525,7 +1791,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">output<wbr>Selection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L21">eth-contracts/compile.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L21">eth-contracts/compile.ts:21</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1534,7 +1800,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">*<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L22">eth-contracts/compile.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L22">eth-contracts/compile.ts:22</a></li>
 								</ul>
 							</aside>
 							<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1543,7 +1809,7 @@ main()</code></pre>
 								<div class="tsd-signature tsd-kind-icon">*<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;abi&#x27;, &#x27;evm.bytecode&#x27;]</span></div>
 								<aside class="tsd-sources">
 									<ul>
-										<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L23">eth-contracts/compile.ts:23</a></li>
+										<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L23">eth-contracts/compile.ts:23</a></li>
 									</ul>
 								</aside>
 							</section>
@@ -1556,7 +1822,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">sources<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L6">eth-contracts/compile.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L6">eth-contracts/compile.ts:6</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1565,7 +1831,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">ERC20<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L7">eth-contracts/compile.ts:7</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L7">eth-contracts/compile.ts:7</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1574,7 +1840,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;fs.readFileSync(path.join(__dirname, &#x27;ERC20.sol&#x27;), &#x27;utf8&#x27;)</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L8">eth-contracts/compile.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L8">eth-contracts/compile.ts:8</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1585,7 +1851,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">ERC721<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L10">eth-contracts/compile.ts:10</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L10">eth-contracts/compile.ts:10</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1594,7 +1860,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;fs.readFileSync(path.join(__dirname, &#x27;ERC721.sol&#x27;), &#x27;utf8&#x27;)</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/0467915/eos-evm-js/src/eth-contracts/compile.ts#L11">eth-contracts/compile.ts:11</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L11">eth-contracts/compile.ts:11</a></li>
 								</ul>
 							</aside>
 						</section>

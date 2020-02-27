@@ -12,3 +12,32 @@ export interface AccountState {
   key: string
   value: string
 }
+
+export interface Log {
+  address: string
+  data: string
+  topics: string[]
+}
+export interface EvmReceipt {
+  status: string
+  from: string
+  to: string
+  value: number
+  nonce: number
+  v: number
+  r: string
+  s: string
+  createdAddress: string
+  gasUsed: number
+  gasLimit: number
+  gasPrice: number
+  logs: Log[]
+  output: string
+  errors: string[]
+  transactionHash: string
+}
+
+export interface EvmResponse {
+  eth: EvmReceipt
+  eos: any
+}

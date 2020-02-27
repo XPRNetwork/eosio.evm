@@ -56,7 +56,7 @@ export class EosEvmApi {
   /**
    * Sets the address for ethereum contract
    *
-   * @param address ethereum contract address
+   * @param contract ethereum contract address
    */
   async setEthereumContract(contract: string) {
     if (contract.substr(0, 2) !== '0x') contract = `0x${contract}`
@@ -66,9 +66,10 @@ export class EosEvmApi {
   /**
    * Initializes Web3 like interface to send actions to EVM
    *
-   * @param account EOSIO account to interact with EVM
-   * @param abi ABI object
-   * @param bytecode Bytecode object
+   * @param {object} [args={}] Arguments
+   * @param {string} [args.account]  EOSIO account to interact with EVM
+   * @param {object} [args.abi]  ABI object
+   * @param {string} [args.bytecodeObject]  Bytecode object
    */
   async loadContractFromAbi({
     account,
@@ -190,12 +191,14 @@ export class EosEvmApi {
   /**
    * Transfers value inside EVM
    *
-   * @param account The EOS account associated to ETH address
-   * @param sender The ETH address sending the TX
-   * @param to The ETH address sending the transaction (nonce is fetched on-chain for this address)
-   * @param quantity EOSIO quantity
-   * @param ethSign Whether to sign transaction with ethereum private key
+   * @param {object} [args={}] Arguments
+   * @param {string} [args.account] The EOS account associated to ETH address
+   * @param {string} [args.sender] The ETH address sending the TX
+   * @param {string} [args.to] The ETH address sending the transaction (nonce is fetched on-chain for this address)
+   * @param {string} [args.quantity] The ETH address sending the transaction (nonce is fetched on-chain for this address)
+   * @param {boolean} [args.rawSign] Whether to sign transaction with ethereum private key. False means to use EOSIO authorization
    *
+   * @returns {Promise<EvmResponse>} EVM receipt and EOS receipt
    */
   async transfer(
     {
@@ -234,14 +237,15 @@ export class EosEvmApi {
   /**
    * Generates RLP encoded transaction sender parameters
    *
-   * @param sender The ETH address sending the transaction (nonce is fetched on-chain for this address)
-   * @param data The data in transaction
-   * @param gasLimit The gas limit of the transaction
-   * @param value The value in the transaction
-   * @param to The ETH address to send transaction to
-   * @param sign Whether to sign the transaction
+   * @param {object} [args={}] Arguments
+   * @param {string} [args.sender]  The ETH address sending the transaction (nonce is fetched on-chain for this address)
+   * @param {object} [args.data] The data in transaction
+   * @param {string} [args.gasLimit]  The gas limit of the transaction
+   * @param {string} [args.value]  The value in the transaction
+   * @param {string} [args.to]  The ETH address to send transaction to
+   * @param {string} [args.sign]  Whether to sign the transaction
    *
-   * @returns RLP encoded transaction
+   * @returns {Promise<string>}RLP encoded transaction
    */
   async createEthTx({
     sender,

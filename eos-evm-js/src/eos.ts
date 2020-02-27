@@ -12,8 +12,16 @@ const transformEthAccount = (account: Account) => {
   return account
 }
 
+/**
+ * EOS API used as a subset of EosEvmApi
+ *
+ * @param {object} args Arguments
+ * @param {Array<string>} args.eosPrivateKeysEOSIO private keys
+ * @param {Array<string>} args.endpointEOSIO rpc endpoint
+ * @param {Array<string>} args.eosContractEOSIO contract name with EVM
+ */
 export class EosApi {
-  eosPrivateKeys: string[]
+  eosPrivateKeys: Array<string>
   signatureProvider: any
   rpc: any
   eos: any
@@ -24,7 +32,7 @@ export class EosApi {
     endpoint,
     eosContract
   }: {
-    eosPrivateKeys: string[]
+    eosPrivateKeys: Array<string>
     endpoint: string
     eosContract: string
   }) {
@@ -41,7 +49,10 @@ export class EosApi {
   }
 
   /**
-   * Actions
+   * Bundles actions into a transaction to send to EOS Api
+   *
+   * @param {any[]} actionsFull EOSIO actions
+   * @returns {Promise<any>} EVM receipt and EOS receipt
    */
   async transact(actions: any[]) {
     try {
@@ -70,9 +81,11 @@ export class EosApi {
   /**
    * Sends a ETH TX to EVM
    *
-   * @param account EOSIO account to interact with EVM
-   * @param tx Raw RLP encoded hex string
-   * @param sender The ETH address of an account if tx is not signed
+   * @param {object} args Arguments
+   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.txRaw RLP encoded hex string
+   * @param {string} args.senderThe ETH address of an account if tx is not signed
+   * @returns {Promise<EvmResponse>} EVM receipt and EOS receipt
    */
   async raw({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
     if (tx && tx.startsWith('0x')) tx = tx.substring(2)
@@ -108,9 +121,11 @@ export class EosApi {
   /**
    * Sends a non state modifying call to EVM
    *
-   * @param account EOSIO account to interact with EVM
-   * @param tx Raw RLP encoded hex string
-   * @param sender The ETH address of an account if tx is not signed
+   * @param {object} args Arguments
+   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.txRaw RLP encoded hex string
+   * @param {string} args.senderThe ETH address of an account if tx is not signed
+   * @returns {Promise<string>} Hex encoded output
    */
   async call({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
     if (tx && tx.startsWith('0x')) tx = tx.substring(2)
@@ -142,8 +157,10 @@ export class EosApi {
   /**
    * Creates EVM address from EOS account
    *
-   * @param account EOSIO account to interact with EVM
-   * @param data Arbitrary string used as salt
+   * @param {object} args Arguments
+   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.data Arbitrary string used as salt to generate new address
+   * @returns {Promise<any>} EOSIO TX Response
    */
   async create({ account, data }: { account: string; data: string }) {
     return await this.transact([
@@ -160,10 +177,12 @@ export class EosApi {
   }
 
   /**
-   * Withdraws core token from the balance of an account
+   * Withdraws token from EVM
    *
-   * @param account EOSIO account to withdraw to
-   * @param data EOSIO asset type quantity to withdraw (0.0001 EOS)
+   * @param {object} args Arguments
+   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.quantity EOSIO asset type quantity to withdraw (0.0001 EOS)
+   * @returns {Promise<any>} EOSIO TX Response
    */
   async withdraw({ account, quantity }: { account: string; quantity: string }) {
     return await this.transact([
@@ -182,9 +201,11 @@ export class EosApi {
   /**
    * Deposits token into EVM
    *
-   * @param from EOSIO account to send from
-   * @param quantity EOSIO asset type quantity to withdraw (0.0001 EOS)
-   * @param memo Memo to transfer
+   * @param {object} args Arguments
+   * @param {string} args.fromEOSIO account to interact with EVM
+   * @param {string} args.quantity EOSIO asset type quantity to deposit (0.0001 EOS)
+   * @param {string} args.memo Memo to transfer
+   * @returns {Promise<any>} EOSIO TX Response
    */
   async deposit({ from, quantity, memo = '' }: { from: string; quantity: string; memo?: string }) {
     return await this.transact([
@@ -203,7 +224,9 @@ export class EosApi {
   }
 
   /**
-   * Testing
+   * Testing: Clears all data in contract
+   *
+   * @returns {Promise<any>} EOS TX response
    */
   async clearAll() {
     return await this.transact([
@@ -217,7 +240,9 @@ export class EosApi {
   }
 
   /**
-   * Fetching
+   * Fetches tables based on data
+   *
+   * @returns {Promise<any>} EOS RPC Get tables row response
    */
   async getTable(data: any) {
     const defaultParams = {
@@ -241,7 +266,7 @@ export class EosApi {
    *
    * @param contract The EOS contract with EVM deplyoed
    *
-   * @returns Full EOS table row
+   * @returns {Promise<Account[]>} all accounts
    */
   async getAllAddresses() {
     const { rows } = await this.getTable({
@@ -261,7 +286,7 @@ export class EosApi {
    * @param contract The EOS contract with EVM deplyoed
    * @param address The ETH address in contract
    *
-   * @returns Full EOS table row
+   * @returns {Promise<Account>} Account row associated with address
    */
   async getEthAccount(address: string): Promise<Account> {
     if (!address) throw new Error('No address provided')
@@ -295,6 +320,14 @@ export class EosApi {
    *
    * @returns Hex-encoded nonce
    */
+
+  /**
+   * Fetches the nonce for an account
+   *
+   * @param address The ETH address in EVM contract
+   *
+   * @returns {Promise<string>} Hex encoded nonce
+   */
   async getNonce(address: any) {
     if (!address) return '0x0'
 
@@ -311,12 +344,12 @@ export class EosApi {
   }
 
   /**
-   * Gets the on-chain state value
+   * Fetches the on-chain storage value at address and key
    *
-   * @param address The EOS contract with EVM deplyoed
-   * @param address The ETH address in contract
+   * @param address The ETH address in EVM contract
+   * @param key Storage key
    *
-   * @returns Full EOS table row
+   * @returns {Promise<AccountState>} account state row containing key and value
    */
   async getStorageAt(address: string, key: string) {
     if (!address || !key) throw new Error('Both address and key are required')
@@ -337,7 +370,7 @@ export class EosApi {
       limit: 1
     })
 
-    if (rows.length && rows[0].address) {
+    if (rows.length && rows[0].key === key) {
       return rows[0]
     } else {
       throw new Error(`No storage for address ${address} with key ${key}`)
@@ -345,11 +378,11 @@ export class EosApi {
   }
 
   /**
-   * Gets the on-chain account by eos account
+   * Gets the on-chain evm account by eos account name
    *
    * @param account The EOS contract linked to ETH address
    *
-   * @returns Full EOS Account table row
+   * @returns {Promise<Account>}
    */
   async getEthAccountByEosAccount(account: string) {
     const { rows } = await this.getTable({

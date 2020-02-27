@@ -8,6 +8,7 @@
 | EVM Transfer   | 325µs [(TX)](https://jungle.bloks.io/transaction/640c061cbd717b08b8af1c28129be1ef7365d1810fc285313a55d44f2271e312)      |
 | EVM New Address| 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)     |
 
+
 ### Achievements
 - Full Javascript SDK for deploying, executing and querying contracts
 - 100% Success on Ethereum Transaction Tests
@@ -18,9 +19,12 @@
 - Web3-similar call support (query view functions with no state modifications)
 - Total size less than 200KB (~2MB on-chain)
 
+
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+
 Basic usage: [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
+
 
 ### Build/Manual Deployment instructions
 Requires latest eosio.cdt with latest eosio 2 with EOSVM
@@ -34,6 +38,7 @@ make -j4
 
 No special instructions needed for manual deployment, simply deploy the WASM and ABI from eosio.evm/eosio.evm/ directory
 
+
 ### Directory structure
 - eosio.evm: contains all contract code
   - src: all sourcefiles
@@ -46,6 +51,7 @@ No special instructions needed for manual deployment, simply deploy the WASM and
   - system_wasms: eosio.system and eosio.token ABIs/WASMS
   - eosio.evm_tests.cpp: testing suite
 - truffle: ERC20 and ERC721 contracts
+
 
 ### Contract Public Actions
 ```c++
@@ -89,6 +95,7 @@ ACTION call( const std::vector<int8_t>& tx,
 - Function to mock execute and view result (no state modifications are persisted), similiar to Web3 call()
 &nbsp;
 
+
 ### Contract Tables
 ```c++
 struct Account {
@@ -118,6 +125,7 @@ struct AccountState {
 - `key` - big-endian encoded key for storage
 - `value` - big-endian encoded value for storage
 
+
 ### EVM Notes
 - We assume that maximum "value" of a transaction is within the limits of a int64_t. Any transaction with a "value" greater than 2^62 - 1 will be considered invalid.
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
@@ -127,10 +135,12 @@ struct AccountState {
 - A value of 1 represents 0.0001 SYS
 - Precompiled contracts are not currently supported, many like ec_mul and ec_add are due to be added to EOSIO soon
 
+
 ### Special Mentions
 - Eddy Ashton for his work on [enclave-ready EVM (eEVM)](https://github.com/microsoft/eEVM)
 - Pawel Bylica for his work on pushing the speed limits of EVMs with [evmone](https://github.com/ethereum/evmone)
 - winsvega for his continous work maintaining [Ethereum Tests](https://github.com/ethereum/tests)
+
 
 ### Disclosure
 Note that this repository is still in a highly iterative state, if you find any bugs, please open an issue or a pull request.

@@ -1076,7 +1076,7 @@ api.loadContractFromAbi({
   <span class="hljs-comment">// New receiver address to send tokens to</span>
   <span class="hljs-keyword">const</span> receiver = <span class="hljs-string">'0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'</span>
 
-  <span class="hljs-comment">// Transfer system tokens to address to create it</span>
+  <span class="hljs-comment">// Transfer system tokens to receiver address to create it (needed for it to sign and execute transferFrom Action)</span>
   <span class="hljs-keyword">await</span> api.transfer({ <span class="hljs-attr">account</span>: evmNormalAccount, <span class="hljs-attr">sender</span>: sender.address, <span class="hljs-attr">to</span>: receiver, <span class="hljs-attr">quantity</span>: <span class="hljs-string">`0.0001 <span class="hljs-subst">${SYSTEM_SYMBOL}</span>`</span> })
 
   <span class="hljs-comment">// Transfer 1000 FIRE ERC20 tokens</span>
@@ -1134,57 +1134,122 @@ main()</code></pre>
 					</ul>
 				</li>
 				<li><a href="#eosapi">EosApi</a><ul>
+						<li><a href="#parameters-4">Parameters</a></li>
 						<li><a href="#transact">transact</a><ul>
-								<li><a href="#parameters-4">Parameters</a></li>
-							</ul>
-						</li>
-						<li><a href="#raw">raw</a><ul>
 								<li><a href="#parameters-5">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#call">call</a><ul>
+						<li><a href="#raw">raw</a><ul>
 								<li><a href="#parameters-6">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#create">create</a><ul>
+						<li><a href="#call">call</a><ul>
 								<li><a href="#parameters-7">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#withdraw">withdraw</a><ul>
+						<li><a href="#create">create</a><ul>
 								<li><a href="#parameters-8">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#deposit">deposit</a><ul>
+						<li><a href="#withdraw">withdraw</a><ul>
 								<li><a href="#parameters-9">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#deposit">deposit</a><ul>
+								<li><a href="#parameters-10">Parameters</a></li>
 							</ul>
 						</li>
 						<li><a href="#clearall">clearAll</a></li>
 						<li><a href="#gettable">getTable</a><ul>
-								<li><a href="#parameters-10">Parameters</a></li>
-							</ul>
-						</li>
-						<li><a href="#getalladdresses">getAllAddresses</a><ul>
 								<li><a href="#parameters-11">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#getethaccount">getEthAccount</a><ul>
+						<li><a href="#getalladdresses">getAllAddresses</a><ul>
 								<li><a href="#parameters-12">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#getnonce">getNonce</a><ul>
+						<li><a href="#getethaccount">getEthAccount</a><ul>
 								<li><a href="#parameters-13">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#getstorageat">getStorageAt</a><ul>
+						<li><a href="#getnonce">getNonce</a><ul>
 								<li><a href="#parameters-14">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#getethaccountbyeosaccount">getEthAccountByEosAccount</a><ul>
+						<li><a href="#getnonce-1">getNonce</a><ul>
 								<li><a href="#parameters-15">Parameters</a></li>
 							</ul>
 						</li>
-						<li><a href="#setupevmcontract">setupEvmContract</a><ul>
+						<li><a href="#getstorageat">getStorageAt</a><ul>
 								<li><a href="#parameters-16">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getethaccountbyeosaccount">getEthAccountByEosAccount</a><ul>
+								<li><a href="#parameters-17">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#setupevmcontract">setupEvmContract</a><ul>
+								<li><a href="#parameters-18">Parameters</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li><a href="#eosapi-1">EosApi</a><ul>
+						<li><a href="#transact-1">transact</a><ul>
+								<li><a href="#parameters-19">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#raw-1">raw</a><ul>
+								<li><a href="#parameters-20">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#call-1">call</a><ul>
+								<li><a href="#parameters-21">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#create-1">create</a><ul>
+								<li><a href="#parameters-22">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#withdraw-1">withdraw</a><ul>
+								<li><a href="#parameters-23">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#deposit-1">deposit</a><ul>
+								<li><a href="#parameters-24">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#clearall-1">clearAll</a></li>
+						<li><a href="#gettable-1">getTable</a><ul>
+								<li><a href="#parameters-25">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getalladdresses-1">getAllAddresses</a><ul>
+								<li><a href="#parameters-26">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getethaccount-1">getEthAccount</a><ul>
+								<li><a href="#parameters-27">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getnonce-2">getNonce</a><ul>
+								<li><a href="#parameters-28">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getnonce-3">getNonce</a><ul>
+								<li><a href="#parameters-29">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getstorageat-1">getStorageAt</a><ul>
+								<li><a href="#parameters-30">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#getethaccountbyeosaccount-1">getEthAccountByEosAccount</a><ul>
+								<li><a href="#parameters-31">Parameters</a></li>
+							</ul>
+						</li>
+						<li><a href="#setupevmcontract-1">setupEvmContract</a><ul>
+								<li><a href="#parameters-32">Parameters</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -1195,35 +1260,37 @@ main()</code></pre>
 			<p>Sets the address for ethereum contract</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>contract</code>  </li>
-				<li><code>address</code>  ethereum contract address</li>
+				<li><code>contract</code>  ethereum contract address</li>
 			</ul>
 			<h4 id="loadcontractfromabi">loadContractFromAbi</h4>
 			<p>Initializes Web3 like interface to send actions to EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>account</code>  EOSIO account to interact with EVM</li>
-				<li><code>abi</code>  ABI object</li>
-				<li><code>bytecode</code>  Bytecode object</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments (optional, default <code>{}</code>)<ul>
+						<li><code>args.account</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> EOSIO account to interact with EVM</li>
+						<li><code>args.abi</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?</strong> ABI object</li>
+						<li><code>args.bytecodeObject</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> Bytecode object</li>
+					</ul>
+				</li>
 			</ul>
 			<h4 id="transfer">transfer</h4>
 			<p>Transfers value inside EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>overrides</code>  </li>
-				<li><code>account</code>  The EOS account associated to ETH address</li>
-				<li><code>sender</code>  The ETH address sending the TX</li>
-				<li><code>to</code>  The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
-				<li><code>quantity</code>  EOSIO quantity</li>
-				<li><code>ethSign</code>  Whether to sign transaction with ethereum private key</li>
+				<li><code>overrides</code></li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments (optional, default <code>{}</code>)<ul>
+						<li><code>args.account</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> The EOS account associated to ETH address</li>
+						<li><code>args.sender</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> The ETH address sending the TX</li>
+						<li><code>args.to</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
+						<li><code>args.quantity</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</strong> The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
+						<li><code>args.rawSign</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?</strong> Whether to sign transaction with ethereum private key. False means to use EOSIO authorization</li>
+					</ul>
+				</li>
 			</ul>
 			<h4 id="createethtx">createEthTx</h4>
 			<p>Generates RLP encoded transaction sender parameters</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
 				<li><code>sender</code>  The ETH address sending the transaction (nonce is fetched on-chain for this address)</li>
 				<li><code>data</code>  The data in transaction</li>
 				<li><code>gasLimit</code>  The gas limit of the transaction</li>
@@ -1233,70 +1300,99 @@ main()</code></pre>
 			</ul>
 			<p>Returns <strong>any</strong> RLP encoded transaction</p>
 			<h3 id="eosapi">EosApi</h3>
+			<p>EOS API used as a subset of EosEvmApi</p>
+			<h4 id="parameters">Parameters</h4>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.eosPrivateKeysEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> private keys</li>
+						<li><code>args.endpointEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> rpc endpoint</li>
+						<li><code>args.eosContractEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> contract name with EVM</li>
+					</ul>
+				</li>
+			</ul>
 			<h4 id="transact">transact</h4>
-			<p>Actions</p>
+			<p>Bundles actions into a transaction to send to EOS Api</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>actions</code>  </li>
+				<li><code>actions</code></li>
+				<li><code>actionsFull</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;any&gt;</strong> EOSIO actions</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EVM receipt and EOS receipt</p>
 			<h4 id="raw">raw</h4>
 			<p>Sends a ETH TX to EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>account</code>  EOSIO account to interact with EVM</li>
-				<li><code>tx</code>  Raw RLP encoded hex string</li>
-				<li><code>sender</code>  The ETH address of an account if tx is not signed</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.txRaw</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> RLP encoded hex string</li>
+						<li><code>args.senderThe</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> ETH address of an account if tx is not signed</li>
+					</ul>
+				</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;EvmResponse&gt;</strong> EVM receipt and EOS receipt</p>
 			<h4 id="call">call</h4>
 			<p>Sends a non state modifying call to EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>account</code>  EOSIO account to interact with EVM</li>
-				<li><code>tx</code>  Raw RLP encoded hex string</li>
-				<li><code>sender</code>  The ETH address of an account if tx is not signed</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.txRaw</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> RLP encoded hex string</li>
+						<li><code>args.senderThe</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> ETH address of an account if tx is not signed</li>
+					</ul>
+				</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> Hex encoded output</p>
 			<h4 id="create">create</h4>
 			<p>Creates EVM address from EOS account</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>account</code>  EOSIO account to interact with EVM</li>
-				<li><code>data</code>  Arbitrary string used as salt</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.data</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> Arbitrary string used as salt to generate new address</li>
+					</ul>
+				</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
 			<h4 id="withdraw">withdraw</h4>
-			<p>Withdraws core token from the balance of an account</p>
+			<p>Withdraws token from EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>account</code>  EOSIO account to withdraw to</li>
-				<li><code>data</code>  EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.quantity</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
+					</ul>
+				</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
 			<h4 id="deposit">deposit</h4>
 			<p>Deposits token into EVM</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>_a</code>  </li>
-				<li><code>from</code>  EOSIO account to send from</li>
-				<li><code>quantity</code>  EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
-				<li><code>memo</code>  Memo to transfer</li>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.fromEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.quantity</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> EOSIO asset type quantity to deposit (0.0001 EOS)</li>
+						<li><code>args.memo</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> Memo to transfer</li>
+					</ul>
+				</li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
 			<h4 id="clearall">clearAll</h4>
-			<p>Testing</p>
+			<p>Testing: Clears all data in contract</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOS TX response</p>
 			<h4 id="gettable">getTable</h4>
-			<p>Fetching</p>
+			<p>Fetches tables based on data</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>data</code>  </li>
+				<li><code>data</code></li>
 			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOS RPC Get tables row response</p>
 			<h4 id="getalladdresses">getAllAddresses</h4>
 			<p>Gets all accounts</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
 				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
 			</ul>
-			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;Account&gt;&gt;</strong> all accounts</p>
 			<h4 id="getethaccount">getEthAccount</h4>
 			<p>Gets the on-chain account</p>
 			<h5 id="parameters">Parameters</h5>
@@ -1304,7 +1400,7 @@ main()</code></pre>
 				<li><code>address</code>  The ETH address in contract</li>
 				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
 			</ul>
-			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;Account&gt;</strong> Account row associated with address</p>
 			<h4 id="getnonce">getNonce</h4>
 			<p>Gets nonce for given address</p>
 			<h5 id="parameters">Parameters</h5>
@@ -1313,21 +1409,157 @@ main()</code></pre>
 				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
 			</ul>
 			<p>Returns <strong>any</strong> Hex-encoded nonce</p>
-			<h4 id="getstorageat">getStorageAt</h4>
-			<p>Gets the on-chain state value</p>
+			<h4 id="getnonce">getNonce</h4>
+			<p>Fetches the nonce for an account</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
-				<li><code>address</code>  The ETH address in contract</li>
-				<li><code>key</code>  </li>
+				<li><code>address</code>  The ETH address in EVM contract</li>
 			</ul>
-			<p>Returns <strong>any</strong> Full EOS table row</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> Hex encoded nonce</p>
+			<h4 id="getstorageat">getStorageAt</h4>
+			<p>Fetches the on-chain storage value at address and key</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in EVM contract</li>
+				<li><code>key</code>  Storage key</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;AccountState&gt;</strong> account state row containing key and value</p>
 			<h4 id="getethaccountbyeosaccount">getEthAccountByEosAccount</h4>
-			<p>Gets the on-chain account by eos account</p>
+			<p>Gets the on-chain evm account by eos account name</p>
 			<h5 id="parameters">Parameters</h5>
 			<ul>
 				<li><code>account</code>  The EOS contract linked to ETH address</li>
 			</ul>
-			<p>Returns <strong>any</strong> Full EOS Account table row</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;Account&gt;</strong></p>
+			<h4 id="setupevmcontract">setupEvmContract</h4>
+			<p>Deploy EVM contract to EOS account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>contractDir</code>  The directory which contains the ABI and WASM</li>
+				<li><code>contract</code>  The EOS contract to deploy EVM to</li>
+			</ul>
+			<h3 id="eosapi">EosApi</h3>
+			<h4 id="transact">transact</h4>
+			<p>Bundles actions into a transaction to send to EOS Api</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>actions</code></li>
+				<li><code>actionsFull</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;any&gt;</strong> EOSIO actions</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EVM receipt and EOS receipt</p>
+			<h4 id="raw">raw</h4>
+			<p>Sends a ETH TX to EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.txRaw</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> RLP encoded hex string</li>
+						<li><code>args.senderThe</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> ETH address of an account if tx is not signed</li>
+					</ul>
+				</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;EvmResponse&gt;</strong> EVM receipt and EOS receipt</p>
+			<h4 id="call">call</h4>
+			<p>Sends a non state modifying call to EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.txRaw</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> RLP encoded hex string</li>
+						<li><code>args.senderThe</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> ETH address of an account if tx is not signed</li>
+					</ul>
+				</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> Hex encoded output</p>
+			<h4 id="create">create</h4>
+			<p>Creates EVM address from EOS account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.data</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> Arbitrary string used as salt to generate new address</li>
+					</ul>
+				</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
+			<h4 id="withdraw">withdraw</h4>
+			<p>Withdraws token from EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.accountEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.quantity</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> EOSIO asset type quantity to withdraw (0.0001 EOS)</li>
+					</ul>
+				</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
+			<h4 id="deposit">deposit</h4>
+			<p>Deposits token into EVM</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>args</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></strong> Arguments<ul>
+						<li><code>args.fromEOSIO</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> account to interact with EVM</li>
+						<li><code>args.quantity</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> EOSIO asset type quantity to deposit (0.0001 EOS)</li>
+						<li><code>args.memo</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> Memo to transfer</li>
+					</ul>
+				</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOSIO TX Response</p>
+			<h4 id="clearall">clearAll</h4>
+			<p>Testing: Clears all data in contract</p>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOS TX response</p>
+			<h4 id="gettable">getTable</h4>
+			<p>Fetches tables based on data</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>data</code></li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;any&gt;</strong> EOS RPC Get tables row response</p>
+			<h4 id="getalladdresses">getAllAddresses</h4>
+			<p>Gets all accounts</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&lt;Account&gt;&gt;</strong> all accounts</p>
+			<h4 id="getethaccount">getEthAccount</h4>
+			<p>Gets the on-chain account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in contract</li>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;Account&gt;</strong> Account row associated with address</p>
+			<h4 id="getnonce">getNonce</h4>
+			<p>Gets nonce for given address</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in contract</li>
+				<li><code>contract</code>  The EOS contract with EVM deplyoed</li>
+			</ul>
+			<p>Returns <strong>any</strong> Hex-encoded nonce</p>
+			<h4 id="getnonce">getNonce</h4>
+			<p>Fetches the nonce for an account</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in EVM contract</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>&gt;</strong> Hex encoded nonce</p>
+			<h4 id="getstorageat">getStorageAt</h4>
+			<p>Fetches the on-chain storage value at address and key</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>address</code>  The ETH address in EVM contract</li>
+				<li><code>key</code>  Storage key</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;AccountState&gt;</strong> account state row containing key and value</p>
+			<h4 id="getethaccountbyeosaccount">getEthAccountByEosAccount</h4>
+			<p>Gets the on-chain evm account by eos account name</p>
+			<h5 id="parameters">Parameters</h5>
+			<ul>
+				<li><code>account</code>  The EOS contract linked to ETH address</li>
+			</ul>
+			<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;Account&gt;</strong></p>
 			<h4 id="setupevmcontract">setupEvmContract</h4>
 			<p>Deploy EVM contract to EOS account</p>
 			<h5 id="parameters">Parameters</h5>
@@ -1405,7 +1637,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>CHAIN_<wbr>ID<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L21">constants.ts:21</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L21">constants.ts:21</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1415,7 +1647,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>GAS_<wbr>LIMIT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x1E8480"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x1E8480&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L19">constants.ts:19</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L19">constants.ts:19</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1425,7 +1657,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>GAS_<wbr>PRICE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x01"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x01&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L18">constants.ts:18</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L18">constants.ts:18</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1435,7 +1667,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>SYMBOL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"EOS"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EOS&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L22">constants.ts:22</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L22">constants.ts:22</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1445,7 +1677,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">DEFAULT_<wbr>VALUE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0x0"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0x0&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L20">constants.ts:20</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L20">constants.ts:20</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1455,7 +1687,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>SYSTEM<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"eosio"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;eosio&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L14">constants.ts:14</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L14">constants.ts:14</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1465,7 +1697,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>TOKEN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"eosio.token"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;eosio.token&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L13">constants.ts:13</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L13">constants.ts:13</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1475,7 +1707,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">EOSIO_<wbr>TOKEN_<wbr>PRECISION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">4</span><span class="tsd-signature-symbol"> =&nbsp;4</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L17">constants.ts:17</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L17">constants.ts:17</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1485,7 +1717,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">ETH_<wbr>CHAIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"mainnet"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;mainnet&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L15">constants.ts:15</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L15">constants.ts:15</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1495,7 +1727,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">FORK<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"istanbul"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;istanbul&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L16">constants.ts:16</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L16">constants.ts:16</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1505,7 +1737,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">abi<wbr>Encoder<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;ethereumjs-abi&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eos-evm-js.ts#L15">eos-evm-js.ts:15</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eos-evm-js.ts#L15">eos-evm-js.ts:15</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1515,7 +1747,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">compiled<wbr>Contract<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;solc.compile(JSON.stringify(contractInput), { import: findImports })</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L33">eth-contracts/compile.ts:33</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L33">eth-contracts/compile.ts:33</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1525,7 +1757,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">fs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;fs&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L1">eth-contracts/compile.ts:1</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L1">eth-contracts/compile.ts:1</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1535,7 +1767,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;path&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L2">eth-contracts/compile.ts:2</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L2">eth-contracts/compile.ts:2</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1545,7 +1777,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">solc<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;solc&#x27;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L3">eth-contracts/compile.ts:3</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L3">eth-contracts/compile.ts:3</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1562,7 +1794,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L29">eth-contracts/compile.ts:29</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L29">eth-contracts/compile.ts:29</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1590,7 +1822,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/deploy.ts#L4">deploy.ts:4</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/deploy.ts#L4">deploy.ts:4</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1621,7 +1853,7 @@ main()</code></pre>
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eos.ts#L10">eos.ts:10</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eos.ts#L10">eos.ts:10</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1643,7 +1875,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">ENDPOINTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L8">constants.ts:8</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L8">constants.ts:8</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -1652,7 +1884,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">jungle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;https://api.jungle.alohaeos.com&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L9">constants.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L9">constants.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1662,7 +1894,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">local<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;http://0.0.0.0:8888&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L10">constants.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L10">constants.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1673,7 +1905,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">chain<wbr>Ids<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L1">constants.ts:1</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L1">constants.ts:1</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -1682,7 +1914,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">jungle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L3">constants.ts:3</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L3">constants.ts:3</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1692,7 +1924,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">kylin<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L4">constants.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L4">constants.ts:4</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1702,7 +1934,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">local<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L5">constants.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L5">constants.ts:5</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1712,7 +1944,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">mainnet<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/constants.ts#L2">constants.ts:2</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/constants.ts#L2">constants.ts:2</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1723,7 +1955,7 @@ main()</code></pre>
 				<div class="tsd-signature tsd-kind-icon">contract<wbr>Input<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L5">eth-contracts/compile.ts:5</a></li>
+						<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L5">eth-contracts/compile.ts:5</a></li>
 					</ul>
 				</aside>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1732,7 +1964,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">language<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Solidity&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L14">eth-contracts/compile.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L14">eth-contracts/compile.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -1742,7 +1974,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L15">eth-contracts/compile.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L15">eth-contracts/compile.ts:15</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1751,7 +1983,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">evm<wbr>Version<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;istanbul&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L20">eth-contracts/compile.ts:20</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L20">eth-contracts/compile.ts:20</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1761,7 +1993,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">optimizer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L16">eth-contracts/compile.ts:16</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L16">eth-contracts/compile.ts:16</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1770,7 +2002,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">enabled<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L17">eth-contracts/compile.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L17">eth-contracts/compile.ts:17</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1780,7 +2012,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">runs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;300</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L18">eth-contracts/compile.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L18">eth-contracts/compile.ts:18</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1791,7 +2023,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">output<wbr>Selection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L21">eth-contracts/compile.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L21">eth-contracts/compile.ts:21</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1800,7 +2032,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">*<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L22">eth-contracts/compile.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L22">eth-contracts/compile.ts:22</a></li>
 								</ul>
 							</aside>
 							<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1809,7 +2041,7 @@ main()</code></pre>
 								<div class="tsd-signature tsd-kind-icon">*<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[&#x27;abi&#x27;, &#x27;evm.bytecode&#x27;]</span></div>
 								<aside class="tsd-sources">
 									<ul>
-										<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L23">eth-contracts/compile.ts:23</a></li>
+										<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L23">eth-contracts/compile.ts:23</a></li>
 									</ul>
 								</aside>
 							</section>
@@ -1822,7 +2054,7 @@ main()</code></pre>
 					<div class="tsd-signature tsd-kind-icon">sources<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L6">eth-contracts/compile.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L6">eth-contracts/compile.ts:6</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1831,7 +2063,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">ERC20<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L7">eth-contracts/compile.ts:7</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L7">eth-contracts/compile.ts:7</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1840,7 +2072,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;fs.readFileSync(path.join(__dirname, &#x27;ERC20.sol&#x27;), &#x27;utf8&#x27;)</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L8">eth-contracts/compile.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L8">eth-contracts/compile.ts:8</a></li>
 								</ul>
 							</aside>
 						</section>
@@ -1851,7 +2083,7 @@ main()</code></pre>
 						<div class="tsd-signature tsd-kind-icon">ERC721<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L10">eth-contracts/compile.ts:10</a></li>
+								<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L10">eth-contracts/compile.ts:10</a></li>
 							</ul>
 						</aside>
 						<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -1860,7 +2092,7 @@ main()</code></pre>
 							<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;fs.readFileSync(path.join(__dirname, &#x27;ERC721.sol&#x27;), &#x27;utf8&#x27;)</span></div>
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/bcc7ba8/eos-evm-js/src/eth-contracts/compile.ts#L11">eth-contracts/compile.ts:11</a></li>
+									<li>Defined in <a href="https://github.com/jafri/eosio.evm/blob/09fcbe8/eos-evm-js/src/eth-contracts/compile.ts#L11">eth-contracts/compile.ts:11</a></li>
 								</ul>
 							</aside>
 						</section>

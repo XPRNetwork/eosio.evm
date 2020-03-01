@@ -1,6 +1,6 @@
 {
   "name": "eos-evm-js",
-  "version": "0.0.17",
+  "version": "0.0.24",
   "description": "EOSIO EVM JS SDK",
   "keywords": [],
   "main": "dist/eos-evm-js.umd.js",
@@ -128,7 +128,7 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@jafri/eosjs2": "^21.0.0-rc.8",
+    "@jafri/eosjs2": "^21.0.0-rc.14",
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-common": "^1.5.0",
     "ethereumjs-tx": "^2.1.2",

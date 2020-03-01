@@ -8,6 +8,7 @@ find_package(eosio.cdt)
 add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.evm.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/processor.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/copy.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/account.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/transfer.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/testing.cpp
@@ -21,7 +22,7 @@ target_include_directories(eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_options(eosio.evm PUBLIC -stack-size 50000 )
+target_link_options(eosio.evm PUBLIC -stack-size 48000 )
 
 set_target_properties(eosio.evm
    PROPERTIES

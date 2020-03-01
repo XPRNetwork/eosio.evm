@@ -131,7 +131,7 @@ export class EosEvmApi {
           const txParams = Object.assign({ data: input, to: that.ethContract }, overrides)
           const encodedTx = await that.createEthTx(txParams)
 
-          // Get output from call and aprse it
+          // Get output from call and parse it
           const output = await that.eos.call({ account, tx: encodedTx, sender: txParams.sender })
           const parsed = abiEncoder.rawDecode(outputTypes, Buffer.from(output, 'hex'))
           return parsed

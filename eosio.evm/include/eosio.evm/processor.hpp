@@ -52,17 +52,9 @@ namespace eosio_evm {
     );
     void dispatch();
 
-    // Can throw errors
-    bool copy_mem_raw(
-      const uint64_t offDst,
-      const uint64_t offSrc,
-      const uint64_t size,
-      std::vector<uint8_t>& dst,
-      const std::vector<uint8_t>& src,
-      const uint8_t pad = 0
-    );
-    bool copy_to_mem(const std::vector<uint8_t>& src, const uint8_t pad);
-    bool prepare_mem_access(const uint64_t offset, const uint64_t size);
+    // Can return/throw errors
+    bool access_mem(const uint256_t& offset, const uint256_t& size);
+    bool prepare_mem_access(const uint256_t& offset, const uint64_t& size);
     bool jump_to(const uint64_t newPc);
     bool use_gas(uint256_t amount);
     bool process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value);
@@ -76,12 +68,12 @@ namespace eosio_evm {
     const Account& get_account(const Address& address);
     AccountResult create_account(
       const Address& address,
-      const int64_t& balance = 0,
       const bool& is_contract = false
     );
     void increment_nonce(const Address& address);
     void set_code(const Address& address, const std::vector<uint8_t>& code);
     void selfdestruct(const Address& addr);
+    void kill_storage(const uint64_t& address_index);
     bool transfer_internal(const Address& from, const Address& to, const int64_t amount);
 
     // Reverting
@@ -161,26 +153,13 @@ namespace eosio_evm {
     void dup();
     void swap();
     void log();
-    void _create(const uint64_t& contract_value, const uint64_t& offset, const int64_t& size, const Address& new_address);
     void create();
-    void create2();
+    int64_t value_by_call_type(const unsigned char call_type);
     void call();
     void return_();
     void revert();
     void selfdestruct();
     void invalid();
     void illegal();
-
-    template <typename T>
-    static T shrink(uint256_t i)
-    {
-      return static_cast<T>(i & std::numeric_limits<T>::max());
-    }
-
-    inline constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
-    {
-      return (static_cast<int64_t>(size_in_bytes) + (ProcessorConsts::WORD_SIZE - 1)) / ProcessorConsts::WORD_SIZE;
-    }
-
   };
 }

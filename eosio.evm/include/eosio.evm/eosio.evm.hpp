@@ -68,6 +68,7 @@ namespace eosio_evm {
     ACTION devnewstore(const eosio::checksum160& address, const std::string& key, const std::string value);
     ACTION devnewacct(const eosio::checksum160& address, const uint64_t balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account);
     ACTION printstate(const eosio::checksum160& address);
+    ACTION printaccount(const eosio::checksum160& address);
     ACTION testtx(const std::vector<int8_t>& tx);
     ACTION printtx(const std::vector<int8_t>& tx);
     ACTION clearall () {

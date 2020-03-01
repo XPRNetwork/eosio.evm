@@ -89,6 +89,7 @@ namespace eosio_evm
     CREATE_ACCOUNT,
     SET_CODE,
     INCREMENT_NONCE,
+    ORIGINAL_STORAGE,
     TRANSFER,
     LOG,
     SELF_DESTRUCT
@@ -110,6 +111,7 @@ namespace eosio_evm
         { SMT::CREATE_ACCOUNT, "CREATE_ACCOUNT"    },
         { SMT::SET_CODE, "SET_CODE"    },
         { SMT::INCREMENT_NONCE, "INCREMENT_NONCE"    },
+        { SMT::ORIGINAL_STORAGE, "ORIGINAL_STORAGE"    },
         { SMT::TRANSFER, "TRANSFER"    },
         { SMT::LOG, "LOG"    },
         { SMT::SELF_DESTRUCT, "SELF_DESTRUCT"    }
@@ -297,7 +299,9 @@ namespace eosio_evm
     /**
      * State Modifications and original storage
      */
-    inline void add_modification(const StateModification& modification) { state_modifications.emplace_back(modification); }
+    inline void add_modification(const StateModification& modification) {
+      state_modifications.emplace_back(modification);
+    }
     inline uint256_t find_original(const uint64_t& address_index, const uint256_t& key) {
       if (original_storage.count(address_index) == 0 || original_storage[address_index].count(key) == 0) {
         return 0;
@@ -364,7 +368,6 @@ namespace eosio_evm
         "sender ",    *sender,              "\n",
         "hash ",      hash,                 "\n"
       );
-      eosio::print("AAAA");
     }
     void printEncoded() const
     {

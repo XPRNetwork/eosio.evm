@@ -22,22 +22,26 @@ namespace eosio_evm {
 
     // Amount verification
     if (amount < 0) {
-      return throw_error(Exception(ET::outOfFunds, "transfer amount must not be negative"), {});
+      transaction.errors.push_back("transfer amount must not be negative");
+      return true;
     }
 
     // From balance verification
     if (from_account == accounts_byaddress.end()) {
-      return throw_error(Exception(ET::outOfFunds, "account does not have a balance"), {});
+      transaction.errors.push_back("account does not have a balance");
+      return true;
     }
-    if (from_account->get_balance() < amount) {
-      return throw_error(Exception(ET::outOfFunds, "account balance too low"), {});
+    if (amount > from_account->get_balance()) {
+      transaction.errors.push_back("account balance too low");
+      return true;
     }
 
     // Create To account if it does not exist
     if (to_account == accounts_byaddress.end()) {
-      auto [new_account, error] = create_account(to, 0);
+      auto [new_account, error] = create_account(to);
       if (error) {
-        return throw_error(Exception(ET::outOfBounds, "Error creating new address to transfer value"), {});
+        transaction.errors.push_back("Error creating new address to transfer value");
+        return true;
       } else {
         to_account = accounts_byaddress.iterator_to(new_account);
       }
@@ -126,7 +130,6 @@ namespace eosio_evm {
   // Returns [account, error], error is true if account already exists
   Processor::AccountResult Processor::create_account(
     const Address& address,
-    const int64_t& balance,
     const bool& is_contract // default false
   )
   {
@@ -136,11 +139,27 @@ namespace eosio_evm {
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
     auto existing_address   = accounts_byaddress.find(address_256);
 
-    // ERROR if nonce > 0
-    if (existing_address != accounts_byaddress.end() && (existing_address->get_nonce() > 0 || !existing_address->get_code().empty()))
-    {
-      static const auto empty_account = Account(address);
-      return { empty_account, true };
+    // If account already exists
+    if (existing_address != accounts_byaddress.end()) {
+      // If it has nonce or non-empty code -> ERROR
+      if (existing_address->get_nonce() > 0 || !existing_address->get_code().empty())
+      {
+        static const auto empty_account = Account(address);
+        return { empty_account, true };
+      }
+      // If it doesn't have nonce or non-empty code -> increment nonce if contract and return
+      // We also kill all storage, as it may be remnant of CREATE2
+      else
+      {
+        if (is_contract) {
+          kill_storage(existing_address->primary_key());
+          accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
+            a.nonce += 1;
+          });
+          transaction.add_modification({ SMT::INCREMENT_NONCE, 0, address, existing_address->get_nonce() - 1, 0, existing_address->get_nonce()});
+        }
+        return { *existing_address, false };
+      }
     }
 
     // Initial Nonce is 1 for contracts and 0 for accounts (no code)
@@ -151,7 +170,7 @@ namespace eosio_evm {
       a.index   = contract->_accounts.available_primary_key();
       a.nonce   = nonce;
       a.address = address_160;
-      a.balance = eosio::asset(balance, TOKEN_SYMBOL);
+      a.balance = eosio::asset(0, TOKEN_SYMBOL);
     });
 
     // Add modification record
@@ -183,11 +202,26 @@ namespace eosio_evm {
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
 
     if (existing_address != accounts_byaddress.end()) {
+      // Kill storage first
+      kill_storage(existing_address->primary_key());
+
+      // Make account empty
       accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.nonce = 0;
         a.balance.amount = 0;
         a.code = {};
       });
+    }
+  }
+  // TODO need to use table indirection instead to save for future processing.
+  void Processor::kill_storage(const uint64_t& address_index)
+  {
+    account_state_table accounts_states(contract->get_self(), address_index);
+    auto itr = accounts_states.end();
+    while (accounts_states.begin() != itr) {
+      --itr;
+      transaction.add_modification({ SMT::STORE_KV, address_index, checksum256ToValue(itr->by_key()), itr->value, 0, 0 });
+      itr = accounts_states.erase(itr);
     }
   }
 
@@ -200,10 +234,16 @@ namespace eosio_evm {
     auto account_state         = accounts_states_bykey.find(checksum_key);
 
     #if (PRINT_STATE == true)
-    eosio::print("\n\nStore KV for address index ", address_index,
-                 "\nKey: ", intx::to_string(key, 10),
-                 "\nValue ", intx::to_string(value, 10),
-                 "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
+    eosio::print(
+      "\n\nStore KV for address index ", address_index,
+      "\nKey: ", intx::hex(key),
+      "\nValue: ", intx::hex(value),
+      "\nFound: ", account_state != accounts_states_bykey.end(),
+      "\nValue is not 0: ", value != 0, "\n"
+    );
+    if (account_state != accounts_states_bykey.end()) {
+      eosio::print("\nOld Value:", intx::hex(account_state->value));
+    }
     #endif
 
     // Key found
@@ -226,11 +266,10 @@ namespace eosio_evm {
     else if (value != 0)
     {
       transaction.add_modification({ SMT::STORE_KV, address_index, key, 0, 0, value });
-
       accounts_states.emplace(contract->get_self(), [&](auto& a) {
-        a.index   = accounts_states.available_primary_key();
-        a.key     = checksum_key;
-        a.value   = value;
+        a.index = accounts_states.available_primary_key();
+        a.key   = checksum_key;
+        a.value = value;
       });
     }
   }
@@ -244,8 +283,11 @@ namespace eosio_evm {
 
     #if (PRINT_STATE == true)
     eosio::print("\n\nLoad KV for address index ", address_index,
-                 "\nKey: ", intx::to_string(key),
+                 "\nKey: ", intx::hex(key),
                  "\nFound: ", account_state != accounts_states_bykey.end(), "\n");
+    if (account_state != accounts_states_bykey.end()) {
+      eosio::print("\nValue: ", intx::hex(account_state->value), "\n");
+    }
     #endif
 
     // Value

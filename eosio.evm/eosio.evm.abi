@@ -159,6 +159,16 @@
             ]
         },
         {
+            "name": "printaccount",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                }
+            ]
+        },
+        {
             "name": "printstate",
             "base": "",
             "fields": [
@@ -255,6 +265,11 @@
         {
             "name": "devnewstore",
             "type": "devnewstore",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "printaccount",
+            "type": "printaccount",
             "ricardian_contract": ""
         },
         {

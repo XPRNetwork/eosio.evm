@@ -1,10 +1,6 @@
 // Copyright (c) 2020 Syed Jafri. All rights reserved.
-// Licensed under the MIT License..
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License..
-// evmone: Fast Ethereum Virtual Machine implementation
-// Copyright 2019 Pawel Bylica.
-// Licensed under the Apache License, Version 2.0..
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -14,6 +10,18 @@ namespace eosio_evm
     auto result = transaction.is_create()
       ? initialize_create(caller)
       : initialize_call(caller);
+
+    // If error
+    if (result.er != ExitReason::returned) {
+      // Revert to initial state
+      revert_state(0);
+      transaction.errors.push_back(result.exmsg);
+
+      // Use all gas if not revert
+      if (result.ex != ET::revert) {
+        transaction.gas_used = transaction.gas_limit;
+      }
+    }
 
     // Print Result
     transaction.print_receipt(result);
@@ -29,7 +37,7 @@ namespace eosio_evm
     const Address to_address = generate_address(caller.get_address(), caller.get_nonce() - 1);
 
     // Prevent collision
-    const auto [callee, error] = create_account(to_address, 0, true);
+    const auto [callee, error] = create_account(to_address, true);
     if (error) return {"EVM Execution Error: " + intx::hex(to_address) + " already exists."};
     transaction.created_address = to_address;
 
@@ -44,11 +52,15 @@ namespace eosio_evm
       result.output = move(output);
       result.gas_used = sub_gas_used;
     };
-    auto error_cb = [&result](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+    auto error_cb = [&](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
       result.er = ExitReason::threw;
       result.ex = ex_.type;
       result.exmsg = ex_.what();
+      result.output = output;
       result.gas_used = sub_gas_used;
+
+      // Reset refunds
+      transaction.gas_refunds = 0;
     };
     push_context(
       transaction.state_modifications.size(),
@@ -66,17 +78,24 @@ namespace eosio_evm
     // Run
     run();
 
+    // Use gas
+    transaction.gas_used += result.gas_used;
+
     // If success
     if (result.er == ExitReason::returned) {
       // Validate size
       const auto output_size = result.output.size();
-      if (output_size >= MAX_CODE_SIZE) return {"EVM Execution Error: Code is larger than max code size, out of gas!"};
+      if (output_size >= MAX_CODE_SIZE) {
+        return {"EVM Execution Error: Code is larger than max code size, out of gas!"};
+      }
 
       // Charge create data gas
       const auto create_gas_cost = output_size * GP_CREATE_DATA;
-      const bool out_of_gas = create_gas_cost > transaction.gas_limit;
-      if (out_of_gas) return {"EVM Execution Error: Out of Gas"};
-      transaction.gas_used += create_gas_cost;
+      if (transaction.gas_left() < create_gas_cost) {
+        return {"EVM Execution Error: Out of Gas"};
+      } else {
+        transaction.gas_used += create_gas_cost;
+      }
 
       // Set code
       set_code(to_address, std::move(result.output));
@@ -101,11 +120,15 @@ namespace eosio_evm
       result.output = move(output);
       result.gas_used = sub_gas_used;
     };
-    auto error_cb = [&result](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+    auto error_cb = [&](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
       result.er = ExitReason::threw;
       result.ex = ex_.type;
       result.exmsg = ex_.what();
+      result.output = output;
       result.gas_used = sub_gas_used;
+
+      // Reset refunds
+      transaction.gas_refunds = 0;
     };
     push_context(
       transaction.state_modifications.size(),
@@ -122,6 +145,9 @@ namespace eosio_evm
 
     // Run
     run();
+
+    // Use gas
+    transaction.gas_used += result.gas_used;
 
     // Call does nothing with result unlike create which sets code for contract
     return result;
@@ -153,7 +179,7 @@ namespace eosio_evm
   }
 
   void Processor::revert_state(const size_t& revert_to) {
-    for (auto i = transaction.state_modifications.size(); i-- > revert_to; ) {
+    for (unsigned i = transaction.state_modifications.size() ; i-- > revert_to ; ) {
       const auto [type, index, key, oldvalue, amount, newvalue] = transaction.state_modifications[i];
 
       switch (type) {
@@ -181,10 +207,13 @@ namespace eosio_evm
         default:
           break;
       }
-
-      // Remove item
-      transaction.state_modifications.pop_back();
     }
+
+    // Slice vector
+    transaction.state_modifications = std::vector<StateModification>(
+      transaction.state_modifications.begin(),
+      transaction.state_modifications.begin() + revert_to
+    );
   }
 
   void Processor::push_context(
@@ -229,7 +258,8 @@ namespace eosio_evm
   }
 
   // Returns true if error
-  bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output) {
+  bool Processor::throw_error(const Exception& exception, const std::vector<uint8_t>& output)
+  {
     // Add to error log
     transaction.errors.push_back(exception.what());
 
@@ -238,6 +268,10 @@ namespace eosio_evm
       ctx->gas_left = 0;
     }
 
+    // Revert all state changes
+    revert_state(ctx->sm_checkpoint);
+
+    // Pop context and Call error callback
     auto error_cb = ctx->error_cb;
     auto gas_used = ctx->gas_used();
     pop_context();
@@ -279,7 +313,7 @@ namespace eosio_evm
         return use_gas(GP_SSTORE_SET_GAS);
       } else {
         bool error = use_gas(GP_SSTORE_RESET_GAS);
-        if (error) return false;
+        if (error) return true;
       }
 
       if (new_value == 0) {
@@ -287,11 +321,16 @@ namespace eosio_evm
       }
     } else {
       bool error = use_gas(GP_SLOAD_GAS);
-      if (error) return false;
+      if (error) return true;
 
       if (original_value != 0) {
         if (current_value == 0 && new_value != 0) {
-          transaction.gas_refunds -= GP_SSTORE_CLEARS_SCHEDULE;
+          // Sets to 0 if refunds would go negative
+          if (transaction.gas_refunds < GP_SSTORE_CLEARS_SCHEDULE) {
+            transaction.gas_refunds = 0;
+          } else {
+            transaction.gas_refunds -= GP_SSTORE_CLEARS_SCHEDULE;
+          }
         }
 
         if (new_value == 0 && current_value != 0) {
@@ -308,99 +347,6 @@ namespace eosio_evm
       }
     }
 
-    return false;
-  }
-
-  // Return true if error
-  bool Processor::copy_mem_raw(
-    const uint64_t offDst,
-    const uint64_t offSrc,
-    const uint64_t size,
-    std::vector<uint8_t>& dst,
-    const std::vector<uint8_t>& src,
-    const uint8_t pad
-  )
-  {
-    if (!size)
-      return false;
-
-    const auto lastDst = offDst + size;
-
-    // Integer overflow or memory limit exceeded
-    if (lastDst <= offDst || lastDst >= ProcessorConsts::MAX_MEM_SIZE) {
-      return throw_error(Exception(ET::overflow, "overflow in copy_mem_raw!"), {});
-    }
-
-    if (lastDst > dst.size())
-      dst.resize(lastDst);
-
-    const auto lastSrc = offSrc + size;
-    const auto endSrc = std::min(lastSrc, static_cast<decltype(lastSrc)>(src.size()));
-
-    uint64_t remaining;
-    if (endSrc > offSrc) {
-      copy(src.begin() + offSrc, src.begin() + endSrc, dst.begin() + offDst);
-      remaining = lastSrc - endSrc;
-    } else {
-      remaining = size;
-    }
-
-    // if there are more bytes to copy than available, add padding
-    fill(dst.begin() + lastDst - remaining, dst.begin() + lastDst, pad);
-
-    // Success
-    return false;
-  }
-
-  // Return true if error
-  bool Processor::copy_to_mem(const std::vector<uint8_t>& src, const uint8_t pad)
-  {
-    const auto offDst = ctx->s.popu64();
-    const auto offSrc = ctx->s.popu64();
-    const auto size = ctx->s.popu64();
-
-    // Gas calculation (copy cost is 3)
-    bool error = use_gas(GP_COPY * ((size + 31) / 32));
-    if (error) return true;
-
-    // Memory cost
-    bool memory_error = prepare_mem_access(offDst, size);
-    if (memory_error) return true;
-
-    return copy_mem_raw(offDst, offSrc, size, ctx->mem, src, pad);
-  }
-
-  // Return true if error
-  bool Processor::prepare_mem_access(const uint64_t offset, const uint64_t size)
-  {
-    if (offset >= ProcessorConsts::MAX_BUFFER_SIZE) {
-      return throw_error(Exception(ET::overflow, "overflow in buffer"), {});
-    }
-
-    const auto new_size = offset + size;
-    const auto current_size = ctx->mem.size();
-
-    if (new_size > current_size)
-    {
-      const auto new_words = num_words(new_size);
-      const auto current_words = static_cast<int64_t>(current_size / 32);
-      const auto new_cost = 3 * new_words + new_words * new_words / 512;
-      const auto current_cost = 3 * current_words + current_words * current_words / 512;
-      const auto cost = new_cost - current_cost;
-
-      // Gas
-      bool error = use_gas(cost);
-      if (error) return true;
-
-      // Resize
-      const auto end = static_cast<size_t>(new_words * ProcessorConsts::WORD_SIZE);
-      if (end >= ProcessorConsts::MAX_MEM_SIZE) {
-        return throw_error(Exception(ET::outOfBounds, "Memory limit exceeded"), {});
-      }
-      ctx->mem.resize(end);
-    }
-
-    // Success
     return false;
   }
 

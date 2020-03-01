@@ -4,7 +4,8 @@ namespace eosio_evm {
   uint256_t Stack::pop()
   {
     if (st.empty()) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Stack out of range"), {}, {});
+      stack_error = "Stack out of range";
+      return 0;
     }
 
     uint256_t val = st.front();
@@ -22,17 +23,19 @@ namespace eosio_evm {
   {
     const auto val = pop();
     if (val > std::numeric_limits<uint64_t>::max()) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^64"), {}, {});
+      stack_error = "Value on stack is larger than 2^64";
+      return 0;
     }
 
     return static_cast<uint64_t>(val);
   }
 
-  int64_t Stack::popAmount()
+  int64_t Stack::pop_amount()
   {
     const auto val = pop();
     if (val > eosio::asset::max_amount) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Value on stack is larger than 2^62 - 1"), {}, {});
+      stack_error = "Value on stack is larger than 2^62 - 1";
+      return 0;
     }
 
     return static_cast<int64_t>(val);
@@ -41,7 +44,8 @@ namespace eosio_evm {
   void Stack::push(const uint256_t& val)
   {
     if (size() == MAX_STACK_SIZE) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Stack memory exceeded"), {}, {});
+      stack_error = "Stack memory exceeded";
+      return;
     }
 
     st.push_front(val);
@@ -55,7 +59,8 @@ namespace eosio_evm {
   void Stack::swap(uint64_t i)
   {
     if (i >= size()) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Swap out of range"), {}, {});
+      stack_error = "Swap out of range";
+      return;
     }
 
     std::swap(st[0], st[i]);
@@ -64,7 +69,8 @@ namespace eosio_evm {
   void Stack::dup(uint64_t a)
   {
     if (a >= size()) {
-      ctx->error_cb(Exception(Exception::Type::outOfBounds, "Dup out of range"), {}, {});
+      stack_error = "Swap out of range";
+      return;
     }
 
     st.push_front(st[a]);
@@ -78,7 +84,7 @@ namespace eosio_evm {
     }
   }
 
-  std::string Stack::asArray() {
+  std::string Stack::as_array() {
     std::string base = "[";
     for (int i = st.size() - 1; i >= 0; i--) {
       base += "\"0x" + intx::hex(st[i]) + "\",";

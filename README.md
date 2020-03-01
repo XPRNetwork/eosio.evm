@@ -17,8 +17,11 @@
 - Istanbul support
 - Full gas cost calculations (not billed to sender)
 - Web3-similar call support (query view functions with no state modifications)
-- Total size less than 200KB (~2MB on-chain)
+- Total size of ~200KB (With OPTRACE and TESTING set to false)
 
+NOTE: CHARGE_SENDER_FOR_GAS and TESTING must be enabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum tests to work properly.
+
+For testing, tests with balance/value over 2^62-1 (max EOSIO asset) were excluded. Pre-compile support is being worked on, some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
 
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)

@@ -7,7 +7,7 @@ namespace eosio_evm
 {
   struct Block
   {
-    uint64_t  number     = 0;
+    uint64_t  number     = eosio::tapos_block_num();
     uint64_t  difficulty = 0;
     uint64_t  gas_limit  = 10000000;  // Average on ethereum mainnet
     uint64_t  timestamp  = eosio::time_point().sec_since_epoch();
@@ -28,6 +28,7 @@ namespace eosio_evm
     std::string currentTimestamp;
     std::string previousHash;
   };
+
   inline void set_current_block (const Env& env) {
     current_block = {
       static_cast<uint64_t>(intx::from_string<uint256_t>(env.currentNumber)),

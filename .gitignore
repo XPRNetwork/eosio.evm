@@ -50,6 +50,6 @@ CTestTestfile.cmake
 _deps
 
 # Remove vs code
-.vscode/*
+*.vscode/*
 
 TODO

@@ -43,6 +43,7 @@ namespace eosio_evm {
     SuccessHandler success_cb;
     ErrorHandler error_cb;
 
+    ~Context() = default;
     Context(
       const size_t sm_checkpoint,
       const Account& caller,
@@ -68,13 +69,13 @@ namespace eosio_evm {
       error_cb(error_cb),
       s(this)
     {
-      // Reserve 4 KB of memory for code
+      // When the code is not empty, we reserve memory to speed up execution
       if (!prog.code.empty()) {
         mem.reserve(4096);
       }
     }
 
-    inline auto get_used_mem() const { return (mem.size() + ProcessorConsts::WORD_SIZE - 1) / ProcessorConsts::WORD_SIZE;  }
+    inline auto get_used_mem() const { return (mem.size() + WORD_SIZE - 1) / WORD_SIZE;  }
     inline uint256_t gas_used() const { return gas_limit - gas_left; }
     PcType get_pc() const { return pc; }
 
@@ -96,7 +97,7 @@ namespace eosio_evm {
     #if (TESTING == true)
     void print() {
       eosio::print("\nmemory\":",  bin2hex(mem));
-      eosio::print("\nstack\":",   s.asArray());
+      eosio::print("\nstack\":",   s.as_array());
       eosio::print("\ncaller\":",  caller.by_address());
       eosio::print("\ncallee\":",  callee.by_address());
       eosio::print("\ngasLeft\":", intx::to_string(gas_left));

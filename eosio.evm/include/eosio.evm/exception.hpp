@@ -39,9 +39,8 @@ namespace eosio_evm
 
   enum class ExitReason : uint8_t
   {
-    empty = 0,
-    returned,
-    threw
+    threw = 0,
+    returned
   };
 
   struct ExecResult

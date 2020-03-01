@@ -41,7 +41,6 @@ void evm::raw(
 ) {
   // Create transaction
   auto transaction = EthereumTransaction(tx);
-  // transaction.printhex();
 
   // Index by address
   auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
@@ -84,14 +83,35 @@ void evm::raw(
   // Check balance
   eosio::check(caller->get_balance() >= transaction.value, "Invalid Transaction: Sender balance too low for value specified");
 
+  // Added for tests and configurability, not a requirement for EOSIO
+  #if (CHARGE_SENDER_FOR_GAS == true)
+  auto gas_cost = transaction.gas_price * transaction.gas_limit;
+  eosio::check(gas_cost <= caller->get_balance(), "Invalid Transaction: Sender balance too low to pay for gas");
+  eosio::check(gas_cost <= eosio::asset::max_amount, "Invalid Transaction: Gas cost too high for EOSIO");
+  accounts_byaddress.modify(caller, eosio::same_payer, [&](auto& a) {
+    a.balance.amount -= static_cast<uint64_t>(gas_cost);
+  });
+  #endif
+
   /**
-   * Savepoint: Anything from this point on could be reverted
+   * Savepoint: All operations in processor could be reverted
    *
    * CANT USE eosio::check()
    */
-
-  // Execute transaction
   Processor(transaction, this).process_transaction(*caller);
+
+  // Added for tests, not a requirement for EOSIO
+  #if (CHARGE_SENDER_FOR_GAS == true)
+    auto gas_used = transaction.gas_refunds > (transaction.gas_used / 2)
+                      ? transaction.gas_used - (transaction.gas_used / 2)
+                      : transaction.gas_used - transaction.gas_refunds;
+    auto gas_used_cost = gas_used * transaction.gas_price;
+    auto gas_unused = transaction.gas_limit - gas_used;
+    auto gas_unused_cost = gas_unused * transaction.gas_price;
+    accounts_byaddress.modify(caller, eosio::same_payer, [&](auto& a) {
+      a.balance.amount += static_cast<uint64_t>(gas_unused_cost);
+    });
+  #endif
 }
 
 /**

@@ -1,23 +1,23 @@
-
 // Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 #pragma once
 
 // Testing
-#define TESTING true
-#define OPTRACE false
-#define PRINT_LOGS true
-#define PRINT_STATE false
+#define PRINT_LOGS true // not really helpful on EOSIO, but kept for completeness
+#define TESTING true // only for testing
+#define OPTRACE false // only for testing
+#define PRINT_STATE false // only for testing
+#define CHARGE_SENDER_FOR_GAS false // only for testing
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
 #define TOKEN_CONTRACT_RAW "eosio.token"
+#define TOKEN_PRECISION 4
 
 #define TOKEN_SYMBOL_CODE eosio::symbol_code(TOKEN_SYMBOL_CODE_RAW)
 #define TOKEN_CONTRACT eosio::name(TOKEN_CONTRACT_RAW)
-
-#define TOKEN_PRECISION 4
 #define TOKEN_SYMBOL eosio::symbol(TOKEN_SYMBOL_CODE, TOKEN_PRECISION)
 
 // Crypto
@@ -40,20 +40,18 @@ namespace eosio_evm
   // Constant chain ID determined at COMPILE time
   static constexpr size_t CURRENT_CHAIN_ID = ChainIDs::ETHEREUM_MAINNET;
 
-  struct ProcessorConsts
-  {
-    static constexpr auto MAX_CALL_DEPTH  = 1024u;
-    static constexpr auto WORD_SIZE       = 32u;
-    static constexpr auto MAX_MEM_SIZE    = 1ull << 25; // 32 MB
-    static constexpr auto MAX_BUFFER_SIZE = std::numeric_limits<uint32_t>::max();
-  };
+  // Processor constants
+  static constexpr auto MAX_CALL_DEPTH  = 1024u;
+  static constexpr auto WORD_SIZE       = 32u;
+  static constexpr auto MAX_MEM_SIZE    = 1ull << 25; // 32 MB
+  constexpr auto MAX_BUFFER_SIZE = std::numeric_limits<uint32_t>::max();
 
   // Signatures: Start depending on EIP 155
   static constexpr size_t PRE_155_V_START  = 27;
   static constexpr size_t POST_155_V_START = 35;
 
   // Gas
-  static constexpr uint256_t GAS_PRICE                 = 1;
+  // static constexpr uint256_t GAS_PRICE = 1; // Not used since gas price is passed in TX
 
   static constexpr uint256_t GP_TRANSACTION            = 21000;
   static constexpr uint256_t GP_TXDATAZERO             = 4;

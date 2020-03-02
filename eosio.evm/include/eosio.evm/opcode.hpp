@@ -1,5 +1,5 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License.
 
 #pragma once
@@ -467,7 +467,8 @@ namespace eosio_evm
   }
 
   #if (OPTRACE == true)
-  static std::map<uint8_t, std::string> opcodeToString = {
+  static std::string opcodeToString (uint8_t op) {
+    std::map<uint8_t, std::string> opToStrings = {
       // 0s: Stop and Arithmetic Operations
       { 0x00, "STOP"   }, // Halts execution
       { 0x01, "ADD"    }, // Addition operation
@@ -632,5 +633,8 @@ namespace eosio_evm
       { 0xfe, "INVALID" }, // Designated invalid instruction
       { 0xff, "SELFDESTRUCT" }
     };
-    #endif /** OPTRACE **/
+
+    return opToStrings[op];
+  }
+  #endif /** OPTRACE **/
 } // namespace eosio_evm

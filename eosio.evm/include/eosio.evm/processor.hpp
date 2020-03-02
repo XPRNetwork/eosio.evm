@@ -1,5 +1,5 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License.
 
 #pragma once
@@ -20,7 +20,6 @@ namespace eosio_evm {
     evm* contract;                              // pointer to parent contract (to call EOSIO actions)
     Context* ctx;                               // pointer to the current context
     std::vector<std::unique_ptr<Context>> ctxs; // the stack of contexts (one per nested call)
-    std::vector<uint8_t> last_return_data;      // last returned data
 
   public:
     Processor(EthereumTransaction& transaction, evm* contract)
@@ -55,7 +54,7 @@ namespace eosio_evm {
     // Can return/throw errors
     bool access_mem(const uint256_t& offset, const uint256_t& size);
     bool prepare_mem_access(const uint256_t& offset, const uint64_t& size);
-    bool jump_to(const uint64_t newPc);
+    bool jump_to(const uint256_t& newPc);
     bool use_gas(uint256_t amount);
     bool process_sstore_gas(uint256_t original_value, uint256_t current_value, uint256_t new_value);
     bool throw_error(const Exception& exception, const std::vector<uint8_t>& output);
@@ -75,6 +74,7 @@ namespace eosio_evm {
     void selfdestruct(const Address& addr);
     void kill_storage(const uint64_t& address_index);
     bool transfer_internal(const Address& from, const Address& to, const int64_t amount);
+    void throw_stack();
 
     // Reverting
     void remove_code(const Address& address);
@@ -84,6 +84,15 @@ namespace eosio_evm {
     // Storage
     void storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value);
     uint256_t loadkv(const uint64_t& address_index, const uint256_t& key);
+
+    // Precompile
+    void precompile_execute(uint256_t address);
+    void precompile_return(const std::vector<uint8_t>& output);
+    void precompile_not_implemented();
+    void precompile_ecrecover();
+    void precompile_sha256();
+    void precompile_ripemd160();
+    void precompile_identity();
 
     // Instructions
     void stop();

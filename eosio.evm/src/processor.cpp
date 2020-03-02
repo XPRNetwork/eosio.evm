@@ -1,6 +1,6 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License..
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
+// Licensed under the MIT License.
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -124,7 +124,7 @@ namespace eosio_evm
       result.er = ExitReason::threw;
       result.ex = ex_.type;
       result.exmsg = ex_.what();
-      result.output = output;
+      result.output = move(output);
       result.gas_used = sub_gas_used;
 
       // Reset refunds
@@ -240,6 +240,7 @@ namespace eosio_evm
       std::move(success_cb),
       std::move(error_cb)
     );
+
     ctxs.emplace_back(move(c));
     ctx = ctxs.back().get();
   }
@@ -279,6 +280,9 @@ namespace eosio_evm
 
     // Always true for error
     return true;
+  }
+  void Processor::throw_stack() {
+    throw_error(Exception(ET::OOB, *ctx->s.stack_error), {});
   }
 
   // Returns true if error
@@ -351,14 +355,20 @@ namespace eosio_evm
   }
 
   // Return true if error
-  bool Processor::jump_to(const uint64_t newPc)
+  bool Processor::jump_to(const uint256_t& newPc)
   {
-    if (ctx->prog.jump_dests.find(newPc) == ctx->prog.jump_dests.end()) {
+    if (newPc > ctx->prog.code.size() || newPc > std::numeric_limits<uint64_t>::max()) {
+      return throw_error(Exception(ET::illegalInstruction, "Invalid Jump Destination"), {});
+    }
+
+    auto bounded_pc = static_cast<uint64_t>(newPc);
+
+    if (ctx->prog.jump_dests.find(bounded_pc) == ctx->prog.jump_dests.end()) {
       return throw_error(Exception(ET::illegalInstruction, "Invalid Jump Destination"), {});
     }
 
     // Set PC
-    ctx->set_pc(newPc);
+    ctx->set_pc(bounded_pc);
     return false;
   }
 } // namespace eosio_evm

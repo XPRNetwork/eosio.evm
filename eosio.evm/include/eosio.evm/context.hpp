@@ -1,5 +1,5 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License.
 
 #pragma once
@@ -31,6 +31,7 @@ namespace eosio_evm {
     std::vector<uint8_t> mem;
     Stack s;
     uint256_t gas_left;
+    std::vector<uint8_t> last_return_data;      // last returned data
 
     const size_t sm_checkpoint;
     const Account& caller;

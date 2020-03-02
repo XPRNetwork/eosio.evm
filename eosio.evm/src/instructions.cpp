@@ -1,10 +1,12 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
-// Licensed under the MIT License..
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License..
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
+// Licensed under the MIT License..
+
 // evmone: Fast Ethereum Virtual Machine implementation
 // Copyright 2019 Pawel Bylica.
 // Licensed under the Apache License, Version 2.0.
+//  - mods, signextend, byte, shl, shr, sar, calldataload, codecopy, mstores, log
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -24,11 +26,12 @@ namespace eosio_evm
       "\"gasCost\":", std::to_string(OpFees::by_code[op]), ",",
       "\"stack\":",   ctx->s.as_array(), ",",
       "\"depth\":",   std::to_string(get_call_depth() - 1), ",",
-      "\"opName\": \"",  opcodeToString[op], "\",",
+      "\"opName\": \"",  opcodeToString(op), "\",",
       "\"sm\": ",  transaction.state_modifications.size(),
       "}",
       ","
     );
+    // eosio::print("\nMem Pages: ", __builtin_wasm_current_memory());
     #endif /* OPTRACE */
 
     // Charge gas
@@ -273,7 +276,6 @@ namespace eosio_evm
   {
     const auto success_cb = ctx->success_cb;
     const auto gas_used = ctx->gas_used();
-
     pop_context();
     success_cb({}, gas_used);
   }
@@ -283,7 +285,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x + y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::mul()
@@ -291,7 +293,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x * y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sub()
@@ -299,7 +301,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x - y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::div()
@@ -311,7 +313,7 @@ namespace eosio_evm
     } else {
       ctx->s.push(x / y);
     }
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sdiv()
@@ -328,7 +330,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::sdivrem(x, y).quot);
 
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::mod()
@@ -341,7 +343,7 @@ namespace eosio_evm
     else
       ctx->s.push(x % m);
 
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::addmod()
@@ -355,7 +357,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::addmod(x, y, m));
 
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::smod()
@@ -368,7 +370,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::sdivrem(x, m).rem);
 
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::mulmod()
@@ -382,19 +384,19 @@ namespace eosio_evm
     else
       ctx->s.push(intx::mulmod(x, y, m));
 
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::exp()
   {
     const auto b = ctx->s.pop();
     const auto e = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Optimize: X^0 = 1
     if (e == 0) {
       ctx->s.push(1);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -406,18 +408,18 @@ namespace eosio_evm
     // Push result
     const auto res = intx::exp(b, uint256_t(e));
     ctx->s.push(res);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::signextend()
   {
     const auto ext = ctx->s.pop();
     const auto x = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     if (ext >= 32) {
       ctx->s.push(x);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -426,7 +428,7 @@ namespace eosio_evm
     const auto value_mask = sign_mask - 1;
     const auto is_neg = (x & sign_mask) != 0;
     ctx->s.push(is_neg ? x | ~value_mask : x & value_mask);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::lt()
@@ -434,7 +436,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x < y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::gt()
@@ -442,7 +444,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x > y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::slt()
@@ -453,13 +455,13 @@ namespace eosio_evm
     auto x_neg = static_cast<bool>(x >> 255);
     auto y_neg = static_cast<bool>(y >> 255);
     ctx->s.push((x_neg ^ y_neg) ? x_neg : x < y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sgt()
   {
     ctx->s.swap(1);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
     slt();
   }
 
@@ -468,14 +470,14 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x == y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::isZero()
   {
     const auto x = ctx->s.pop();
     ctx->s.push(x == 0);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::and_()
@@ -483,7 +485,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x & y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::or_()
@@ -491,7 +493,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x | y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::xor_()
@@ -499,14 +501,14 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x ^ y);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::not_()
   {
     const auto x = ctx->s.pop();
     ctx->s.push(~x);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::byte()
@@ -522,7 +524,7 @@ namespace eosio_evm
       auto y = x >> sh;
       ctx->s.push(y & 0xff);
     }
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::shl()
@@ -530,7 +532,7 @@ namespace eosio_evm
     const auto shift = ctx->s.pop();
     const auto value = ctx->s.pop();
     ctx->s.push(value << shift);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::shr()
@@ -538,7 +540,7 @@ namespace eosio_evm
     const auto shift = ctx->s.pop();
     const auto value = ctx->s.pop();
     ctx->s.push(value >> shift);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sar()
@@ -548,7 +550,7 @@ namespace eosio_evm
 
     if ((value & (uint256_t{1} << 255)) == 0) {
       ctx->s.push(value >> shift);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -558,14 +560,14 @@ namespace eosio_evm
     } else {
       ctx->s.push((value >> shift) | (ones << (256 - shift)));
     }
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sha3()
   {
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Memory acess + gas
     bool memory_error = access_mem(offset, size);
@@ -580,13 +582,13 @@ namespace eosio_evm
     keccak_256(ctx->mem.data() + static_cast<uint64_t>(offset), static_cast<unsigned int>(size), h);
 
     ctx->s.push(intx::be::load<uint256_t>(h));
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::address()
   {
     ctx->s.push(ctx->callee.get_address());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::balance()
@@ -595,31 +597,32 @@ namespace eosio_evm
 
     const Account& given_account = get_account(address);
     ctx->s.push(given_account.get_balance_u64());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::origin()
   {
     const auto address = checksum160ToAddress(*transaction.sender);
     ctx->s.push(address);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::caller()
   {
     ctx->s.push(ctx->caller.get_address());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::callvalue()
   {
     ctx->s.push(ctx->call_value);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::calldataload()
   {
     const auto index = ctx->s.pop();
+
     const auto input_size = ctx->input.size();
 
     if (input_size < index)
@@ -636,19 +639,19 @@ namespace eosio_evm
 
       ctx->s.push(intx::be::load<uint256_t>(data));
     }
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::calldatasize()
   {
     ctx->s.push(ctx->input.size());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::codesize()
   {
     ctx->s.push(ctx->prog.code.size());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::codecopy()
@@ -656,14 +659,14 @@ namespace eosio_evm
     const auto mem_index = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     bool memory_error = access_mem(mem_index, size);
     if (memory_error) return;
 
     const auto code_size = ctx->prog.code.size();
     auto dst = static_cast<size_t>(mem_index);
-    auto src = code_size < input_index ? code_size : static_cast<size_t>(input_index);
+    auto src = (code_size < input_index) ? code_size : static_cast<size_t>(input_index);
     auto s = static_cast<size_t>(size);
     auto copy_size = std::min(s, code_size - src);
 
@@ -681,7 +684,7 @@ namespace eosio_evm
   void Processor::gasprice()
   {
     ctx->s.push(transaction.gas_price);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::extcodesize()
@@ -690,19 +693,19 @@ namespace eosio_evm
 
     auto code = get_account(address).get_code();
     ctx->s.push(code.size());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::returndatasize()
   {
-    ctx->s.push(last_return_data.size());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    ctx->s.push(ctx->last_return_data.size());
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::extcodehash()
   {
     auto address = ctx->s.pop_addr();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Fetch code account
     const Account& code_account = get_account(address);
@@ -710,7 +713,7 @@ namespace eosio_evm
     // If account is empty, return 0
     if (code_account.is_empty()) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -726,68 +729,68 @@ namespace eosio_evm
 
   void Processor::blockhash()
   {
-    const auto i = ctx->s.popu64();
+    const auto i = ctx->s.pop();
+    if (ctx->s.stack_error) return throw_stack();;
 
     if (i >= 256)
       ctx->s.push(0);
     else
-      ctx->s.push(get_block_hash(i % 256));
-
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      ctx->s.push(get_block_hash(static_cast<uint8_t>(i % 256)));
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::coinbase()
   {
     ctx->s.push(get_current_block().coinbase);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::timestamp()
   {
     ctx->s.push(get_current_block().timestamp);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::number()
   {
     ctx->s.push(get_current_block().number);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::difficulty()
   {
     ctx->s.push(get_current_block().difficulty);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::gaslimit()
   {
     ctx->s.push(get_current_block().gas_limit);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::chainid()
   {
     ctx->s.push(CURRENT_CHAIN_ID);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::selfbalance()
   {
     ctx->s.push(ctx->callee.get_balance_u64());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::pop()
   {
     ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::mload()
   {
     const auto offset = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     bool error = access_mem(offset, WORD_SIZE);
     if (error) return;
@@ -795,14 +798,14 @@ namespace eosio_evm
     auto res = intx::be::unsafe::load<uint256_t>(&ctx->mem[static_cast<uint64_t>(offset)]);
 
     ctx->s.push(res);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::mstore()
   {
     const auto offset = ctx->s.pop();
     const auto word = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     bool error = access_mem(offset, WORD_SIZE);
     if (error) return;
@@ -814,7 +817,7 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.pop();
     const auto byte = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     bool error = access_mem(offset, 1);
     if (error) return;
@@ -825,11 +828,11 @@ namespace eosio_evm
   void Processor::sload()
   {
     const auto k = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
     uint256_t loaded = loadkv(ctx->callee.primary_key(), k);
 
     ctx->s.push(loaded);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::sstore()
@@ -846,7 +849,7 @@ namespace eosio_evm
     // Get items from stack
     const auto k = ctx->s.pop();
     const auto v = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Load current value
     uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
@@ -862,8 +865,8 @@ namespace eosio_evm
 
   void Processor::jump()
   {
-    const auto newPc = ctx->s.popu64();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    const auto newPc = ctx->s.pop();
+    if (ctx->s.stack_error) return throw_stack();;
 
     bool error = jump_to(newPc);
     if (error) return;
@@ -871,9 +874,9 @@ namespace eosio_evm
 
   void Processor::jumpi()
   {
-    const auto newPc = ctx->s.popu64();
+    const auto newPc = ctx->s.pop();
     const auto cond = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     if (cond) {
       bool error = jump_to(newPc);
@@ -884,19 +887,19 @@ namespace eosio_evm
   void Processor::pc()
   {
     ctx->s.push(ctx->get_pc());
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::msize()
   {
     ctx->s.push(ctx->get_used_mem() * 32);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::gas()
   {
     ctx->s.push(ctx->gas_left);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::jumpdest() {}
@@ -907,7 +910,7 @@ namespace eosio_evm
     const auto end = ctx->get_pc() + bytes;
 
     if (end < ctx->get_pc()) {
-      throw_error(Exception(ET::outOfBounds, "Integer overflow in push"), {});
+      throw_error(Exception(ET::OOB, "Integer overflow in push"), {});
       return;
     }
     if (end >= ctx->prog.code.size()) {
@@ -923,20 +926,20 @@ namespace eosio_evm
     }
 
     ctx->s.push(imm);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
     ctx->set_pc(pc);
   }
 
   void Processor::dup()
   {
     ctx->s.dup(get_op() - DUP1);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::swap()
   {
     ctx->s.swap(get_op() - SWAP1 + 1);
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
   }
 
   void Processor::log()
@@ -949,33 +952,40 @@ namespace eosio_evm
     // Pop initial
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-
-    // Pop logs
-    const uint8_t log_n = get_op() - LOG0;
-    std::vector<uint256_t> topics(log_n);
-    for (int i = 0; i < log_n; i++) {
-      topics[i] = ctx->s.pop();
-    }
-
-    // Check pop error
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
-
-    // Gas
-    bool gas_error = use_gas((size * GP_LOG_DATA) + (log_n * GP_EXTRA_PER_LOG));
-    if (gas_error) return;
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Memory access
     bool memory_error = access_mem(offset, size);
     if (memory_error) return;
 
-    // Get log data
-    std::vector<uint8_t> log_data = {
-      ctx->mem.begin() + static_cast<uint64_t>(offset),
-      ctx->mem.begin() + static_cast<uint64_t>(offset) + static_cast<uint64_t>(size)
-    };
+    // Bound size
+    const auto o = static_cast<size_t>(offset);
+    const auto s = static_cast<size_t>(size);
 
-    transaction.logs.add({ ctx->callee.get_address(), log_data, topics });
-    transaction.add_modification({ SMT::LOG, 0, 0, 0, 0, 0 });
+    // Number of logs
+    const uint8_t num_topics = get_op() - LOG0;
+
+    // Gas
+    bool gas_error = use_gas((size * GP_LOG_DATA) + (num_topics * GP_EXTRA_PER_LOG));
+    if (gas_error) return;
+
+    // POP logs
+    std::vector<uint256_t> topics (num_topics);
+    for (size_t i = 0; i < num_topics; ++i) {
+      auto log = ctx->s.pop();
+      if (ctx->s.stack_error) return throw_stack();;
+
+      topics[i] = log;
+    }
+
+    #if (PRINT_LOGS == true)
+      if (size != 0) {
+        const auto& data = std::vector<uint8_t>(ctx->mem.begin() + o, ctx->mem.begin() + o + s);
+        LogEntry log ({ ctx->callee.get_address(), std::move(data), topics });
+        transaction.logs.logs.emplace_back(std::move(log));
+        transaction.add_modification({ SMT::LOG, 0, 0, 0, 0, 0 });
+      }
+    #endif
   }
 
   void Processor::invalid() {
@@ -1003,20 +1013,18 @@ namespace eosio_evm
     const auto offset         = ctx->s.pop();
     const auto size           = ctx->s.pop();
     const auto arbitrary      = op == CREATE2 ? ctx->s.pop() : ctx->callee.get_nonce();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Find init code
     bool memory_error = access_mem(offset, size);
     if (memory_error) return;
 
-    std::vector<uint8_t> init_code = {
-      ctx->mem.begin() + static_cast<uint64_t>(offset),
-      ctx->mem.begin() + static_cast<uint64_t>(offset) + static_cast<uint64_t>(size)
-    };
+    // Check max
+    const std::vector<uint8_t> init_code = { &ctx->mem[size_t(offset)], &ctx->mem[size_t(offset)] + size_t(size) };
 
     // Extra gas cast for CREATE2
     if (op == CREATE2) {
-      bool error = use_gas(num_words(static_cast<uint64_t>(size)) * GP_SHA3_WORD);
+      bool error = use_gas(num_words(size_t(size)) * GP_SHA3_WORD);
       if (error) return;
     }
 
@@ -1029,14 +1037,14 @@ namespace eosio_evm
     const auto gas_limit = ctx->gas_left - (ctx->gas_left / 64);
 
     // Clear return data
-    last_return_data.clear();
+    ctx->last_return_data.clear();
 
     // Depth and balance Validation
     bool max_call_depth = get_call_depth() >= MAX_CALL_DEPTH;
     bool insufficient_balance = ctx->callee.get_balance() < contract_value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -1056,7 +1064,7 @@ namespace eosio_evm
     auto [new_account, error] = create_account(new_address, true);
     if (error) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       use_gas(gas_limit); // Collisions are full exceptions
       return;
     }
@@ -1065,7 +1073,7 @@ namespace eosio_evm
     bool transfer_error = transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
     if (transfer_error) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -1073,9 +1081,10 @@ namespace eosio_evm
     const auto old_refunds = transaction.gas_refunds;
 
     // Execute new account's code
-    auto parent_context = ctx;
+    auto p_ctx = ctx;
     auto new_account_address = new_account.get_address();
-    auto success_cb = [&, parent_context, new_account_address, gas_limit](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+
+    auto success_cb = [&, p_ctx, new_account_address, gas_limit](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
       auto create_data_gas = output.size() * GP_CREATE_DATA;
       auto total_sub_gas = sub_gas_used + create_data_gas;
 
@@ -1084,8 +1093,8 @@ namespace eosio_evm
         bool gas_error = use_gas(gas_limit);
         if (gas_error) return;
 
-        parent_context->s.push(0);
-        if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+        p_ctx->s.push(0);
+        if (ctx->s.stack_error) return throw_stack();;
         return;
       }
 
@@ -1097,17 +1106,17 @@ namespace eosio_evm
       set_code(new_account_address, move(output));
 
       // Push created address on stack
-      parent_context->s.push(new_account_address);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      p_ctx->s.push(new_account_address);
+      if (p_ctx->s.stack_error) return throw_stack();
     };
-    auto error_cb = [&, parent_context, old_refunds](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
-      parent_context->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
-
+    auto error_cb = [&, p_ctx, old_refunds](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
       // Set return data if revert
       if (ex_.type == ET::revert) {
-        last_return_data = output;
+        p_ctx->last_return_data = output;
       }
+
+      p_ctx->s.push(0);
+      if (p_ctx->s.stack_error) return throw_stack();
 
       // Reset refunds
       transaction.gas_refunds = old_refunds;
@@ -1115,6 +1124,7 @@ namespace eosio_evm
       bool gas_error = use_gas(sub_gas_used);
       if (gas_error) return;
     };
+
     push_context(
       sm_checkpoint,
       ctx->callee,
@@ -1149,14 +1159,9 @@ namespace eosio_evm
     const auto value      = value_by_call_type(op);
     const auto offIn      = ctx->s.pop();
     const auto sizeIn     = ctx->s.pop();
-    const auto offOut     = ctx->s.pop();
-    const auto sizeOut    = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
-
-    // TODO: implement precompiled contracts
-    if (toAddress >= 1 && toAddress <= 8) {
-      return (void) throw_error(Exception(ET::notImplemented, "Precompiled contracts/native extensions are not implemented."), {});
-    }
+    const auto off_out    = ctx->s.pop();
+    const auto size_out   = ctx->s.pop();
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Fetch "to" account and code
     const Account& to_account = get_account(toAddress);
@@ -1182,7 +1187,7 @@ namespace eosio_evm
     }
 
     // Prepare memory for output and pay gas for memory
-    bool error = access_mem(offOut, sizeOut);
+    bool error = access_mem(off_out, size_out);
     if (error) return;
 
     // callValueTransfer (9000) (PRE 63/64)
@@ -1216,14 +1221,14 @@ namespace eosio_evm
     }
 
     // Clear return data
-    last_return_data.clear();
+    ctx->last_return_data.clear();
 
     // Depth and balance Validation
     bool max_call_depth = get_call_depth() >= MAX_CALL_DEPTH;
     bool insufficient_balance = ctx->callee.get_balance() < value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -1241,15 +1246,15 @@ namespace eosio_evm
       bool transfer_error = transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
       if (transfer_error) {
         ctx->s.push(0);
-        if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+        if (ctx->s.stack_error) return throw_stack();;
         return;
       }
     }
 
-    // Skip execution if code is empty
-    if (new_code.empty()) {
+    // Skip execution if code is empty and not a precompile
+    if (!is_precompile(toAddress) && new_code.empty()) {
       ctx->s.push(1);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+      if (ctx->s.stack_error) return throw_stack();;
       return;
     }
 
@@ -1257,32 +1262,38 @@ namespace eosio_evm
     const auto old_refunds = transaction.gas_refunds;
 
     // Push call context with callbacks
-    auto parent_context = ctx;
-    auto success_cb = [&, parent_context, sizeOut, offOut](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
-      parent_context->s.push(1);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
-      last_return_data = output;
+    auto p_ctx = ctx;
+
+    auto success_cb = [&, p_ctx, size_out, off_out](const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      p_ctx->last_return_data = output;
+
+      p_ctx->s.push(1);
+      if (p_ctx->s.stack_error) return throw_stack();
 
       // Copy results to memory
-      auto bytes_to_copy = std::min(static_cast<unsigned int>(sizeOut), output.size());
+      auto bytes_to_copy = std::min(static_cast<unsigned int>(size_out), output.size());
       if (bytes_to_copy > 0) {
-        std::memcpy(&ctx->mem[static_cast<uint64_t>(offOut)], output.data(), bytes_to_copy);
+        std::memcpy(&p_ctx->mem[static_cast<uint64_t>(off_out)], output.data(), bytes_to_copy);
       }
 
       // Charge sub-execution gas
       bool error = use_gas(sub_gas_used);
       if (error) return;
     };
-    auto error_cb = [&, parent_context, sizeOut, offOut, old_refunds](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
-      parent_context->s.push(0);
-      if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
-      last_return_data = output;
+
+    auto error_cb = [&, p_ctx, size_out, off_out, old_refunds](const Exception& ex_, const std::vector<uint8_t>& output, const uint256_t& sub_gas_used) {
+      if (ex_.type == ET::revert) {
+        p_ctx->last_return_data = output;
+      }
+
+      p_ctx->s.push(0);
+      if (p_ctx->s.stack_error) return throw_stack();
 
       // Only copy output to memory if REVERT
       if (ex_.type == ET::revert) {
-        auto bytes_to_copy = std::min(static_cast<unsigned int>(sizeOut), output.size());
+        auto bytes_to_copy = std::min(static_cast<unsigned int>(size_out), output.size());
         if (bytes_to_copy > 0) {
-          std::memcpy(&ctx->mem[static_cast<uint64_t>(offOut)], output.data(), bytes_to_copy);
+          std::memcpy(&p_ctx->mem[static_cast<uint64_t>(off_out)], output.data(), bytes_to_copy);
         }
       }
 
@@ -1293,6 +1304,7 @@ namespace eosio_evm
       bool error = use_gas(sub_gas_used);
       if (error) return;
     };
+
     push_context(
       sm_checkpoint,
       new_caller,
@@ -1305,13 +1317,18 @@ namespace eosio_evm
       std::move(success_cb),
       std::move(error_cb)
     );
+
+    // Executes precompile
+    if (is_precompile(toAddress)) {
+      precompile_execute(toAddress);
+    }
   }
 
   void Processor::return_()
   {
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Prepare memory access
     bool error = access_mem(offset, size);
@@ -1335,7 +1352,7 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.pop();
     const auto size   = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Prepare Memory
     bool error = access_mem(offset, size);
@@ -1348,7 +1365,7 @@ namespace eosio_evm
     };
 
     // Set return data
-    last_return_data = output;
+    ctx->last_return_data = output;
 
     // Error
     throw_error(Exception(ET::revert, "One of the actions in this transaction was REVERTed."), output);
@@ -1363,7 +1380,7 @@ namespace eosio_evm
 
     // Pop Stack
     auto recipient_address = ctx->s.pop_addr();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Find recipient
     auto recipient = get_account(recipient_address);

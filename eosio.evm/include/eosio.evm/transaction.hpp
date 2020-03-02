@@ -1,5 +1,5 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License.
 #pragma once
 
@@ -65,6 +65,7 @@ namespace eosio_evm
     #if (PRINT_LOGS == true)
     std::string as_json_string() const {
       std::string output = "[";
+
       for (auto i = 0; i < logs.size(); i++) {
         output += R"({"address": ")" + intx::hex(logs[i].address)     + "\"," +
                   R"("data": ")"    + bin2hex(logs[i].data)           + "\"," +
@@ -343,7 +344,9 @@ namespace eosio_evm
           "\"gasUsed\": ", intx::to_string(gas_used), ",",
           "\"gasLimit\": ", intx::to_string(gas_limit), ",",
           "\"gasPrice\": ", static_cast<int128_t>(gas_price), ",",
-          "\"logs\": ", PRINT_LOGS ? logs.as_json_string() : "", ",",
+          #if(PRINT_LOGS == true)
+          "\"logs\": ", logs.as_json_string(), ",",
+          #endif
           "\"output\": \"", bin2hex(result.output), "\","
           "\"errors\": ", errors_as_json_string(), ","
           "\"transactionHash\": \"", hash, "\""
@@ -369,11 +372,6 @@ namespace eosio_evm
         "hash ",      hash,                 "\n"
       );
     }
-    void printEncoded() const
-    {
-      eosio::print("\n", encode() );
-    }
     #endif /* TESTING */
-
   };
 } // namespace eosio_evm

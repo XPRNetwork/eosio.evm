@@ -18,10 +18,11 @@
 - Full gas cost calculations (not billed to sender)
 - Web3-similar call support (query view functions with no state modifications)
 - Total size of ~200KB (With OPTRACE and TESTING set to false)
+- ecrecover, sha256, ripdemd160 and identity precompiles supported
 
-NOTE: CHARGE_SENDER_FOR_GAS and TESTING must be enabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum tests to work properly.
+NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly.
 
-For testing, tests with balance/value over 2^62-1 (max EOSIO asset) were excluded. Pre-compile support is being worked on, some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
+For testing, tests with balance/value over 2^62-1 (max EOSIO asset) were excluded. Full Pre-compile support is being worked on, some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
 
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)

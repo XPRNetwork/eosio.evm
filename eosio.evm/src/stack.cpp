@@ -1,3 +1,7 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
+// Licensed under the MIT License.
+
 #include <eosio.evm/eosio.evm.hpp>
 
 namespace eosio_evm {

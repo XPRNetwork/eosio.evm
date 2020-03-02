@@ -448,15 +448,19 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          // Print name of test
          std::cout << testPath << " " << testName  << std::endl;
 
-         // // Only these folder
-         // if (testCategory != "stZeroCallsTest" && testCategory != "stTimeConsuming") {
+         // // Execute Only this file
+         // if (testName != "JUMPDEST_Attack") {
+         //    continue;
+         // }
+         // // Execute Only this folder
+         // if (testCategory != "stStaticCall") {
          //    continue;
          // }
 
-         // SKIP precompile folders
+
+         // SKIP ECC precompile folders
          if (
             testCategory == "stPreCompiledContracts" ||
-            testCategory == "stPreCompiledContracts2" ||
             testCategory == "stZeroKnowledge" ||
             testCategory == "stZeroKnowledge2"
          ) {
@@ -465,7 +469,7 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
 
          // SKIP file
          if (
-            // Time consuming (Completed)
+            // Time consuming (Completed successfully already, comment to run them)
             // testName == "sstore_combinations_initial00" ||
             // testName == "sstore_combinations_initial01" ||
             // testName == "sstore_combinations_initial10" ||
@@ -474,11 +478,27 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             // testName == "sstore_combinations_initial21" ||
             // testName == "randomStatetest178" ||
 
+            // Unrecoverable keys (ecrecover precompile) crash EOSIO contracts
+            testName == "CallEcrecoverUnrecoverableKey" ||
+            testName == "CallEcrecover80" ||
+            testName == "CallEcrecoverR_prefixed0" ||
+            testName == "CALLCODEEcrecover80" ||
+            testName == "CALLCODEEcrecoverR_prefixed0" ||
+            testName == "static_CallEcrecoverR_prefixed0" ||
+            testName == "static_CallEcrecover80" ||
+            testName == "failed_tx_xcf416c53" ||
+
+            // Code too large
+            testName == "randomStatetest177" || // Tried to deploy 6 MB init code
+            testName == "QuadraticComplexitySolidity_CallDataCopy" || // Way too long to process in EOSIO WASM
+            testName == "static_LoopCallsThenRevert" ||  // Way too long to process in EOSIO WASM
+            testName == "JUMPDEST_AttackwithJump" || // Large code leads to out of memory for EOSIO 32MB max
+            testName == "JUMPDEST_Attack" || // Large code leads to out of memory for EOSIO 32MB max
+
             // Only hash provided, cannot verify (no state merkle tree for EOSIO)
             testName == "recursiveCreateReturnValue" ||
 
             // Balance too high for EOSIO Asset
-            // TODO many others too, what should we do?
             testName == "randomStatetest144" ||
             testName == "randomStatetest184" ||
             testName == "PythonRevertTestTue201814-1430" ||
@@ -504,100 +524,14 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             testName == "callWithHighValueAndGasOOG" ||
             testName == "callcodeWithHighValueAndGasOOG" ||
 
-            // TODO Precompile
-            testName == "randomStatetest85" ||
-            testName == "create2callPrecompiles" ||
-            testName == "create_callprecompile_returndatasize" ||
-            testName == "TestCryptographicFunctions" ||
-            testName == "callcodeNonConst" ||
-            testName == "delegatecallNonConst" ||
-            testName == "callNonConst" ||
+            // TODO Expmod Precompile
             testName == "RevertPrecompiledTouchExactOOG" ||
-            testName == "call_ecrec_success_empty_then_returndatasize" ||
-            testName == "static_CallRipemd160_1" ||
-            testName == "static_CallRipemd160_2" ||
-            testName == "static_CallRipemd160_3_postfixed0" ||
-            testName == "static_CallRipemd160_3_prefixed0" ||
-            testName == "static_CallRipemd160_3" ||
-            testName == "static_CallRipemd160_4_gas719" ||
-            testName == "static_CallRipemd160_4" ||
-            testName == "static_CallRipemd160_5" ||
-            testName == "static_CallSha256_1_nonzeroValue" ||
-            testName == "static_CallSha256_1" ||
-            testName == "static_CallSha256_2" ||
-            testName == "static_CallSha256_3_postfix0" ||
-            testName == "static_CallSha256_3_prefix0" ||
-            testName == "static_CallSha256_3" ||
-            testName == "static_CallSha256_4_gas99" ||
-            testName == "static_CallSha256_4" ||
-            testName == "static_CallSha256_5" ||
-            testName == "static_CallEcrecover0_0input" ||
-            testName == "static_CallEcrecover0_completeReturnValue" ||
-            testName == "static_CallEcrecover0_Gas2999" ||
-            testName == "static_CallEcrecover0_gas3000" ||
-            testName == "static_CallEcrecover0_NoGas" ||
-            testName == "static_CallEcrecover0_overlappingInputOutput" ||
-            testName == "static_CallEcrecover0" ||
-            testName == "static_CallEcrecover1" ||
-            testName == "static_CallEcrecover2" ||
-            testName == "static_CallEcrecover3" ||
-            testName == "static_CallEcrecover80" ||
-            testName == "static_CallEcrecoverCheckLength" ||
-            testName == "static_CallEcrecoverCheckLengthWrongV" ||
-            testName == "static_CallEcrecoverH_prefixed0" ||
-            testName == "static_CallEcrecoverR_prefixed0" ||
-            testName == "static_CallEcrecoverS_prefixed0" ||
-            testName == "static_CallEcrecoverV_prefixed0" ||
-            testName == "static_CallGoesOOGOnSecondLevel" ||
-            testName == "static_CallGoesOOGOnSecondLevel2" ||
-            testName == "static_CallIdentitiy_1" ||
-            testName == "static_CallIdentity_1_nonzeroValue" ||
-            testName == "static_CallIdentity_2" ||
-            testName == "static_CallIdentity_3" ||
-            testName == "static_CallIdentity_4_gas17" ||
-            testName == "static_CallIdentity_4_gas18" ||
-            testName == "static_CallIdentity_4" ||
-            testName == "static_CallIdentity_5" ||
-            testName == "randomStatetest579" ||
-            testName == "failed_tx_xcf416c53" ||
-
-            // Way too high memory (breaks 32 MB limits)
-            testName == "createInitFailStackSizeLargerThan1024" ||
-            testName == "stackLimitPush32_1025" ||
-            testName == "stackLimitPush32_1024" ||
-            testName == "stackLimitPush32_1023" ||
-            testName == "stackLimitPush31_1025" ||
-            testName == "stackLimitPush31_1024" ||
-            testName == "stackLimitPush31_1023" ||
-            testName == "stackLimitGas_1023" ||
-            testName == "stackLimitGas_1024" ||
-            testName == "stackLimitGas_1025" ||
-            testName == "QuadraticComplexitySolidity_CallDataCopy" || // Check
-            testName == "JUMPDEST_AttackwithJump" ||
-            // testName == "JUMPDEST_Attack" ||
-            testName == "static_LoopCallsThenRevert" ||
-            testName == "randomStatetest36" || // TODO 10 MB memory access (fix?)
-            testName == "randomStatetest48" ||
-            testName == "randomStatetest150" ||
-            testName == "randomStatetest154" || // Call depth max
-            testName == "randomStatetest159" || // Large memory usage, 10K printing tons of logs
-            testName == "randomStatetest163" ||
-            testName == "randomStatetest177" || // Check this one
-            testName == "randomStatetest185" ||
-            testName == "randomStatetest205" ||
-            testName == "randomStatetest263" ||
-            testName == "randomStatetest306" ||
-            testName == "randomStatetest326" ||
-            testName == "randomStatetest418" ||
-            testName == "randomStatetest458" ||
-            testName == "randomStatetest467" ||
-            testName == "randomStatetest476" ||
-            testName == "randomStatetest547" ||
-            testName == "randomStatetest554" ||
-            testName == "randomStatetest583" ||
-            testName == "randomStatetest636" ||
-            testName == "randomStatetest639"
-
+            testName == "static_CallEcrecover0_0input" || // Uses expmod
+            testName == "modexp_0_0_0_20500" || // Uses expmod
+            testName == "modexp_0_0_0_22000" || // Uses expmo // Uses expmodd
+            testName == "modexp_0_0_0_25000" || // Uses expmod
+            testName == "modexp_0_0_0_35000" || // Uses expmod
+            testName == "modexpRandomInput"  // Uses expmod
          ) {
             continue;
          }
@@ -607,6 +541,8 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
 
          // For every test in the file
          for (const auto& singleTest: json.get_object()) {
+            std::cout << singleTest.key() << std::endl;
+
             // SKIP specific tests
             if (
                // "Value" too high in contract (same limit as balance)
@@ -614,15 +550,19 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
                singleTest.key() == "static_callcodecallcodecall_110_2_d0g0v0_Istanbul" ||
                singleTest.key() == "static_callcodecallcodecall_1102_d0g0v0_Istanbul" ||
                singleTest.key() == "static_callcodecallcodecall_110_OOGMBefore2_d0g0v0_Istanbul" ||
-               singleTest.key() == "randomStatetest618_d0g0v0_Istanbul"
+               singleTest.key() == "randomStatetest618_d0g0v0_Istanbul" ||
+               // Unsupported Precompiles
+               singleTest.key() == "create2callPrecompiles_d4g0v0_Istanbul" ||
+               singleTest.key() == "create2callPrecompiles_d6g0v0_Istanbul" ||
+               singleTest.key() == "create2callPrecompiles_d7g0v0_Istanbul"
             ) {
                continue;
             }
 
             // (use for single test testing)
-            if (singleTest.key() != "JUMPDEST_Attack_d0g0v0_Istanbul") {
-               continue;
-            }
+            // if (singleTest.key() != "randomStatetest85_d0g0v0_Istanbul") {
+            //    continue;
+            // }
 
             auto testObject = singleTest.value().get_object();
 

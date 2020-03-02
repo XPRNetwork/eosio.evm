@@ -1,9 +1,9 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
-// Licensed under the MIT License..
-
 // evmone: Fast Ethereum Virtual Machine implementation
 // Copyright 2019 Pawel Bylica.
 // Licensed under the Apache License, Version 2.0.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
+// Licensed under the MIT License..
+//  - Modified error handling and sources modified
 
 #include <eosio.evm/eosio.evm.hpp>
 
@@ -48,8 +48,9 @@ namespace eosio_evm
       // Resize
       const auto end = static_cast<size_t>(new_words * WORD_SIZE);
       if (end >= MAX_MEM_SIZE) {
-        return throw_error(Exception(ET::outOfBounds, "Memory limit exceeded"), {});
+        return throw_error(Exception(ET::OOB, "Memory limit exceeded"), {});
       }
+
       ctx->mem.resize(end);
     }
 
@@ -62,7 +63,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);
@@ -97,7 +98,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);
@@ -136,7 +137,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return (void) throw_error(Exception(ET::outOfBounds, *ctx->s.stack_error), {});
+    if (ctx->s.stack_error) return throw_stack();;
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);
@@ -146,9 +147,9 @@ namespace eosio_evm
     auto destination_index = static_cast<size_t>(mem_index);
 
     // Validate return data
-    auto return_data_size = last_return_data.size();
+    auto return_data_size = ctx->last_return_data.size();
     if (return_data_size < input_index) {
-      throw_error(Exception(ET::outOfBounds, "Invalid memory access"), {});
+      throw_error(Exception(ET::OOB, "Invalid memory access"), {});
       return;
     }
 
@@ -158,7 +159,7 @@ namespace eosio_evm
 
     // Validate source index
     if (source_index + bounded_size > return_data_size) {
-      throw_error(Exception(ET::outOfBounds, "Invalid memory access"), {});
+      throw_error(Exception(ET::OOB, "Invalid memory access"), {});
       return;
     }
 
@@ -168,7 +169,7 @@ namespace eosio_evm
 
     // Write to memory
     if (bounded_size > 0) {
-      std::memcpy(&ctx->mem[destination_index], &last_return_data[source_index], bounded_size);
+      std::memcpy(&ctx->mem[destination_index], &ctx->last_return_data[source_index], bounded_size);
     }
   }
 } // namespace eosio_evm

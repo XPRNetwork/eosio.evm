@@ -14,6 +14,11 @@ add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/testing.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/stack.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/instructions.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/index.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/ecrecover.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/sha256.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/ripemd160.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/identity.cpp
 )
 
 target_include_directories(eosio.evm
@@ -22,7 +27,7 @@ target_include_directories(eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_options(eosio.evm PUBLIC -stack-size 48000 )
+target_link_options(eosio.evm PUBLIC -stack-size 40000 -use-freeing-malloc )
 
 set_target_properties(eosio.evm
    PROPERTIES

@@ -1,15 +1,19 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License.
 
 #pragma once
 
-// Testing
-#define PRINT_LOGS true // not really helpful on EOSIO, but kept for completeness
-#define TESTING true // only for testing
-#define OPTRACE false // only for testing
-#define PRINT_STATE false // only for testing
-#define CHARGE_SENDER_FOR_GAS false // only for testing
+// Adds superpower testing functions (required for running cpp tests/clearing data in contract)
+#define TESTING true
+
+// Only turn this on when doing ethereum/tests (otherwise balances won't match)
+#define CHARGE_SENDER_FOR_GAS false
+
+// Keep all of these off unless testing/debugging
+#define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness
+#define OPTRACE false
+#define PRINT_STATE false
 
 // Token constants
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
@@ -72,6 +76,15 @@ namespace eosio_evm
   static constexpr uint256_t GP_SSTORE_RESET_GAS       = 5000;
   static constexpr uint256_t GP_SSTORE_CLEARS_SCHEDULE = 15000;
   static constexpr uint256_t GP_EXTRA_PER_LOG          = 375;
+
+  // Precompiles
+  static constexpr uint256_t GP_ECRECOVER              = 3000;
+  static constexpr uint256_t GP_IDENTITY_BASE          = 15;
+  static constexpr uint256_t GP_IDENTITY_WORD          = 3;
+  static constexpr uint256_t GP_SHA256                 = 60;
+  static constexpr uint256_t GP_SHA256_WORD            = 12;
+  static constexpr uint256_t GP_RIPEMD160              = 600;
+  static constexpr uint256_t GP_RIPEMD160_WORD         = 120;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;

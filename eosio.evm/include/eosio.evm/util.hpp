@@ -1,5 +1,5 @@
-// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) 2020 Syed Jafri. All rights reserved.
 // Licensed under the MIT License..
 
 #pragma once
@@ -23,7 +23,11 @@ namespace eosio_evm
     return res;
   }
 
-  inline constexpr int64_t num_words(uint64_t size_in_bytes) noexcept
+  inline constexpr bool is_precompile(uint256_t address) {
+    return address >= 1 && address <= 65535;
+  }
+
+  inline constexpr int64_t num_words(uint64_t size_in_bytes)
   {
     return (static_cast<int64_t>(size_in_bytes) + (WORD_SIZE - 1)) / WORD_SIZE;
   }

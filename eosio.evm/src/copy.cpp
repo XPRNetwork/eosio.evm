@@ -63,7 +63,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);
@@ -98,7 +98,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);
@@ -137,7 +137,7 @@ namespace eosio_evm
     const auto mem_index   = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size        = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Memory access + gas cost
     bool memory_error = access_mem(mem_index, size);

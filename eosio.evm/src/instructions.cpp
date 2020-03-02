@@ -285,7 +285,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x + y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::mul()
@@ -293,7 +293,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x * y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sub()
@@ -301,7 +301,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x - y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::div()
@@ -313,7 +313,7 @@ namespace eosio_evm
     } else {
       ctx->s.push(x / y);
     }
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sdiv()
@@ -330,7 +330,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::sdivrem(x, y).quot);
 
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::mod()
@@ -343,7 +343,7 @@ namespace eosio_evm
     else
       ctx->s.push(x % m);
 
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::addmod()
@@ -357,7 +357,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::addmod(x, y, m));
 
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::smod()
@@ -370,7 +370,7 @@ namespace eosio_evm
     else
       ctx->s.push(intx::sdivrem(x, m).rem);
 
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::mulmod()
@@ -384,19 +384,19 @@ namespace eosio_evm
     else
       ctx->s.push(intx::mulmod(x, y, m));
 
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::exp()
   {
     const auto b = ctx->s.pop();
     const auto e = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Optimize: X^0 = 1
     if (e == 0) {
       ctx->s.push(1);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -408,18 +408,18 @@ namespace eosio_evm
     // Push result
     const auto res = intx::exp(b, uint256_t(e));
     ctx->s.push(res);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::signextend()
   {
     const auto ext = ctx->s.pop();
     const auto x = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     if (ext >= 32) {
       ctx->s.push(x);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -428,7 +428,7 @@ namespace eosio_evm
     const auto value_mask = sign_mask - 1;
     const auto is_neg = (x & sign_mask) != 0;
     ctx->s.push(is_neg ? x | ~value_mask : x & value_mask);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::lt()
@@ -436,7 +436,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x < y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::gt()
@@ -444,7 +444,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x > y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::slt()
@@ -455,13 +455,13 @@ namespace eosio_evm
     auto x_neg = static_cast<bool>(x >> 255);
     auto y_neg = static_cast<bool>(y >> 255);
     ctx->s.push((x_neg ^ y_neg) ? x_neg : x < y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sgt()
   {
     ctx->s.swap(1);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
     slt();
   }
 
@@ -470,14 +470,14 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x == y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::isZero()
   {
     const auto x = ctx->s.pop();
     ctx->s.push(x == 0);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::and_()
@@ -485,7 +485,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x & y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::or_()
@@ -493,7 +493,7 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x | y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::xor_()
@@ -501,14 +501,14 @@ namespace eosio_evm
     const auto x = ctx->s.pop();
     const auto y = ctx->s.pop();
     ctx->s.push(x ^ y);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::not_()
   {
     const auto x = ctx->s.pop();
     ctx->s.push(~x);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::byte()
@@ -524,7 +524,7 @@ namespace eosio_evm
       auto y = x >> sh;
       ctx->s.push(y & 0xff);
     }
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::shl()
@@ -532,7 +532,7 @@ namespace eosio_evm
     const auto shift = ctx->s.pop();
     const auto value = ctx->s.pop();
     ctx->s.push(value << shift);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::shr()
@@ -540,7 +540,7 @@ namespace eosio_evm
     const auto shift = ctx->s.pop();
     const auto value = ctx->s.pop();
     ctx->s.push(value >> shift);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sar()
@@ -550,7 +550,7 @@ namespace eosio_evm
 
     if ((value & (uint256_t{1} << 255)) == 0) {
       ctx->s.push(value >> shift);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -560,14 +560,14 @@ namespace eosio_evm
     } else {
       ctx->s.push((value >> shift) | (ones << (256 - shift)));
     }
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sha3()
   {
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Memory acess + gas
     bool memory_error = access_mem(offset, size);
@@ -582,13 +582,13 @@ namespace eosio_evm
     keccak_256(ctx->mem.data() + static_cast<uint64_t>(offset), static_cast<unsigned int>(size), h);
 
     ctx->s.push(intx::be::load<uint256_t>(h));
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::address()
   {
     ctx->s.push(ctx->callee.get_address());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::balance()
@@ -597,26 +597,26 @@ namespace eosio_evm
 
     const Account& given_account = get_account(address);
     ctx->s.push(given_account.get_balance_u64());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::origin()
   {
     const auto address = checksum160ToAddress(*transaction.sender);
     ctx->s.push(address);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::caller()
   {
     ctx->s.push(ctx->caller.get_address());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::callvalue()
   {
     ctx->s.push(ctx->call_value);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::calldataload()
@@ -639,19 +639,19 @@ namespace eosio_evm
 
       ctx->s.push(intx::be::load<uint256_t>(data));
     }
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::calldatasize()
   {
     ctx->s.push(ctx->input.size());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::codesize()
   {
     ctx->s.push(ctx->prog.code.size());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::codecopy()
@@ -659,7 +659,7 @@ namespace eosio_evm
     const auto mem_index = ctx->s.pop();
     const auto input_index = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     bool memory_error = access_mem(mem_index, size);
     if (memory_error) return;
@@ -684,7 +684,7 @@ namespace eosio_evm
   void Processor::gasprice()
   {
     ctx->s.push(transaction.gas_price);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::extcodesize()
@@ -693,19 +693,19 @@ namespace eosio_evm
 
     auto code = get_account(address).get_code();
     ctx->s.push(code.size());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::returndatasize()
   {
     ctx->s.push(ctx->last_return_data.size());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::extcodehash()
   {
     auto address = ctx->s.pop_addr();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Fetch code account
     const Account& code_account = get_account(address);
@@ -713,7 +713,7 @@ namespace eosio_evm
     // If account is empty, return 0
     if (code_account.is_empty()) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -730,67 +730,67 @@ namespace eosio_evm
   void Processor::blockhash()
   {
     const auto i = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     if (i >= 256)
       ctx->s.push(0);
     else
       ctx->s.push(get_block_hash(static_cast<uint8_t>(i % 256)));
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::coinbase()
   {
     ctx->s.push(get_current_block().coinbase);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::timestamp()
   {
     ctx->s.push(get_current_block().timestamp);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::number()
   {
     ctx->s.push(get_current_block().number);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::difficulty()
   {
     ctx->s.push(get_current_block().difficulty);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::gaslimit()
   {
     ctx->s.push(get_current_block().gas_limit);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::chainid()
   {
     ctx->s.push(CURRENT_CHAIN_ID);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::selfbalance()
   {
     ctx->s.push(ctx->callee.get_balance_u64());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::pop()
   {
     ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::mload()
   {
     const auto offset = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     bool error = access_mem(offset, WORD_SIZE);
     if (error) return;
@@ -798,14 +798,14 @@ namespace eosio_evm
     auto res = intx::be::unsafe::load<uint256_t>(&ctx->mem[static_cast<uint64_t>(offset)]);
 
     ctx->s.push(res);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::mstore()
   {
     const auto offset = ctx->s.pop();
     const auto word = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     bool error = access_mem(offset, WORD_SIZE);
     if (error) return;
@@ -817,7 +817,7 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.pop();
     const auto byte = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     bool error = access_mem(offset, 1);
     if (error) return;
@@ -828,11 +828,11 @@ namespace eosio_evm
   void Processor::sload()
   {
     const auto k = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
     uint256_t loaded = loadkv(ctx->callee.primary_key(), k);
 
     ctx->s.push(loaded);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::sstore()
@@ -849,7 +849,7 @@ namespace eosio_evm
     // Get items from stack
     const auto k = ctx->s.pop();
     const auto v = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Load current value
     uint256_t current_value = loadkv(ctx->callee.primary_key(), k);
@@ -866,7 +866,7 @@ namespace eosio_evm
   void Processor::jump()
   {
     const auto newPc = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     bool error = jump_to(newPc);
     if (error) return;
@@ -876,7 +876,7 @@ namespace eosio_evm
   {
     const auto newPc = ctx->s.pop();
     const auto cond = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     if (cond) {
       bool error = jump_to(newPc);
@@ -887,19 +887,19 @@ namespace eosio_evm
   void Processor::pc()
   {
     ctx->s.push(ctx->get_pc());
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::msize()
   {
     ctx->s.push(ctx->get_used_mem() * 32);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::gas()
   {
     ctx->s.push(ctx->gas_left);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::jumpdest() {}
@@ -926,20 +926,20 @@ namespace eosio_evm
     }
 
     ctx->s.push(imm);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
     ctx->set_pc(pc);
   }
 
   void Processor::dup()
   {
     ctx->s.dup(get_op() - DUP1);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::swap()
   {
     ctx->s.swap(get_op() - SWAP1 + 1);
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
   }
 
   void Processor::log()
@@ -952,7 +952,7 @@ namespace eosio_evm
     // Pop initial
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Memory access
     bool memory_error = access_mem(offset, size);
@@ -973,7 +973,7 @@ namespace eosio_evm
     std::vector<uint256_t> topics (num_topics);
     for (size_t i = 0; i < num_topics; ++i) {
       auto log = ctx->s.pop();
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
 
       topics[i] = log;
     }
@@ -1013,7 +1013,7 @@ namespace eosio_evm
     const auto offset         = ctx->s.pop();
     const auto size           = ctx->s.pop();
     const auto arbitrary      = op == CREATE2 ? ctx->s.pop() : ctx->callee.get_nonce();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Find init code
     bool memory_error = access_mem(offset, size);
@@ -1044,7 +1044,7 @@ namespace eosio_evm
     bool insufficient_balance = ctx->callee.get_balance() < contract_value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -1064,7 +1064,7 @@ namespace eosio_evm
     auto [new_account, error] = create_account(new_address, true);
     if (error) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       use_gas(gas_limit); // Collisions are full exceptions
       return;
     }
@@ -1073,7 +1073,7 @@ namespace eosio_evm
     bool transfer_error = transfer_internal(ctx->callee.get_address(), new_account.get_address(), contract_value);
     if (transfer_error) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -1094,7 +1094,7 @@ namespace eosio_evm
         if (gas_error) return;
 
         p_ctx->s.push(0);
-        if (ctx->s.stack_error) return throw_stack();;
+        if (ctx->s.stack_error) return throw_stack();
         return;
       }
 
@@ -1161,7 +1161,7 @@ namespace eosio_evm
     const auto sizeIn     = ctx->s.pop();
     const auto off_out    = ctx->s.pop();
     const auto size_out   = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Fetch "to" account and code
     const Account& to_account = get_account(toAddress);
@@ -1228,7 +1228,7 @@ namespace eosio_evm
     bool insufficient_balance = ctx->callee.get_balance() < value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -1246,7 +1246,7 @@ namespace eosio_evm
       bool transfer_error = transfer_internal(ctx->callee.get_address(), new_callee.get_address(), value);
       if (transfer_error) {
         ctx->s.push(0);
-        if (ctx->s.stack_error) return throw_stack();;
+        if (ctx->s.stack_error) return throw_stack();
         return;
       }
     }
@@ -1254,7 +1254,7 @@ namespace eosio_evm
     // Skip execution if code is empty and not a precompile
     if (!is_precompile(toAddress) && new_code.empty()) {
       ctx->s.push(1);
-      if (ctx->s.stack_error) return throw_stack();;
+      if (ctx->s.stack_error) return throw_stack();
       return;
     }
 
@@ -1328,7 +1328,7 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.pop();
     const auto size = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Prepare memory access
     bool error = access_mem(offset, size);
@@ -1352,7 +1352,7 @@ namespace eosio_evm
   {
     const auto offset = ctx->s.pop();
     const auto size   = ctx->s.pop();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Prepare Memory
     bool error = access_mem(offset, size);
@@ -1380,7 +1380,7 @@ namespace eosio_evm
 
     // Pop Stack
     auto recipient_address = ctx->s.pop_addr();
-    if (ctx->s.stack_error) return throw_stack();;
+    if (ctx->s.stack_error) return throw_stack();
 
     // Find recipient
     auto recipient = get_account(recipient_address);

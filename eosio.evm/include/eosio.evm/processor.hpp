@@ -43,7 +43,7 @@ namespace eosio_evm {
       const Account& callee,
       uint256_t gas_left,
       const bool is_static,
-      const int64_t call_value,
+      const uint256_t call_value,
       std::vector<uint8_t>&& input,
       Program&& prog,
       SuccessHandler&& success_cb,
@@ -73,7 +73,7 @@ namespace eosio_evm {
     void set_code(const Address& address, const std::vector<uint8_t>& code);
     void selfdestruct(const Address& addr);
     void kill_storage(const uint64_t& address_index);
-    bool transfer_internal(const Address& from, const Address& to, const int64_t amount);
+    bool transfer_internal(const Address& from, const Address& to, const uint256_t& amount);
     void throw_stack();
 
     // Reverting
@@ -163,7 +163,7 @@ namespace eosio_evm {
     void swap();
     void log();
     void create();
-    int64_t value_by_call_type(const unsigned char call_type);
+    uint256_t value_by_call_type(const unsigned char call_type);
     void call();
     void return_();
     void revert();

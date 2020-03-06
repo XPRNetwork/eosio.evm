@@ -21,9 +21,7 @@ namespace eosio_evm {
     Stack(Context* _ctx): ctx(_ctx) {};
 
     uint256_t pop();
-    uint64_t popu64();
     uint256_t pop_addr();
-    int64_t pop_amount();
     void push(const uint256_t& val);
     uint64_t size() const;
     void swap(uint64_t i);

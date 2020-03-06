@@ -21,7 +21,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "asset"
+                    "type": "checksum256"
                 },
                 {
                     "name": "nonce",
@@ -124,7 +124,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "uint64"
+                    "type": "string"
                 },
                 {
                     "name": "code",

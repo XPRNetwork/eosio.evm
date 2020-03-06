@@ -15,7 +15,7 @@ namespace eosio_evm {
     transaction.printhex();
   }
 
-  void evm::devnewacct(const eosio::checksum160& address, const uint64_t balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account) {
+  void evm::devnewacct(const eosio::checksum160& address, const std::string balance, const std::vector<uint8_t> code, const uint64_t nonce, const eosio::name& account) {
     require_auth(get_self());
 
     // Create account
@@ -23,12 +23,14 @@ namespace eosio_evm {
     auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
     auto existing_address   = accounts_byaddress.find(address_256);
     eosio::check(existing_address == accounts_byaddress.end(), "An account already exists with this address");
-    eosio::check(balance >= 0 && balance <= eosio::asset::max_amount, "Balance too high for EOSIO");
+
+    auto ubalance = intx::from_string<uint256_t>(balance);
+    eosio::check(ubalance >= 0, "Balance cannot be negative");
     _accounts.emplace(get_self(), [&](auto& a) {
       a.index   = _accounts.available_primary_key();
       a.address = address;
       a.account = account;
-      a.balance = eosio::asset(balance, TOKEN_SYMBOL);
+      a.balance = ubalance;
       a.nonce   = nonce;
       a.code    = code;
     });
@@ -79,7 +81,7 @@ namespace eosio_evm {
       auto nonce = intx::hex(intx::from_string<uint256_t>(std::to_string(existing_address->get_nonce())));
       nonce = nonce.length() % 2 == 0 ? "0x" + nonce : "0x0" + nonce;
 
-      auto balance = intx::hex(intx::from_string<uint256_t>(std::to_string(existing_address->get_balance())));
+      auto balance = intx::hex(existing_address->get_balance());
       balance = balance.length() % 2 == 0 ? "0x" + balance : "0x0" + balance;
 
       eosio::print("\"code\":\"", code, "\",");

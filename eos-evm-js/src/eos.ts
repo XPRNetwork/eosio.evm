@@ -6,9 +6,11 @@ import { readFileSync } from 'fs'
 import { getDeployableFilesFromDir } from './deploy'
 import { EOSIO_TOKEN, EOSIO_SYSTEM } from './constants'
 import { Account } from './interfaces'
+const BN = require('bn.js')
 
 const transformEthAccount = (account: Account) => {
   account.address = `0x${account.address}`
+  account.balance = new BN(account.balance)
   return account
 }
 

@@ -42,7 +42,7 @@ namespace eosio_evm
     transaction.created_address = to_address;
 
     // Transfer value
-    bool transfer_error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    bool transfer_error = transfer_internal(caller.get_address(), to_address, transaction.value);
     if (transfer_error) return {"EVM Execution Error: Unable to process value transfer, check your balance."};
 
     // Push initial context
@@ -68,7 +68,7 @@ namespace eosio_evm
       callee,
       transaction.gas_left(),
       false,
-      transaction.get_value(),
+      transaction.value,
       std::move(std::vector<uint8_t>{}), // Data is empty
       std::move(transaction.data),  // Init data used as code here
       std::move(success_cb),
@@ -110,7 +110,7 @@ namespace eosio_evm
     const Account& callee = get_account(to_address);
 
     // Transfer value
-    bool error = transfer_internal(caller.get_address(), to_address, transaction.get_value());
+    bool error = transfer_internal(caller.get_address(), to_address, transaction.value);
     if (error) return {"EVM Execution Error: Unable to process value transfer, check your balance."};
 
     // Push initial context
@@ -136,12 +136,17 @@ namespace eosio_evm
       callee,
       transaction.gas_left(),
       false,
-      transaction.get_value(),
+      transaction.value,
       std::move(transaction.data),
       std::move(callee.get_code()),
       std::move(success_cb),
       std::move(error_cb)
     );
+
+    // Executes precompile
+    if (is_precompile(to_address)) {
+      precompile_execute(to_address);
+    }
 
     // Run
     run();
@@ -222,7 +227,7 @@ namespace eosio_evm
     const Account& callee,
     uint256_t gas_left,
     const bool is_static,
-    const int64_t call_value,
+    const uint256_t call_value,
     std::vector<uint8_t>&& input,
     Program&& prog,
     SuccessHandler&& success_cb,

@@ -51,7 +51,7 @@ namespace eosio_evm
     }
     else
     {
-      return stop();
+      return; // No-op
     }
   }
 } // namespace eosio_evm

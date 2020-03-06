@@ -23,28 +23,6 @@ namespace eosio_evm {
     return pop() & MASK_160;
   }
 
-  uint64_t Stack::popu64()
-  {
-    const auto val = pop();
-    if (val > std::numeric_limits<uint64_t>::max()) {
-      stack_error = "Value on stack is larger than 2^64";
-      return 0;
-    }
-
-    return static_cast<uint64_t>(val);
-  }
-
-  int64_t Stack::pop_amount()
-  {
-    const auto val = pop();
-    if (val > eosio::asset::max_amount) {
-      stack_error = "Value on stack is larger than 2^62 - 1";
-      return 0;
-    }
-
-    return static_cast<int64_t>(val);
-  }
-
   void Stack::push(const uint256_t& val)
   {
     if (size() == MAX_STACK_SIZE) {
@@ -77,7 +55,7 @@ namespace eosio_evm {
       return;
     }
 
-    st.push_front(st[a]);
+    push(st[a]);
   }
 
   void Stack::print() {

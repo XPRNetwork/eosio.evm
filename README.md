@@ -20,9 +20,9 @@
 - Total size of ~200KB (With OPTRACE and TESTING set to false)
 - ecrecover, sha256, ripdemd160 and identity precompiles supported
 
-NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly.
+NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly. Tests that pass the 32MB RAM limit on EOSIO were disabled.
 
-For testing, tests with balance/value over 2^62-1 (max EOSIO asset) were excluded. Full Pre-compile support is being worked on, some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
+Some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
 
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)

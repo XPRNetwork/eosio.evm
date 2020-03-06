@@ -38,7 +38,7 @@ namespace eosio_evm {
     const Account& callee;
     uint256_t gas_limit;
     const bool is_static;
-    const int64_t call_value;
+    const uint256_t call_value;
     const std::vector<uint8_t> input;
     const Program prog;
     SuccessHandler success_cb;
@@ -51,7 +51,7 @@ namespace eosio_evm {
       const Account& callee,
       uint256_t gas_limit,
       const bool is_static,
-      const int64_t call_value,
+      const uint256_t call_value,
       std::vector<uint8_t>&& input,
       Program&& prog,
       SuccessHandler&& success_cb,
@@ -104,7 +104,7 @@ namespace eosio_evm {
       eosio::print("\ngasLeft\":", intx::to_string(gas_left));
       eosio::print("\nIs Static\":", is_static);
       eosio::print("\nInput\":", bin2hex(input));
-      eosio::print("\nCall Value\":", call_value, "\n");
+      eosio::print("\nCall Value\":", intx::to_string(call_value), "\n");
     }
     #endif /* TESTING */
   };

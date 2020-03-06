@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled
          ("index", 0)
          ("address", "bc5c5b389d1bd6b0e356bfcb2b3d748a98304a0c")
          ("account", "1234test1111")
-         ("balance", "0.0000 EOS")
+         ("balance", 0)
          ("nonce", 1)
          ("code", vector<uint8_t>{})
       );
@@ -469,14 +469,13 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
 
          // SKIP file
          if (
-            // Time consuming (Completed successfully already, comment to run them)
-            // testName == "sstore_combinations_initial00" ||
-            // testName == "sstore_combinations_initial01" ||
-            // testName == "sstore_combinations_initial10" ||
-            // testName == "sstore_combinations_initial11" ||
-            // testName == "sstore_combinations_initial20" ||
-            // testName == "sstore_combinations_initial21" ||
-            // testName == "randomStatetest178" ||
+            // Time consuming (Completed successfully already, comment out to run them)
+            testName == "sstore_combinations_initial00" ||
+            testName == "sstore_combinations_initial01" ||
+            testName == "sstore_combinations_initial10" ||
+            testName == "sstore_combinations_initial11" ||
+            testName == "sstore_combinations_initial20" ||
+            testName == "sstore_combinations_initial21" ||
 
             // Unrecoverable keys (ecrecover precompile) crash EOSIO contracts
             testName == "CallEcrecoverUnrecoverableKey" ||
@@ -494,44 +493,24 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             testName == "static_LoopCallsThenRevert" ||  // Way too long to process in EOSIO WASM
             testName == "JUMPDEST_AttackwithJump" || // Large code leads to out of memory for EOSIO 32MB max
             testName == "JUMPDEST_Attack" || // Large code leads to out of memory for EOSIO 32MB max
+            testName == "static_Call50000_sha256" || // Large code leads to out of memory for EOSIO 32MB max
 
             // Only hash provided, cannot verify (no state merkle tree for EOSIO)
             testName == "recursiveCreateReturnValue" ||
+            testName == "Create2Recursive" ||
 
-            // Balance too high for EOSIO Asset
-            testName == "randomStatetest144" ||
-            testName == "randomStatetest184" ||
-            testName == "PythonRevertTestTue201814-1430" ||
-            testName == "randomStatetest642" ||
-            testName == "randomStatetest644" ||
-            testName == "randomStatetest643" ||
-            testName == "randomStatetest645" ||
-            testName == "randomStatetest646" ||
-            testName == "returndatacopyPythonBug_Tue_03_48_41-1432" ||
-            testName == "randomStatetestDEFAULT-Tue_07_58_41-15153-575192" ||
-            testName == "chainId" ||
-            testName == "chainIdGasCost" ||
-            testName == "JUMPI_Bounds" ||
-            testName == "JUMP_Bounds2" ||
-            testName == "DUP_Bounds" ||
-            testName == "JUMP_Bounds" ||
-            testName == "OverflowGasMakeMoney" ||
-            testName == "extcodecopy" ||
-            testName == "SstoreCallToSelfSubRefundBelowZero" ||
-            // "Value" too high in contract (same limit as balance)
-            testName == "randomStatetest248" ||
-            testName == "createNameRegistratorZeroMem2" ||
-            testName == "callWithHighValueAndGasOOG" ||
-            testName == "callcodeWithHighValueAndGasOOG" ||
-
-            // TODO Expmod Precompile
+            // TODO Precompiles
             testName == "RevertPrecompiledTouchExactOOG" ||
             testName == "static_CallEcrecover0_0input" || // Uses expmod
             testName == "modexp_0_0_0_20500" || // Uses expmod
             testName == "modexp_0_0_0_22000" || // Uses expmo // Uses expmodd
             testName == "modexp_0_0_0_25000" || // Uses expmod
             testName == "modexp_0_0_0_35000" || // Uses expmod
-            testName == "modexpRandomInput"  // Uses expmod
+            testName == "modexpRandomInput" || // Uses expmod
+            testName == "modexp_modsize0_returndatasize" || // Uses expmod
+            testName == "CALLBlake2f_MaxRounds" || // Blake 2
+            testName == "CALLCODEBlake2f" || // Blake 2
+            testName == "CALLBlake2f" // Blake 2
          ) {
             continue;
          }
@@ -545,22 +524,54 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
 
             // SKIP specific tests
             if (
-               // "Value" too high in contract (same limit as balance)
-               singleTest.key() == "static_callcodecallcodecall_110_OOGE2_d0g0v0_Istanbul" ||
-               singleTest.key() == "static_callcodecallcodecall_110_2_d0g0v0_Istanbul" ||
-               singleTest.key() == "static_callcodecallcodecall_1102_d0g0v0_Istanbul" ||
-               singleTest.key() == "static_callcodecallcodecall_110_OOGMBefore2_d0g0v0_Istanbul" ||
-               singleTest.key() == "randomStatetest618_d0g0v0_Istanbul" ||
-               // Unsupported Precompiles
+               // TODO Precompiles
                singleTest.key() == "create2callPrecompiles_d4g0v0_Istanbul" ||
                singleTest.key() == "create2callPrecompiles_d6g0v0_Istanbul" ||
-               singleTest.key() == "create2callPrecompiles_d7g0v0_Istanbul"
+               singleTest.key() == "create2callPrecompiles_d7g0v0_Istanbul"||
+
+               // Long running Quadratic Complexity tests, all go out of memory in EOSIO 32MB limit
+               singleTest.key() == "Call1024PreCalls_d0g0v0_Istanbul" ||
+               singleTest.key() == "Call1024PreCalls_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call20KbytesContract50_2_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call20KbytesContract50_3_d0g1v0_Istanbul" ||
+               singleTest.key() == "Callcode50000_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call1MB1024Calldepth_d0g1v0_Istanbul" ||
+               singleTest.key() == "Return50000_2_d0g1v0_Istanbul" ||
+               singleTest.key() == "Return50000_d0g1v0_Istanbul" ||
+               singleTest.key() == "Create1000_d0g1v0_Istanbul" ||
+               singleTest.key() == "Create1000Byzantium_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_ecrec_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_sha256_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_identity2_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_identity_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_rip160_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_d0g1v0_Istanbul" ||
+               singleTest.key() == "Call50000_d0g1v0_Istanbul" ||
+               singleTest.key() == "static_Call1MB1024Calldepth_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_rip160_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_rip160_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_ecrec_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_ecrec_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Return50000_2_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_identity_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_identity_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_identity2_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000_identity2_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_1_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_1_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_2_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_2_d1g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_3_d0g0v0_Istanbul" ||
+               singleTest.key() == "static_Call50000bytesContract50_3_d1g0v0_Istanbul" ||
+               singleTest.key() == "ContractCreationSpam_d0g0v0_Istanbul"
             ) {
                continue;
             }
 
             // (use for single test testing)
-            // if (singleTest.key() != "randomStatetest85_d0g0v0_Istanbul") {
+            // if (singleTest.key() != "randomStatetestDEFAULT-Tue_07_58_41-15153-575192_d0g0v0_Istanbul") {
             //    continue;
             // }
 
@@ -571,16 +582,8 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
                auto singlePreObject = singlePre.value().get_object();
                std::string address = singlePre.key();
                std::string code = singlePreObject["code"].get_string();
-               unsigned long long balance = 0;
-               unsigned long long nonce = 0;
-               try {
-                  balance = std::stoull(singlePreObject["balance"].get_string(), 0, 16);
-                  nonce = std::stoull(singlePreObject["nonce"].get_string(), 0, 16);
-               } catch (const std::exception& e) {
-                  std::cout << "Skipped " << testName << " due to Balance (" << singlePreObject["balance"].get_string()
-                            << ") or Nonce (" << singlePreObject["nonce"].get_string() << ") out of limit: " << std::endl;
-                  goto next_test;
-               }
+               std::string balance = singlePreObject["balance"].get_string();
+               unsigned long long nonce = std::stoull(singlePreObject["nonce"].get_string(), 0, 16);
 
                // Create pre account
                base_tester::push_action( N(eosio.evm), N(devnewacct), N(eosio.evm), mvo()

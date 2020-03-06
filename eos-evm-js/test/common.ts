@@ -1,4 +1,5 @@
 import { EosEvmApi } from '../src/eos-evm-js'
+const BN = require('bn.js')
 const compiled = require('../src/eth-contracts/compiled.json')
 
 // Change accordingly
@@ -12,7 +13,7 @@ export const allowanceAddress = '0xab21f17d0c3e30be30e115508643817b297ae8d6'
 export const initialAccount = {
   account,
   address: '0x10d10ef03ef3316b750d2544bae8c96309aa4360',
-  balance: '0.0000 EOS',
+  balance: new BN(0),
   code: [],
   index: 0,
   nonce: 1

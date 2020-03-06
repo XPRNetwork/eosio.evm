@@ -332,9 +332,8 @@ BOOST_FIXTURE_TEST_CASE( transaction_tests, eosio_evm_tester ) try {
 
          // Skip
          // String10MbData: EOSIO doesnt support data of 10 MB
-         // TransactionWithHighValue: Max value is 2^62 - 1
          // dataTx_bcValidBlockTestFrontier: For frontier
-         if (testName == "String10MbData" || testName == "TransactionWithHighValue" || testName == "dataTx_bcValidBlockTestFrontier") {
+         if (testName == "String10MbData" || testName == "dataTx_bcValidBlockTestFrontier") {
             // NO OP
          }
          // If valid
@@ -420,6 +419,12 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_st, * boost::unit_test::enable_if<state_tests_enabled>())
 BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
+   std::cout << "***********************************************************************************************************" << std::endl;
+   std::cout << "***********************************************************************************************************" << std::endl << std::endl;
+   std::cout << "ENSURE (TESTING, CHARGE_SENDER_FOR_GAS) IS ENABLED AND (OPTRACE, PRINT_LOGS) IS DISABLED FOR ETH TESTS!" << std::endl << std::endl;
+   std::cout << "***********************************************************************************************************" << std::endl;
+   std::cout << "***********************************************************************************************************" << std::endl << std::endl;
+
    auto testDirectory = "jsontests/BlockchainTests/GeneralStateTestsEOS";
 
    // For each folder in GeneralStateTestsEOS
@@ -571,7 +576,7 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             }
 
             // (use for single test testing)
-            // if (singleTest.key() != "randomStatetestDEFAULT-Tue_07_58_41-15153-575192_d0g0v0_Istanbul") {
+            // if (singleTest.key() != "Call1024PreCalls_d0g0v0_Istanbul") {
             //    continue;
             // }
 

@@ -470,12 +470,12 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          // SKIP file
          if (
             // Time consuming (Completed successfully already, comment out to run them)
-            testName == "sstore_combinations_initial00" ||
-            testName == "sstore_combinations_initial01" ||
-            testName == "sstore_combinations_initial10" ||
-            testName == "sstore_combinations_initial11" ||
-            testName == "sstore_combinations_initial20" ||
-            testName == "sstore_combinations_initial21" ||
+            // testName == "sstore_combinations_initial00" ||
+            // testName == "sstore_combinations_initial01" ||
+            // testName == "sstore_combinations_initial10" ||
+            // testName == "sstore_combinations_initial11" ||
+            // testName == "sstore_combinations_initial20" ||
+            // testName == "sstore_combinations_initial21" ||
 
             // Unrecoverable keys (ecrecover precompile) crash EOSIO contracts
             testName == "CallEcrecoverUnrecoverableKey" ||

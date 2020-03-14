@@ -453,14 +453,21 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          // Print name of test
          std::cout << testPath << " " << testName  << std::endl;
 
-         // // Execute Only this file
-         // if (testName != "JUMPDEST_Attack") {
-         //    continue;
-         // }
          // // Execute Only this folder
-         // if (testCategory != "stStaticCall") {
+         // if (testCategory != "CALLCODEBlake2f") {
          //    continue;
          // }
+         // // Execute Only this file
+         if (
+            testName != "modexp_0_0_0_20500" &&
+            testName != "modexp_0_0_0_22000" &&
+            testName != "modexp_0_0_0_25000" &&
+            testName != "modexp_0_0_0_35000" &&
+            testName != "modexpRandomInput" &&
+            testName != "modexp_modsize0_returndatasize"
+         ) {
+            continue;
+         }
 
 
          // SKIP ECC precompile folders
@@ -475,14 +482,15 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          // SKIP file
          if (
             // Time consuming (Completed successfully already, comment out to run them)
-            // testName == "sstore_combinations_initial00" ||
-            // testName == "sstore_combinations_initial01" ||
-            // testName == "sstore_combinations_initial10" ||
-            // testName == "sstore_combinations_initial11" ||
-            // testName == "sstore_combinations_initial20" ||
-            // testName == "sstore_combinations_initial21" ||
+            testName == "sstore_combinations_initial00" ||
+            testName == "sstore_combinations_initial01" ||
+            testName == "sstore_combinations_initial10" ||
+            testName == "sstore_combinations_initial11" ||
+            testName == "sstore_combinations_initial20" ||
+            testName == "sstore_combinations_initial21" ||
+            testName == "CALLBlake2f_MaxRounds" ||
 
-            // Unrecoverable keys (ecrecover precompile) crash EOSIO contracts
+            // Unrecoverable keys (ecrecover) crashes EOSIO contracts
             testName == "CallEcrecoverUnrecoverableKey" ||
             testName == "CallEcrecover80" ||
             testName == "CallEcrecoverR_prefixed0" ||
@@ -505,17 +513,13 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             testName == "Create2Recursive" ||
 
             // TODO Precompiles
-            testName == "RevertPrecompiledTouchExactOOG" ||
-            testName == "static_CallEcrecover0_0input" || // Uses expmod
-            testName == "modexp_0_0_0_20500" || // Uses expmod
-            testName == "modexp_0_0_0_22000" || // Uses expmo // Uses expmodd
-            testName == "modexp_0_0_0_25000" || // Uses expmod
-            testName == "modexp_0_0_0_35000" || // Uses expmod
-            testName == "modexpRandomInput" || // Uses expmod
-            testName == "modexp_modsize0_returndatasize" || // Uses expmod
-            testName == "CALLBlake2f_MaxRounds" || // Blake 2
-            testName == "CALLCODEBlake2f" || // Blake 2
-            testName == "CALLBlake2f" // Blake 2
+            testName == "RevertPrecompiledTouchExactOOG"
+            // testName == "modexp_0_0_0_20500" || // Uses expmod
+            // testName == "modexp_0_0_0_22000" || // Uses expmo
+            // testName == "modexp_0_0_0_25000" || // Uses expmod
+            // testName == "modexp_0_0_0_35000" || // Uses expmod
+            // testName == "modexpRandomInput" || // Uses expmod
+            // testName == "modexp_modsize0_returndatasize" // Uses expmod
          ) {
             continue;
          }
@@ -533,6 +537,9 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
                singleTest.key() == "create2callPrecompiles_d4g0v0_Istanbul" ||
                singleTest.key() == "create2callPrecompiles_d6g0v0_Istanbul" ||
                singleTest.key() == "create2callPrecompiles_d7g0v0_Istanbul"||
+               singleTest.key() == "static_CallEcrecover0_0input_d6g0v0_Istanbul" ||
+               singleTest.key() == "static_CallEcrecover0_0input_d7g0v0_Istanbul" ||
+               singleTest.key() == "static_CallEcrecover0_0input_d8g0v0_Istanbul" ||
 
                // Long running Quadratic Complexity tests, all go out of memory in EOSIO 32MB limit
                singleTest.key() == "Call1024PreCalls_d0g0v0_Istanbul" ||

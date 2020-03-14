@@ -35,6 +35,8 @@ Requires latest eosio.cdt with latest eosio 2 with EOSVM
 
 Change the token symbol in eosio.evm/include/eosio.evm/constants.hpp to reflect your chain
 
+Please ensure BOOST_ROOT is set.
+
 ```
 cmake .
 make -j4

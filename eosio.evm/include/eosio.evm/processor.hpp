@@ -93,6 +93,13 @@ namespace eosio_evm {
     void precompile_sha256();
     void precompile_ripemd160();
     void precompile_identity();
+    void precompile_blake2b();
+    void precompile_expmod();
+    uint256_t adjusted_exponent_length(uint256_t exponent_length, uint256_t base_length);
+    uint256_t mult_complexity(const uint256_t& len);
+    uint256_t read_input(uint64_t offset, uint64_t length);
+    // BigInt modpow(BigInt b, BigInt e, BigInt m);
+    // BigInt read_input_large(uint64_t offset, uint64_t length);
 
     // Instructions
     void stop();

@@ -8,11 +8,11 @@
 #define TESTING true
 
 // Only turn this on when doing ethereum/tests (otherwise balances won't match)
-#define CHARGE_SENDER_FOR_GAS false
+#define CHARGE_SENDER_FOR_GAS true
 
 // Keep all of these off unless testing/debugging
 #define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness
-#define OPTRACE false
+#define OPTRACE true
 #define PRINT_STATE false
 
 // Token constants
@@ -85,6 +85,9 @@ namespace eosio_evm
   static constexpr uint256_t GP_SHA256_WORD            = 12;
   static constexpr uint256_t GP_RIPEMD160              = 600;
   static constexpr uint256_t GP_RIPEMD160_WORD         = 120;
+  static constexpr uint256_t GP_BLAKE2_ROUND           = 1;
+  static constexpr uint256_t GP_MODEXP                 = 20;
+  static constexpr uint256_t GP_ECADD                  = 150;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;

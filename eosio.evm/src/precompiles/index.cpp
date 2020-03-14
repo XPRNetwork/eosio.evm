@@ -14,11 +14,6 @@ namespace eosio_evm
     success_cb(output, gas_used);
   }
 
-  void Processor::precompile_not_implemented()
-  {
-    throw_error(Exception(ET::notImplemented, "This precompiled contract is not implemented."), {});
-  }
-
   void Processor::precompile_execute(uint256_t address)
   {
     // 1.ECDSARECOVER
@@ -42,12 +37,22 @@ namespace eosio_evm
       return precompile_identity();
     }
     // 5. EXPMOD
-    // 6. SNARKV
-    // 7. BNADD
-    // 8. BNMUL
-    else if (address >= 5 && address <= 8)
+    else if (address == 5)
     {
-      return precompile_not_implemented();
+      return precompile_expmod();
+    }
+    //67. BNADD
+    // 7. BNMUL
+    // 8. SNARKV
+    else if (address >= 6 && address <= 8)
+    {
+      throw_error(Exception(ET::notImplemented, "The precompiled contract at address 0x" + intx::hex(address) + " is not implemented."), {});
+      return;
+    }
+    // 9. blake2b
+    else if (address == 9)
+    {
+      return precompile_blake2b();
     }
     else
     {

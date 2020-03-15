@@ -10,17 +10,18 @@
 #ifndef BIGINT_HPP_
 #define BIGINT_HPP_
 #include <cstddef>
-#include <iostream>
 
-#include <gmp.h>
+#define GMP_LIMB_BITS 64
+#define GMP_NUMB_BITS 64
+#include <gmp/mini-gmp.c>
 
 #include <libff/common/serialization.hpp>
 
 namespace libff {
 
 template<mp_size_t n> class bigint;
-template<mp_size_t n> std::ostream& operator<<(std::ostream &, const bigint<n>&);
-template<mp_size_t n> std::istream& operator>>(std::istream &, bigint<n>&);
+// template<mp_size_t n> std::ostream& operator<<(std::ostream &, const bigint<n>&);
+// template<mp_size_t n> std::istream& operator>>(std::istream &, bigint<n>&);
 
 /**
  * Wrapper class around GMP's MPZ long integers. It supports arithmetic operations,
@@ -54,8 +55,8 @@ public:
 
     bigint& randomize();
 
-    friend std::ostream& operator<< <n>(std::ostream &out, const bigint<n> &b);
-    friend std::istream& operator>> <n>(std::istream &in, bigint<n> &b);
+    // friend std::ostream& operator<< <n>(std::ostream &out, const bigint<n> &b);
+    // friend std::istream& operator>> <n>(std::istream &in, bigint<n> &b);
 };
 
 } // libff

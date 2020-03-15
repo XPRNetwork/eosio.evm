@@ -41,7 +41,11 @@ namespace eosio_evm
     {
       return precompile_expmod();
     }
-    //67. BNADD
+    // 6. EXPMOD
+    else if (address == 6)
+    {
+      return precompile_bnadd();
+    }
     // 7. BNMUL
     // 8. SNARKV
     else if (address >= 6 && address <= 8)

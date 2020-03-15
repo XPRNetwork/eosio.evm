@@ -11,7 +11,7 @@
 #define UTILS_HPP_
 
 #include <cassert>
-#include <iostream>
+// #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -48,8 +48,8 @@ void UNUSED(Types&&...) {}
 #define FMT(...) (libff::UNUSED(__VA_ARGS__), "")
 #endif
 
-void serialize_bit_vector(std::ostream &out, const bit_vector &v);
-void deserialize_bit_vector(std::istream &in, bit_vector &v);
+// void serialize_bit_vector(std::ostream &out, const bit_vector &v);
+// void deserialize_bit_vector(std::istream &in, bit_vector &v);
 
 template<typename T>
 size_t size_in_bits(const std::vector<T> &v);

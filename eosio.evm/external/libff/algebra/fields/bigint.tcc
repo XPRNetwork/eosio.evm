@@ -11,7 +11,6 @@
 #define BIGINT_TCC_
 #include <cassert>
 #include <cstring>
-#include <random>
 
 namespace libff {
 
@@ -166,14 +165,16 @@ bool bigint<n>::test_bit(const std::size_t bitno) const
 template<mp_size_t n>
 bigint<n>& bigint<n>::randomize()
 {
-    static_assert(GMP_NUMB_BITS == sizeof(mp_limb_t) * 8, "Wrong GMP_NUMB_BITS value");
-	std::random_device rd;
-	constexpr size_t num_random_words = sizeof(mp_limb_t) * n / sizeof(std::random_device::result_type);
-	auto random_words = reinterpret_cast<std::random_device::result_type*>(this->data);
-	for (size_t i = 0; i < num_random_words; ++i)
-	{
-		random_words[i] = rd();
-	}
+    // TODO not really needed, hardcoded
+
+    // static_assert(GMP_NUMB_BITS == sizeof(mp_limb_t) * 8, "Wrong GMP_NUMB_BITS value");
+	// std::random_device rd;
+	// constexpr size_t num_random_words = sizeof(mp_limb_t) * n / sizeof(std::random_device::result_type);
+	// auto random_words = reinterpret_cast<std::random_device::result_type*>(this->data);
+	// for (size_t i = 0; i < num_random_words; ++i)
+	// {
+	// 	random_words[i] = rd();
+	// }
 
     return (*this);
 }

@@ -5,6 +5,7 @@ project(eosio_evm)
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
 
+
 add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.evm.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/processor.cpp
@@ -21,6 +22,7 @@ add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/identity.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/blake2b.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/expmod.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/bnadd.cpp
 )
 
 target_include_directories(eosio.evm

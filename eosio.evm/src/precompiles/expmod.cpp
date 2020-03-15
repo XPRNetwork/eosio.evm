@@ -6,11 +6,11 @@
 // Copyright 2020 e-wasm team
 // Licensed under the Apache License, Version 2.0.
 // https://github.com/ewasm/ewasm-precompiles/blob/master/modexp/src/lib.rs
+
 #define BOOST_NO_STRINGSTREAM
 #define BOOST_EXCEPTION_DISABLE 1
+
 #include <eosio.evm/eosio.evm.hpp>
-#include <bigint/BigInt.hpp>
-#include <bigint/operators/binary_arithmetic.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 namespace eosio_evm

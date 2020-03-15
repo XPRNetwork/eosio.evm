@@ -95,6 +95,7 @@ namespace eosio_evm {
     void precompile_identity();
     void precompile_blake2b();
     void precompile_expmod();
+    void precompile_bnadd();
     uint256_t adjusted_exponent_length(uint256_t exponent_length, uint256_t base_length);
     uint256_t mult_complexity(const uint256_t& len);
     uint256_t read_input(uint64_t offset, uint64_t length);

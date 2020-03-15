@@ -11,7 +11,7 @@
 #define CHARGE_SENDER_FOR_GAS true
 
 // Keep all of these off unless testing/debugging
-#define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness
+#define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness.
 #define OPTRACE true
 #define PRINT_STATE false
 
@@ -87,7 +87,7 @@ namespace eosio_evm
   static constexpr uint256_t GP_RIPEMD160_WORD         = 120;
   static constexpr uint256_t GP_BLAKE2_ROUND           = 1;
   static constexpr uint256_t GP_MODEXP                 = 20;
-  static constexpr uint256_t GP_ECADD                  = 150;
+  static constexpr uint256_t GP_BNADD                  = 150;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;

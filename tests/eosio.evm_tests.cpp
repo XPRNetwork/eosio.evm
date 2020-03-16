@@ -454,30 +454,30 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          std::cout << testPath << " " << testName  << std::endl;
 
          // // Execute Only this folder
-         // if (testCategory != "CALLCODEBlake2f") {
+         // if (testCategory != "stZeroKnowledge") {
          //    continue;
          // }
          // // Execute Only this file
-         if (
-            testName != "modexp_0_0_0_20500" &&
-            testName != "modexp_0_0_0_22000" &&
-            testName != "modexp_0_0_0_25000" &&
-            testName != "modexp_0_0_0_35000" &&
-            testName != "modexpRandomInput" &&
-            testName != "modexp_modsize0_returndatasize"
-         ) {
-            continue;
-         }
+         // if (
+         //    testName != "modexp_0_0_0_20500" &&
+         //    testName != "modexp_0_0_0_22000" &&
+         //    testName != "modexp_0_0_0_25000" &&
+         //    testName != "modexp_0_0_0_35000" &&
+         //    testName != "modexpRandomInput" &&
+         //    testName != "modexp_modsize0_returndatasize"
+         // ) {
+         //    continue;
+         // }
 
 
          // SKIP ECC precompile folders
-         if (
-            testCategory == "stPreCompiledContracts" ||
-            testCategory == "stZeroKnowledge" ||
-            testCategory == "stZeroKnowledge2"
-         ) {
-            continue;
-         }
+         // if (
+         //    testCategory == "stPreCompiledContracts" ||
+         //    testCategory == "stZeroKnowledge" ||
+         //    testCategory == "stZeroKnowledge2"
+         // ) {
+         //    continue;
+         // }
 
          // SKIP file
          if (
@@ -583,9 +583,9 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             }
 
             // (use for single test testing)
-            // if (singleTest.key() != "Call1024PreCalls_d0g0v0_Istanbul") {
-            //    continue;
-            // }
+            if (singleTest.key() != "ecadd_0-0_1-2_25000_192_d0g0v0_Istanbul") {
+               continue;
+            }
 
             auto testObject = singleTest.value().get_object();
 

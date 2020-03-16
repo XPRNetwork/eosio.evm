@@ -88,6 +88,9 @@ namespace eosio_evm
   static constexpr uint256_t GP_BLAKE2_ROUND           = 1;
   static constexpr uint256_t GP_MODEXP                 = 20;
   static constexpr uint256_t GP_BNADD                  = 150;
+  static constexpr uint256_t GP_BNMUL                  = 6000;
+  static constexpr uint256_t GP_BNPAIR_BASE            = 45000;
+  static constexpr uint256_t GP_BNPAIR_K               = 34000;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;

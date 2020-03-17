@@ -763,22 +763,22 @@ inline bool check_denorm(std::complex<T> val, R* result, const char* function, c
 
 // Default instantiations with ignore_error policy.
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_overflow(T /* val */, R* /* result */, const char* /* function */, const overflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_overflow(T /* val */, R* /* result */, const char* /* function */, const overflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_overflow(std::complex<T> /* val */, R* /* result */, const char* /* function */, const overflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_overflow(std::complex<T> /* val */, R* /* result */, const char* /* function */, const overflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_underflow(T /* val */, R* /* result */, const char* /* function */, const underflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_underflow(T /* val */, R* /* result */, const char* /* function */, const underflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_underflow(std::complex<T> /* val */, R* /* result */, const char* /* function */, const underflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_underflow(std::complex<T> /* val */, R* /* result */, const char* /* function */, const underflow_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_denorm(T /* val */, R* /* result*/, const char* /* function */, const denorm_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_denorm(T /* val */, R* /* result*/, const char* /* function */, const denorm_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 template <class R, class T>
-inline BOOST_MATH_CONSTEXPR bool check_denorm(std::complex<T> /* val */, R* /* result*/, const char* /* function */, const denorm_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T)) 
+inline BOOST_MATH_CONSTEXPR bool check_denorm(std::complex<T> /* val */, R* /* result*/, const char* /* function */, const denorm_error<ignore_error>&) BOOST_NOEXCEPT_IF(BOOST_MATH_IS_FLOAT(R) && BOOST_MATH_IS_FLOAT(T))
 { return false; }
 
 } // namespace detail

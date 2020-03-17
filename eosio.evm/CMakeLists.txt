@@ -31,7 +31,7 @@ target_include_directories(eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_options(eosio.evm PUBLIC -stack-size 48000 )
+target_link_options(eosio.evm PUBLIC -stack-size 32000 )
 
 set_target_properties(eosio.evm
    PROPERTIES

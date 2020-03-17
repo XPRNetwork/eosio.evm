@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled
          ("index", 0)
          ("address", "bc5c5b389d1bd6b0e356bfcb2b3d748a98304a0c")
          ("account", "1234test1111")
-         ("balance", 0)
+         ("balance", "0000000000000000000000000000000000000000000000000000000000000000")
          ("nonce", 1)
          ("code", vector<uint8_t>{})
       );
@@ -583,7 +583,7 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             }
 
             // (use for single test testing)
-            if (singleTest.key() != "ecadd_0-0_1-2_25000_192_d0g0v0_Istanbul") {
+            if (singleTest.key() != "pointAdd_d0g0v0_Istanbul") {
                continue;
             }
 

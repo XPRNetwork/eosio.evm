@@ -495,43 +495,47 @@ bool Op::init(const mpz_class& _p, size_t maxBitSize, int _xi_a, Mode mode, size
 		}
 	}
 #endif
-	switch (N) {
-	case 1:  setOp<1>(*this, mode); break;
-	case 2:  setOp<2>(*this, mode); break;
-	case 3:  setOp<3>(*this, mode); break;
-	case 4:  setOp<4>(*this, mode); break; // 256 if 64-bit
-#if MCL_MAX_UNIT_SIZE >= 6
-	case 5:  setOp<5>(*this, mode); break;
-	case 6:  setOp<6>(*this, mode); break;
-#endif
-#if MCL_MAX_UNIT_SIZE >= 8
-	case 7:  setOp<7>(*this, mode); break;
-	case 8:  setOp<8>(*this, mode); break;
-#endif
-#if MCL_MAX_UNIT_SIZE >= 9
-	case 9:  setOp<9>(*this, mode); break; // 521 if 64-bit
-#endif
-#if MCL_MAX_UNIT_SIZE >= 10
-	case 10: setOp<10>(*this, mode); break;
-#endif
-#if MCL_MAX_UNIT_SIZE >= 12
-	case 11: setOp<11>(*this, mode); break;
-	case 12: setOp<12>(*this, mode); break; // 768 if 64-bit
-#endif
-#if MCL_MAX_UNIT_SIZE >= 14
-	case 13: setOp<13>(*this, mode); break;
-	case 14: setOp<14>(*this, mode); break;
-#endif
-#if MCL_MAX_UNIT_SIZE >= 16
-	case 15: setOp<15>(*this, mode); break;
-	case 16: setOp<16>(*this, mode); break; // 1024 if 64-bit
-#endif
-#if MCL_MAX_UNIT_SIZE >= 17
-	case 17: setOp<17>(*this, mode); break; // 521 if 32-bit
-#endif
-	default:
-		return false;
-	}
+
+// TODO
+setOp<8>(*this, mode);
+
+// 	switch (N) {
+// 	case 1:  setOp<1>(*this, mode); break;
+// 	case 2:  setOp<2>(*this, mode); break;
+// 	case 3:  setOp<3>(*this, mode); break;
+// 	case 4:  setOp<4>(*this, mode); break; // 256 if 64-bit
+// #if MCL_MAX_UNIT_SIZE >= 6
+// 	case 5:  setOp<5>(*this, mode); break;
+// 	case 6:  setOp<6>(*this, mode); break;
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 8
+// 	case 7:  setOp<7>(*this, mode); break;
+// 	case 8:  setOp<8>(*this, mode); break;
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 9
+// 	case 9:  setOp<9>(*this, mode); break; // 521 if 64-bit
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 10
+// 	case 10: setOp<10>(*this, mode); break;
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 12
+// 	case 11: setOp<11>(*this, mode); break;
+// 	case 12: setOp<12>(*this, mode); break; // 768 if 64-bit
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 14
+// 	case 13: setOp<13>(*this, mode); break;
+// 	case 14: setOp<14>(*this, mode); break;
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 16
+// 	case 15: setOp<15>(*this, mode); break;
+// 	case 16: setOp<16>(*this, mode); break; // 1024 if 64-bit
+// #endif
+// #if MCL_MAX_UNIT_SIZE >= 17
+// 	case 17: setOp<17>(*this, mode); break; // 521 if 32-bit
+// #endif
+// 	default:
+// 		return false;
+// 	}
 #ifdef MCL_USE_LLVM
 	if (primeMode == PM_NIST_P192) {
 		fp_mul = &mcl_fp_mulNIST_P192L;

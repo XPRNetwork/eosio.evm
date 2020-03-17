@@ -6,7 +6,7 @@ const compiled = require('../src/eth-contracts/compiled.json')
 export const contractDir = '/Users/jafri/eosio.evm/eosio.evm'
 
 export const ethContractAddress = '0xb3e48339798967507eeda1773e824255ac7c6258'
-export const contract = '1234test1111'
+export const contract = 'wuffwuffwuff'
 export const account = 'vestvestvest'
 export const sender = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
 export const allowanceAddress = '0xab21f17d0c3e30be30e115508643817b297ae8d6'
@@ -22,7 +22,7 @@ export const initialAccount = {
 export const api = new EosEvmApi({
   endpoint: 'https://jungle.eosdac.io',
   chainId: 1,
-  eosContract: '1234test1111',
+  eosContract: contract,
   ethPrivateKeys: [
     '0x8dd3ec4846cecac347a830b758bf7e438c4d9b36a396b189610c90b57a70163d', // 0xf79b834a37f3143f4a73fc3934edac67fd3a01cd
     '0x206cbcc0ccbb96a0df7ba079d25866bd0d52f4248861a0a38bc9bfd58c00556a' // 0xab21f17d0c3e30be30e115508643817b297ae8d6

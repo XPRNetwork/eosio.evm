@@ -11,10 +11,10 @@ describe('Full ERC20 Test', () => {
       expect(rows.length).toEqual(0)
     })
 
-    // it(`setups contract at ${contract}`, async () => {
-    //   await api.eos.setupEvmContract(contractDir)
-    //   expect(await api.eos.rpc.getRawAbi(contract)).toBeTruthy()
-    // })
+    it(`setups contract at ${contract}`, async () => {
+      await api.eos.setupEvmContract(contractDir)
+      expect(await api.eos.rpc.getRawAbi(contract)).toBeTruthy()
+    })
 
     it(`Pre-create accounts`, async () => {
       await api.eos.devNewAccount(

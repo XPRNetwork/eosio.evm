@@ -22,6 +22,17 @@ namespace eosio_evm
 
     return res;
   }
+  static inline std::string bin2hex(const std::array<uint8_t, 32>& bin)
+  {
+    std::string res;
+    const char hex[] = "0123456789abcdef";
+    for(auto byte : bin) {
+      res += hex[byte >> 4];
+      res += hex[byte & 0xf];
+    }
+
+    return res;
+  }
 
   inline constexpr bool is_precompile(uint256_t address) {
     return address >= 1 && address <= 65535;

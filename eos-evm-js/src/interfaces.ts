@@ -1,7 +1,9 @@
+import { BN } from 'ethereumjs-util'
+
 export interface Account {
   index: number
   address: string
-  balance: string
+  balance: BN
   code: string | Buffer
   nonce: number
   account: string

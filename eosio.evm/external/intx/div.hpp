@@ -24,7 +24,7 @@ template <typename IntT>
 inline normalized_div_args<IntT::num_bits> normalize(
     const IntT& numerator, const IntT& denominator) noexcept
 {
-    // FIXME: Make the implementation type independent
+    // FIXME: Make the implementation type independent.
     static constexpr auto num_words = IntT::num_words;
 
     auto* u = as_words(numerator);

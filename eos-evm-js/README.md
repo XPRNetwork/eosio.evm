@@ -84,7 +84,7 @@ async function main () {
   // New receiver address to send tokens to
   const receiver = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
 
-  // Transfer system tokens to receiver address to create it (needed for it to sign and execute transferFrom Action)
+  // Transfer system tokens to address to create it
   await api.transfer({ account: evmNormalAccount, sender: sender.address, to: receiver, quantity: `0.0001 ${SYSTEM_SYMBOL}` })
 
   // Transfer 1000 FIRE ERC20 tokens
@@ -92,7 +92,7 @@ async function main () {
 
   // Query ERC20 FIRE balance using "view" function calls
   console.log(`${sender.address} Balance:`, +(await api.eth.balanceOf(sender.address)).toString(10), 'FIRE') // 999,000
-  console.log(`${receiver} Balance:`,       +(await api.eth.balanceOf(receiver)).toString(10)), 'FIRE'       //   1,000
+  console.log(`${receiver} Balance:`,       +(await api.eth.balanceOf(receiver)).toString(10), 'FIRE'), //   1,000
 
   // Set allowance, and modify it
   await api.eth.approve(receiver, 100, { sender: sender.address })

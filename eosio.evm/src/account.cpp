@@ -6,7 +6,7 @@
 
 namespace eosio_evm {
   // Internal transfers only, returns true if error
-  bool Processor::transfer_internal(const Address& from, const Address& to, const int64_t amount) {
+  bool Processor::transfer_internal(const Address& from, const Address& to, const uint256_t& amount) {
     if (amount == 0) {
       return false;
     }
@@ -49,10 +49,10 @@ namespace eosio_evm {
 
     // Reflect state
     accounts_byaddress.modify(from_account, eosio::same_payer, [&](auto& a) {
-      a.balance.amount -= amount;
+      a.balance -= amount;
     });
     accounts_byaddress.modify(to_account, eosio::same_payer, [&](auto& a) {
-      a.balance.amount += amount;
+      a.balance += amount;
     });
 
     // Modification record
@@ -170,7 +170,7 @@ namespace eosio_evm {
       a.index   = contract->_accounts.available_primary_key();
       a.nonce   = nonce;
       a.address = address_160;
-      a.balance = eosio::asset(0, TOKEN_SYMBOL);
+      a.balance = 0;
     });
 
     // Add modification record
@@ -208,7 +208,7 @@ namespace eosio_evm {
       // Make account empty
       accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.nonce = 0;
-        a.balance.amount = 0;
+        a.balance = 0;
         a.code = {};
       });
     }

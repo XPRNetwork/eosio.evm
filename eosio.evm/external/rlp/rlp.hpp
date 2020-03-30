@@ -5,6 +5,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or https://opensource.org/licenses/mit-license.php.
 
+#pragma once
+
 enum RLP_constants {
 	RLP_maxUintLen		= 8,
 	RLP_bufferLenStart	= 0x80,

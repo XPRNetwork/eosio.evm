@@ -20,16 +20,16 @@
                     "type": "name"
                 },
                 {
-                    "name": "balance",
-                    "type": "asset"
-                },
-                {
                     "name": "nonce",
                     "type": "uint64"
                 },
                 {
                     "name": "code",
                     "type": "uint8[]"
+                },
+                {
+                    "name": "balance",
+                    "type": "checksum256"
                 }
             ]
         },
@@ -124,7 +124,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "uint64"
+                    "type": "string"
                 },
                 {
                     "name": "code",
@@ -245,12 +245,12 @@
         {
             "name": "call",
             "type": "call",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CALL\nsummary: 'call'\nicon:\n---"
         },
         {
             "name": "clearall",
             "type": "clearall",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CLEARALL\nsummary: 'clearall'\nicon:\n---"
         },
         {
             "name": "create",
@@ -260,27 +260,27 @@
         {
             "name": "devnewacct",
             "type": "devnewacct",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: DEVNEWACCT\nsummary: 'devnewacct'\nicon:\n---"
         },
         {
             "name": "devnewstore",
             "type": "devnewstore",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: DEVNEWSTORE\nsummary: 'devnewstore'\nicon:\n---"
         },
         {
             "name": "printaccount",
             "type": "printaccount",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTACCOUNT\nsummary: 'printaccount'\nicon:\n---"
         },
         {
             "name": "printstate",
             "type": "printstate",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTSTATE\nsummary: 'printstate'\nicon:\n---"
         },
         {
             "name": "printtx",
             "type": "printtx",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTTX\nsummary: 'printtx'\nicon:\n---"
         },
         {
             "name": "raw",
@@ -290,12 +290,12 @@
         {
             "name": "teststatetx",
             "type": "teststatetx",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: TESTSTATETX\nsummary: 'teststatetx'\nicon:\n---"
         },
         {
             "name": "testtx",
             "type": "testtx",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: TESTTX\nsummary: 'testtx'\nicon:\n---"
         },
         {
             "name": "withdraw",

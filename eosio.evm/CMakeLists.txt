@@ -19,6 +19,9 @@ add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/sha256.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/ripemd160.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/identity.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/blake2b.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/expmod.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/bncurve.cpp
 )
 
 target_include_directories(eosio.evm
@@ -27,7 +30,9 @@ target_include_directories(eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_options(eosio.evm PUBLIC -stack-size 40000 -use-freeing-malloc )
+target_compile_definitions(eosio.evm PRIVATE -D_LIBCPP_STRSTREAM -DBOOST_EXCEPTION_DISABLE=1 -D_GLIBCXX_SSTREAM=1 -D_LIBCPP_SSTREAM -DBOOST_NO_IOSTREAM -DBOOST_NO_STRINGSTREAM )
+
+target_link_options(eosio.evm PUBLIC -stack-size 32000 -use-freeing-malloc)
 
 set_target_properties(eosio.evm
    PROPERTIES
@@ -35,11 +40,3 @@ set_target_properties(eosio.evm
 )
 
 target_compile_options( eosio.evm PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian)
-
-# add_test( evm_test ${CMAKE_BINARY_DIR}/tests/evm_test )
-# set_property(TEST evm_test PROPERTY LABELS unit_tests)
-
-### add a new test
-# include(CTest)
-# enable_testing()
-# add_subdirectory(tests)

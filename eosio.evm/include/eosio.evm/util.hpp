@@ -11,11 +11,24 @@ namespace eosio_evm
   /**
    * Conversions
    */
-  static inline std::string bin2hex(const std::vector<uint8_t>& input)
+  static inline std::string bin2hex(const std::vector<uint8_t>& bin)
   {
     std::string res;
     const char hex[] = "0123456789abcdef";
-    for(auto byte : input) {
+    for(auto byte : bin) {
+      res += hex[byte >> 4];
+      res += hex[byte & 0xf];
+    }
+
+    return res;
+  }
+
+  template<unsigned N, typename T>
+  static inline std::string bin2hex(const std::array<T, N>& bin)
+  {
+    std::string res;
+    const char hex[] = "0123456789abcdef";
+    for(auto byte : bin) {
       res += hex[byte >> 4];
       res += hex[byte & 0xf];
     }

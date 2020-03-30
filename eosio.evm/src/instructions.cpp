@@ -596,7 +596,7 @@ namespace eosio_evm
     const auto address = ctx->s.pop_addr();
 
     const Account& given_account = get_account(address);
-    ctx->s.push(given_account.get_balance_u64());
+    ctx->s.push(given_account.get_balance());
     if (ctx->s.stack_error) return throw_stack();
   }
 
@@ -777,7 +777,7 @@ namespace eosio_evm
 
   void Processor::selfbalance()
   {
-    ctx->s.push(ctx->callee.get_balance_u64());
+    ctx->s.push(ctx->callee.get_balance());
     if (ctx->s.stack_error) return throw_stack();
   }
 
@@ -1009,7 +1009,7 @@ namespace eosio_evm
     }
 
     // Pop stack
-    const auto contract_value = ctx->s.pop_amount();
+    const auto contract_value = ctx->s.pop();
     const auto offset         = ctx->s.pop();
     const auto size           = ctx->s.pop();
     const auto arbitrary      = op == CREATE2 ? ctx->s.pop() : ctx->callee.get_nonce();
@@ -1040,7 +1040,7 @@ namespace eosio_evm
     ctx->last_return_data.clear();
 
     // Depth and balance Validation
-    bool max_call_depth = get_call_depth() >= MAX_CALL_DEPTH;
+    bool max_call_depth = get_call_depth() > MAX_CALL_DEPTH;
     bool insufficient_balance = ctx->callee.get_balance() < contract_value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
@@ -1139,13 +1139,13 @@ namespace eosio_evm
     );
   }
 
-  int64_t Processor::value_by_call_type(const unsigned char call_type) {
+  uint256_t Processor::value_by_call_type(const unsigned char call_type) {
     if (call_type == Opcode::DELEGATECALL) {
       return ctx->call_value;
     } else if (call_type == Opcode::STATICCALL) {
       return 0;
     } else {
-      return ctx->s.pop_amount();
+      return ctx->s.pop();
     }
   }
 
@@ -1224,7 +1224,7 @@ namespace eosio_evm
     ctx->last_return_data.clear();
 
     // Depth and balance Validation
-    bool max_call_depth = get_call_depth() >= MAX_CALL_DEPTH;
+    bool max_call_depth = get_call_depth() > MAX_CALL_DEPTH;
     bool insufficient_balance = ctx->callee.get_balance() < value;
     if (max_call_depth || insufficient_balance) {
       ctx->s.push(0);
@@ -1408,7 +1408,7 @@ namespace eosio_evm
       {
         auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
         accounts_byaddress.modify(accounts_byaddress.iterator_to(ctx->callee), eosio::same_payer, [&](auto& a) {
-          a.balance.amount = 0;
+          a.balance = 0;
         });
       }
       // Transfer all balance

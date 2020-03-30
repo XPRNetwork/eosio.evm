@@ -9,9 +9,9 @@ namespace eosio_evm {
     uint64_t index;
     eosio::checksum160 address;
     eosio::name account;
-    eosio::asset balance;
     uint64_t nonce;
     std::vector<uint8_t> code;
+    bigint::checksum256 balance;
 
     Account () = default;
     Account (uint256_t _address): address(addressToChecksum160(_address)) {}
@@ -19,11 +19,10 @@ namespace eosio_evm {
 
     uint64_t get_account_value() const { return account.value; };
     uint256_t get_address() const { return checksum160ToAddress(address); };
-    int64_t get_balance() const { return balance.amount; };
-    uint64_t get_balance_u64() const { return (uint64_t) balance.amount; };
+    uint256_t get_balance() const { return balance; };
     uint64_t get_nonce() const { return nonce; };
     std::vector<uint8_t> get_code() const { return code; };
-    bool is_empty() const { return nonce == 0 && balance.amount == 0 && code.size() == 0; };
+    bool is_empty() const { return nonce == 0 && balance == 0 && code.size() == 0; };
 
     eosio::checksum256 by_address() const { return pad160(address); };
 
@@ -34,14 +33,14 @@ namespace eosio_evm {
       eosio::print("\nAddress ", address);
       eosio::print("\nIndex ", index);
       eosio::print("\nEOS Account " + account.to_string());
-      eosio::print("\nBalance ", balance);
+      eosio::print("\nBalance ", intx::to_string(balance));
       eosio::print("\nCode ", bin2hex(code));
       eosio::print("\nNonce ", nonce);
       eosio::print("\n---Acc Info End---\n");
     }
     #endif /* TESTING */
 
-    EOSLIB_SERIALIZE(Account, (index)(address)(account)(balance)(nonce)(code));
+    EOSLIB_SERIALIZE(Account, (index)(address)(account)(nonce)(code)(balance));
   };
 
   struct [[eosio::table, eosio::contract("eosio.evm")]] AccountState {

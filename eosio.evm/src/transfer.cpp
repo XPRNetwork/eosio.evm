@@ -45,7 +45,7 @@ namespace eosio_evm {
     eosio::check(quantity.amount >= 0, "amount must not be negative");
 
     accounts_byaccount.modify(account, eosio::same_payer, [&](auto& a) {
-      a.balance += quantity;
+      a.balance += quantity.amount;
     });
   }
 
@@ -59,10 +59,10 @@ namespace eosio_evm {
     auto account = accounts_byaccount.find(user.value);
     eosio::check(account != accounts_byaccount.end(), "account does not have a balance (sub_balance)..");
     eosio::check(quantity.amount >= 0, "amount must not be negative");
-    eosio::check(account->balance.amount >= quantity.amount, "account balance too low.");
+    eosio::check(account->balance >= quantity.amount, "account balance too low.");
 
     accounts_byaccount.modify(account, eosio::same_payer, [&](auto& a) {
-      a.balance -= quantity;
+      a.balance -= quantity.amount;
     });
   }
 }

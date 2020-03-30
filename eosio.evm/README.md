@@ -4,13 +4,25 @@ Configure eosio.evm/include/eosio.evm/constants.hpp as needed with constants suc
 Please note that setting the JS-SDK will not currently work if OPTRACE or PRINT_STATE are set to true as it will print more information to EOSIO console.
 
 ### EVM Notes
+- Account and code tables were merged to match the specification in the Ethereum Yellow Paper
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
-- Precompiled contracts are not currently supported, many like ec_mul and ec_add are due to be added to EOSIO soon
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
-- Account and code tables were merged to match the specification in the Ethereum Yellow Paper
+
+### Precompile support
+eosio.evm supports 9 precompiles
+1. ec_recover
+2. sha256
+3. ripemd160
+4. identity
+5. expmod
+6. bn_add
+7. bn_mul
+8. bn_pairing
+9. blake2b
+
 
 ### Contract Public Actions
 ```c++

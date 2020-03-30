@@ -141,12 +141,12 @@ struct AccountState {
 
 
 ### EVM Notes
+- Account and code tables were merged to match the specification in the Ethereum Yellow Paper
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
-
 
 ### Special Mentions
 - Eddy Ashton for his work on [enclave-ready EVM (eEVM)](https://github.com/microsoft/eEVM)

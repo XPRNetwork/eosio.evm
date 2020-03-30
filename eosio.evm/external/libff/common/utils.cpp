@@ -30,7 +30,7 @@ size_t get_power_of_two(size_t n)
 }
 
 size_t log2(size_t n)
-/* returns ceil(log2(n)), so 1ul<<log2(n) is the smallest power of 2,
+/* returns ceil(log2(n)), so 1ull<<log2(n) is the smallest power of 2,
    that is not less than n. */
 {
     size_t r = ((n & (n-1)) == 0 ? 0 : 1); // add 1 if n is not power of 2
@@ -53,8 +53,8 @@ size_t to_twos_complement(int i, size_t w)
 
 int from_twos_complement(size_t i, size_t w)
 {
-    assert(i < (1ul<<w));
-    return (i < (1ul<<(w-1))) ? i : i - (1ul<<w);
+    assert(i < (1ull<<w));
+    return (i < (1ull<<(w-1))) ? i : i - (1ull<<w);
 }
 
 size_t bitreverse(size_t n, const size_t l)
@@ -75,7 +75,7 @@ bit_vector int_list_to_bits(const std::initializer_list<unsigned long> &l, const
     {
         for (size_t j = 0; j < wordsize; ++j)
         {
-            res[i*wordsize + j] = (*(l.begin()+i) & (1ul<<(wordsize-1-j)));
+            res[i*wordsize + j] = (*(l.begin()+i) & (1ull<<(wordsize-1-j)));
         }
     }
     return res;

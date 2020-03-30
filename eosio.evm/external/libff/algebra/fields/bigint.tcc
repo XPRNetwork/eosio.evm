@@ -13,6 +13,8 @@
 #include <cstring>
 // #include <random>
 
+constexpr int LIMBS = 4;
+constexpr int LIMB_SIZE = sizeof(mp_limb_t);
 namespace libff {
 
 template<mp_size_t n>
@@ -57,6 +59,23 @@ bigint<n>::bigint(const mpz_t r) /// Initialize from MPZ element
 }
 
 template<mp_size_t n>
+bigint<n>::bigint(const std::array<uint8_t, 32>& bytes)
+{
+    for (auto a = 0; a < LIMBS; ++a) {
+        for (auto b = 0; b < LIMB_SIZE; ++b) {
+            auto outer_index = LIMBS - a - 1;
+            auto inner_index = LIMB_SIZE - b - 1;
+            auto term = static_cast<unsigned long long>(bytes[b + (LIMB_SIZE * a)]);
+
+            auto shift = 8 * inner_index;
+            auto xorBy = term << shift;
+            this->data[outer_index] |= xorBy;
+        }
+    }
+}
+
+
+template<mp_size_t n>
 void bigint<n>::print() const
 {
     // gmp_printf("%Nd\n", this->data, n);
@@ -72,6 +91,12 @@ template<mp_size_t n>
 bool bigint<n>::operator==(const bigint<n>& other) const
 {
     return (mpn_cmp(this->data, other.data, n) == 0);
+}
+
+template<mp_size_t n>
+bool bigint<n>::operator<=(const bigint<n>& other) const
+{
+    return mpn_cmp(this->data, other.data, n) <= 0;
 }
 
 template<mp_size_t n>
@@ -133,6 +158,23 @@ template<mp_size_t n>
 unsigned long bigint<n>::as_ulong() const
 {
     return this->data[0];
+}
+
+template<mp_size_t n>
+std::array<uint8_t, 32> bigint<n>::as_array() const
+{
+    std::array<uint8_t, 32> bytes;
+    for (auto a = 0; a < LIMBS; ++a) {
+      for (auto b = 0; b < LIMB_SIZE; ++b) {
+        auto outer_index = LIMBS - a - 1;
+        auto inner_index = LIMB_SIZE - b - 1;
+        auto result_index = LIMB_SIZE * a + b;
+        auto to_shift = 8 * inner_index;
+        auto res = this->data[outer_index] >> to_shift;
+        bytes[result_index] = static_cast<uint8_t>(res);
+      }
+    }
+    return bytes;
 }
 
 template<mp_size_t n>

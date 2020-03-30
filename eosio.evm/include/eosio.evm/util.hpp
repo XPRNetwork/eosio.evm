@@ -22,7 +22,9 @@ namespace eosio_evm
 
     return res;
   }
-  static inline std::string bin2hex(const std::array<uint8_t, 32>& bin)
+
+  template<unsigned N, typename T>
+  static inline std::string bin2hex(const std::array<T, N>& bin)
   {
     std::string res;
     const char hex[] = "0123456789abcdef";

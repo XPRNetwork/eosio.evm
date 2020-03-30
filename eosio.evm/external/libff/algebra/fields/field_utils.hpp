@@ -10,19 +10,19 @@
 #include <cstdint>
 
 #include <libff/algebra/fields/bigint.hpp>
-#include <libff/common/double.hpp>
+// #include <libff/common/double.hpp>
 #include <libff/common/utils.hpp>
 
 namespace libff {
 
-// returns root of unity of order n (for n a power of 2), if one exists
-template<typename FieldT>
-typename std::enable_if<std::is_same<FieldT, Double>::value, FieldT>::type
-get_root_of_unity(const size_t n);
+// // returns root of unity of order n (for n a power of 2), if one exists
+// template<typename FieldT>
+// typename std::enable_if<std::is_same<FieldT, Double>::value, FieldT>::type
+// get_root_of_unity(const size_t n);
 
-template<typename FieldT>
-typename std::enable_if<!std::is_same<FieldT, Double>::value, FieldT>::type
-get_root_of_unity(const size_t n);
+// template<typename FieldT>
+// typename std::enable_if<!std::is_same<FieldT, Double>::value, FieldT>::type
+// get_root_of_unity(const size_t n);
 
 template<typename FieldT>
 std::vector<FieldT> pack_int_vector_into_field_element_vector(const std::vector<size_t> &v, const size_t w);

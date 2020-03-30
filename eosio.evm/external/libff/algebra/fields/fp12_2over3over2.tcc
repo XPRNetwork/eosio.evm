@@ -331,7 +331,6 @@ Fp12_2over3over2_model<n, modulus> operator^(const Fp12_2over3over2_model<n, mod
     return self^(exponent.as_bigint());
 }
 
-
 template<mp_size_t n, const bigint<n>& modulus>
 template<mp_size_t m>
 Fp12_2over3over2_model<n, modulus> Fp12_2over3over2_model<n,modulus>::cyclotomic_exp(const bigint<m> &exponent) const
@@ -348,7 +347,7 @@ Fp12_2over3over2_model<n, modulus> Fp12_2over3over2_model<n,modulus>::cyclotomic
                 res = res.cyclotomic_squared();
             }
 
-            if (exponent.data[i] & (1ul<<j))
+            if (exponent.data[i] & (1ull<<j))
             {
                 found_one = true;
                 res = res * (*this);

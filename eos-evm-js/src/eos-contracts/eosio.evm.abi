@@ -20,16 +20,16 @@
                     "type": "name"
                 },
                 {
-                    "name": "balance",
-                    "type": "checksum256"
-                },
-                {
                     "name": "nonce",
                     "type": "uint64"
                 },
                 {
                     "name": "code",
                     "type": "uint8[]"
+                },
+                {
+                    "name": "balance",
+                    "type": "checksum256"
                 }
             ]
         },

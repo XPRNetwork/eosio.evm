@@ -5,7 +5,6 @@ project(eosio_evm)
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
 
-
 add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.evm.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/processor.cpp
@@ -22,7 +21,7 @@ add_contract(eosio.evm eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/identity.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/blake2b.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/expmod.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/bnadd.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/precompiles/bncurve.cpp
 )
 
 target_include_directories(eosio.evm
@@ -31,7 +30,10 @@ target_include_directories(eosio.evm
    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_options(eosio.evm PUBLIC -stack-size 32000 )
+set(FLAGS USE_FIELD_5X52 USE_SCALAR_4X64 HAVE_BUILTIN_EXPECT HAVE___INT128 ENABLE_MODULE_RECOVERY USE_FIELD_INV_BUILTIN USE_NUM_NONE USE_SCALAR_INV_BUILTIN )
+target_compile_definitions(eosio.evm PRIVATE -DECMULT_WINDOW_SIZE=15 -DECMULT_GEN_PREC_BITS=4 ${FLAGS})
+
+target_link_options(eosio.evm PUBLIC -stack-size 32000 -use-freeing-malloc)
 
 set_target_properties(eosio.evm
    PROPERTIES
@@ -39,11 +41,3 @@ set_target_properties(eosio.evm
 )
 
 target_compile_options( eosio.evm PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian)
-
-# add_test( evm_test ${CMAKE_BINARY_DIR}/tests/evm_test )
-# set_property(TEST evm_test PROPERTY LABELS unit_tests)
-
-### add a new test
-# include(CTest)
-# enable_testing()
-# add_subdirectory(tests)

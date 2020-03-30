@@ -16,51 +16,19 @@ namespace eosio_evm
 
   void Processor::precompile_execute(uint256_t address)
   {
-    // 1.ECDSARECOVER
-    if (address == 1)
-    {
-      return precompile_ecrecover();
-    }
-    // 2. SHA256
-    else if (address == 2)
-    {
-      return precompile_sha256();
-    }
-    // 3. RIPEMD160
-    else if (address == 3)
-    {
-      return precompile_ripemd160();
-    }
-    // 4. IDENTITY
-    else if (address == 4)
-    {
-      return precompile_identity();
-    }
-    // 5. EXPMOD
-    else if (address == 5)
-    {
-      return precompile_expmod();
-    }
-    // 6. EXPMOD
-    else if (address == 6)
-    {
-      return precompile_bnadd();
-    }
-    // 7. BNMUL
-    // 8. SNARKV
-    else if (address >= 6 && address <= 8)
-    {
-      throw_error(Exception(ET::notImplemented, "The precompiled contract at address 0x" + intx::hex(address) + " is not implemented."), {});
-      return;
-    }
-    // 9. blake2b
-    else if (address == 9)
-    {
-      return precompile_blake2b();
-    }
-    else
-    {
-      return; // No-op
+    switch (static_cast<uint64_t>(address)) {
+      case 1: return precompile_ecrecover();
+      case 2: return precompile_sha256();
+      case 3: return precompile_ripemd160();
+      case 4: return precompile_identity();
+      case 5: return precompile_expmod();
+      #if (BN_CURVE == true)
+      case 6: return precompile_bnadd();
+      case 7: return precompile_bnmul();
+      case 8: return precompile_bnpairing();
+      #endif
+      case 9: return precompile_blake2b();
+      default: return;
     }
   }
 } // namespace eosio_evm

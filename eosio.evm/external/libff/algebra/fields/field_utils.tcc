@@ -10,10 +10,10 @@
 #ifndef FIELD_UTILS_TCC_
 #define FIELD_UTILS_TCC_
 
-#include <complex>
+// #include <complex>
 #include <stdexcept>
 
-#include <libff/common/double.hpp>
+// #include <libff/common/double.hpp>
 #include <libff/common/utils.hpp>
 
 namespace libff {
@@ -24,31 +24,31 @@ FieldT coset_shift()
     return FieldT::multiplicative_generator.squared();
 }
 
-template<typename FieldT>
-typename std::enable_if<std::is_same<FieldT, Double>::value, FieldT>::type
-get_root_of_unity(const size_t n)
-{
-    const double PI = 3.141592653589793238460264338328L;
+// template<typename FieldT>
+// typename std::enable_if<std::is_same<FieldT, Double>::value, FieldT>::type
+// get_root_of_unity(const size_t n)
+// {
+//     const double PI = 3.141592653589793238460264338328L;
 
-    return FieldT(cos(2 * PI / n), sin(2 * PI / n));
-}
+//     return FieldT(cos(2 * PI / n), sin(2 * PI / n));
+// }
 
-template<typename FieldT>
-typename std::enable_if<!std::is_same<FieldT, Double>::value, FieldT>::type
-get_root_of_unity(const size_t n)
-{
-    const size_t logn = log2(n);
-    if (n != (1u << logn)) eosio::check(false, "libff::get_root_of_unity: expected n == (1u << logn)");
-    if (logn > FieldT::s) eosio::check(false, "libff::get_root_of_unity: expected logn <= FieldT::s");
+// template<typename FieldT>
+// typename std::enable_if<!std::is_same<FieldT, Double>::value, FieldT>::type
+// get_root_of_unity(const size_t n)
+// {
+//     const size_t logn = log2(n);
+//     if (n != (1u << logn)) eosio::check(false, "libff::get_root_of_unity: expected n == (1u << logn)");
+//     if (logn > FieldT::s) eosio::check(false, "libff::get_root_of_unity: expected logn <= FieldT::s");
 
-    FieldT omega = FieldT::root_of_unity;
-    for (size_t i = FieldT::s; i > logn; --i)
-    {
-        omega *= omega;
-    }
+//     FieldT omega = FieldT::root_of_unity;
+//     for (size_t i = FieldT::s; i > logn; --i)
+//     {
+//         omega *= omega;
+//     }
 
-    return omega;
-}
+//     return omega;
+// }
 
 template<typename FieldT>
 std::vector<FieldT> pack_int_vector_into_field_element_vector(const std::vector<size_t> &v, const size_t w)

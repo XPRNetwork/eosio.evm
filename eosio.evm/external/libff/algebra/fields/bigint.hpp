@@ -38,16 +38,19 @@ public:
     bigint(const unsigned long x); /// Initalize from a small integer
     bigint(const char* s); /// Initialize from a string containing an integer in decimal notation
     bigint(const mpz_t r); /// Initialize from MPZ element
+    bigint(const std::array<uint8_t, 32>& bytes);
 
     void print() const;
     void print_hex() const;
     bool operator==(const bigint<n>& other) const;
     bool operator!=(const bigint<n>& other) const;
+    bool operator<=(const bigint<n>& other) const;
     void clear();
     bool is_zero() const;
     size_t max_bits() const { return n * GMP_NUMB_BITS; } /// Returns the number of bits representable by this bigint type
     size_t num_bits() const; /// Returns the number of bits in this specific bigint value, i.e., position of the most-significant 1
 
+    std::array<uint8_t, 32> as_array() const;
     unsigned long as_ulong() const; /// Return the last limb of the integer
     void to_mpz(mpz_t r) const;
     bool test_bit(const std::size_t bitno) const;

@@ -18,7 +18,7 @@
 
 namespace libff {
 
-  class Double 
+  class Double
   {
     public:
       std::complex<double> val;

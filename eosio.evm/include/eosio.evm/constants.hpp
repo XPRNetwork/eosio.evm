@@ -7,8 +7,11 @@
 // Adds superpower testing functions (required for running cpp tests/clearing data in contract)
 #define TESTING true
 
+// Adds bnadd, bnmul, and bnpair precompiles and mini-gmp
+#define BN_CURVE true
+
 // Only turn this on when doing ethereum/tests (otherwise balances won't match)
-#define CHARGE_SENDER_FOR_GAS false
+#define CHARGE_SENDER_FOR_GAS true
 
 // Keep all of these off unless testing/debugging
 #define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness.
@@ -57,40 +60,40 @@ namespace eosio_evm
   // Gas
   // static constexpr uint256_t GAS_PRICE = 1; // Not used since gas price is passed in TX
 
-  static constexpr uint256_t GP_TRANSACTION            = 21000;
-  static constexpr uint256_t GP_TXDATAZERO             = 4;
-  static constexpr uint256_t GP_TXDATANONZERO          = 16;
-  static constexpr uint256_t GP_TXCREATE               = 32000;
-  static constexpr uint256_t GP_NEW_ACCOUNT            = 25000;
-  static constexpr uint256_t GP_COPY                   = 3;
-  static constexpr uint256_t GP_CALL_VALUE_TRANSFER    = 9000;
-  static constexpr uint256_t GP_CALL_STIPEND           = 2300;
-  static constexpr uint256_t GP_SHA3_WORD              = 6;
-  static constexpr uint256_t GP_EXP_BYTE               = 50;
-  static constexpr uint256_t GP_CREATE_DATA            = 200;
-  static constexpr uint256_t GP_LOG_DATA               = 8;
-  static constexpr uint256_t GP_SELFDESTRUCT_REFUND    = 24000;
-  static constexpr uint256_t GP_SSTORE_MINIMUM         = 2300;
-  static constexpr uint256_t GP_SLOAD_GAS              = 800;
-  static constexpr uint256_t GP_SSTORE_SET_GAS         = 20000;
-  static constexpr uint256_t GP_SSTORE_RESET_GAS       = 5000;
-  static constexpr uint256_t GP_SSTORE_CLEARS_SCHEDULE = 15000;
-  static constexpr uint256_t GP_EXTRA_PER_LOG          = 375;
+  static constexpr uint64_t GP_TRANSACTION            = 21000;
+  static constexpr uint64_t GP_TXDATAZERO             = 4;
+  static constexpr uint64_t GP_TXDATANONZERO          = 16;
+  static constexpr uint64_t GP_TXCREATE               = 32000;
+  static constexpr uint64_t GP_NEW_ACCOUNT            = 25000;
+  static constexpr uint64_t GP_COPY                   = 3;
+  static constexpr uint64_t GP_CALL_VALUE_TRANSFER    = 9000;
+  static constexpr uint64_t GP_CALL_STIPEND           = 2300;
+  static constexpr uint64_t GP_SHA3_WORD              = 6;
+  static constexpr uint64_t GP_EXP_BYTE               = 50;
+  static constexpr uint64_t GP_CREATE_DATA            = 200;
+  static constexpr uint64_t GP_LOG_DATA               = 8;
+  static constexpr uint64_t GP_SELFDESTRUCT_REFUND    = 24000;
+  static constexpr uint64_t GP_SSTORE_MINIMUM         = 2300;
+  static constexpr uint64_t GP_SLOAD_GAS              = 800;
+  static constexpr uint64_t GP_SSTORE_SET_GAS         = 20000;
+  static constexpr uint64_t GP_SSTORE_RESET_GAS       = 5000;
+  static constexpr uint64_t GP_SSTORE_CLEARS_SCHEDULE = 15000;
+  static constexpr uint64_t GP_EXTRA_PER_LOG          = 375;
 
   // Precompiles
-  static constexpr uint256_t GP_ECRECOVER              = 3000;
-  static constexpr uint256_t GP_IDENTITY_BASE          = 15;
-  static constexpr uint256_t GP_IDENTITY_WORD          = 3;
-  static constexpr uint256_t GP_SHA256                 = 60;
-  static constexpr uint256_t GP_SHA256_WORD            = 12;
-  static constexpr uint256_t GP_RIPEMD160              = 600;
-  static constexpr uint256_t GP_RIPEMD160_WORD         = 120;
-  static constexpr uint256_t GP_BLAKE2_ROUND           = 1;
-  static constexpr uint256_t GP_MODEXP                 = 20;
-  static constexpr uint256_t GP_BNADD                  = 150;
-  static constexpr uint256_t GP_BNMUL                  = 6000;
-  static constexpr uint256_t GP_BNPAIR_BASE            = 45000;
-  static constexpr uint256_t GP_BNPAIR_K               = 34000;
+  static constexpr uint64_t GP_ECRECOVER              = 3000;
+  static constexpr uint64_t GP_IDENTITY_BASE          = 15;
+  static constexpr uint64_t GP_IDENTITY_WORD          = 3;
+  static constexpr uint64_t GP_SHA256                 = 60;
+  static constexpr uint64_t GP_SHA256_WORD            = 12;
+  static constexpr uint64_t GP_RIPEMD160              = 600;
+  static constexpr uint64_t GP_RIPEMD160_WORD         = 120;
+  static constexpr uint64_t GP_BLAKE2_ROUND           = 1;
+  static constexpr uint64_t GP_MODEXP                 = 20;
+  static constexpr uint64_t GP_BNADD                  = 150;
+  static constexpr uint64_t GP_BNMUL                  = 6000;
+  static constexpr uint64_t GP_BNPAIR_BASE            = 45000;
+  static constexpr uint64_t GP_BNPAIR_K               = 34000;
 
   // TX
   static constexpr size_t R_FIXED_LENGTH = 32u;

@@ -261,12 +261,6 @@ BOOST_AUTO_TEST_SUITE(eosio_evm_erc20, * boost::unit_test::enable_if<erc20_enabl
          ( "sender", "424a26f6de36eb738762cead721bac23c62a724e")
       );
 
-      // Check table
-      // auto table = push_action2( N(eosio.evm), N(printstate), N(eosio.evm), mvo()
-      //    ( "address", "b3e48339798967507eeda1773e824255ac7c6258")
-      // );
-      // std::cout << table->action_traces[0].console << std::endl;
-
       // Transfer SYED tokens
       auto transfer_res = push_action2( N(eosio.evm), N(raw), N(vestvestvest), mvo()
          ( "tx", "f88d0101831e84808080b84000000000000000000000000010d10ef03ef3316b750d2544bae8c96309aa436000000000000000000000000000000000000000000000000000000000000003e825a020e1cb44a38ac9d6d78eb86e6dd736ff22d559c58bb5c7dce8ada0c4df7eb6a8a06515f6f24d1086b6f7e65595559bc2d7ea8b8af817e17b89e5d63e4d99707a3c")
@@ -404,19 +398,6 @@ BOOST_FIXTURE_TEST_CASE( debugging, eosio_evm_tester ) try {
 } FC_LOG_AND_RETHROW()
 BOOST_AUTO_TEST_SUITE_END()
 
-// BOOST_AUTO_TEST_SUITE(eosio_evm_st, * boost::unit_test::enable_if<debug_state_tests_enabled>())
-// BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
-//    // Execute transaction
-//    base_tester::push_action( N(eosio.evm), N(teststatetx), N(eosio.evm), mvo()
-//       ( "tx", singleTransaction.get_string())
-//       ( "env", blockEnv)
-//    );
-//    produce_blocks(1);
-// } FC_LOG_AND_RETHROW()
-
-// BOOST_AUTO_TEST_SUITE_END()
-
-
 BOOST_AUTO_TEST_SUITE(eosio_evm_st, * boost::unit_test::enable_if<state_tests_enabled>())
 BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
    std::cout << "***********************************************************************************************************" << std::endl;
@@ -454,72 +435,32 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          std::cout << testPath << " " << testName  << std::endl;
 
          // // Execute Only this folder
-         // if (testCategory != "stZeroKnowledge") {
+         // if (testCategory != "stPreCompiledContracts2") {
          //    continue;
          // }
-         // // Execute Only this file
-         // if (
-         //    testName != "modexp_0_0_0_20500" &&
-         //    testName != "modexp_0_0_0_22000" &&
-         //    testName != "modexp_0_0_0_25000" &&
-         //    testName != "modexp_0_0_0_35000" &&
-         //    testName != "modexpRandomInput" &&
-         //    testName != "modexp_modsize0_returndatasize"
-         // ) {
-         //    continue;
-         // }
-
-
-         // SKIP ECC precompile folders
-         // if (
-         //    testCategory == "stPreCompiledContracts" ||
-         //    testCategory == "stZeroKnowledge" ||
-         //    testCategory == "stZeroKnowledge2"
-         // ) {
-         //    continue;
-         // }
+         // Execute only this file
+         if (testName != "Call50000_identity2" ) {
+            continue;
+         }
 
          // SKIP file
          if (
-            // Time consuming (Completed successfully already, comment out to run them)
+            // Time consuming (all passing, comment out to run them)
             testName == "sstore_combinations_initial00" ||
             testName == "sstore_combinations_initial01" ||
             testName == "sstore_combinations_initial10" ||
             testName == "sstore_combinations_initial11" ||
             testName == "sstore_combinations_initial20" ||
             testName == "sstore_combinations_initial21" ||
-            testName == "CALLBlake2f_MaxRounds" ||
+            testName == "CALLBlake2f_MaxRounds" || // Takes an hour to complete
 
-            // Unrecoverable keys (ecrecover) crashes EOSIO contracts
-            testName == "CallEcrecoverUnrecoverableKey" ||
-            testName == "CallEcrecover80" ||
-            testName == "CallEcrecoverR_prefixed0" ||
-            testName == "CALLCODEEcrecover80" ||
-            testName == "CALLCODEEcrecoverR_prefixed0" ||
-            testName == "static_CallEcrecoverR_prefixed0" ||
-            testName == "static_CallEcrecover80" ||
-            testName == "failed_tx_xcf416c53" ||
-
-            // Code too large
-            testName == "randomStatetest177" || // Tried to deploy 6 MB init code
-            testName == "QuadraticComplexitySolidity_CallDataCopy" || // Way too long to process in EOSIO WASM
-            testName == "static_LoopCallsThenRevert" ||  // Way too long to process in EOSIO WASM
-            testName == "JUMPDEST_AttackwithJump" || // Large code leads to out of memory for EOSIO 32MB max
-            testName == "JUMPDEST_Attack" || // Large code leads to out of memory for EOSIO 32MB max
-            testName == "static_Call50000_sha256" || // Large code leads to out of memory for EOSIO 32MB max
-
-            // Only hash provided, cannot verify (no state merkle tree for EOSIO)
-            testName == "recursiveCreateReturnValue" ||
-            testName == "Create2Recursive" ||
-
-            // TODO Precompiles
-            testName == "RevertPrecompiledTouchExactOOG"
-            // testName == "modexp_0_0_0_20500" || // Uses expmod
-            // testName == "modexp_0_0_0_22000" || // Uses expmo
-            // testName == "modexp_0_0_0_25000" || // Uses expmod
-            // testName == "modexp_0_0_0_35000" || // Uses expmod
-            // testName == "modexpRandomInput" || // Uses expmod
-            // testName == "modexp_modsize0_returndatasize" // Uses expmod
+            // Out of memory due to 1000s of calls (No way in EOSIO to reclaim memory once allocated)
+            testName == "randomStatetest177" ||
+            testName == "QuadraticComplexitySolidity_CallDataCopy" ||
+            testName == "static_LoopCallsThenRevert" ||
+            testName == "JUMPDEST_AttackwithJump" ||
+            testName == "JUMPDEST_Attack" ||
+            testName == "static_Call50000_sha256"
          ) {
             continue;
          }
@@ -533,13 +474,10 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
 
             // SKIP specific tests
             if (
-               // TODO Precompiles
-               singleTest.key() == "create2callPrecompiles_d4g0v0_Istanbul" ||
-               singleTest.key() == "create2callPrecompiles_d6g0v0_Istanbul" ||
-               singleTest.key() == "create2callPrecompiles_d7g0v0_Istanbul"||
-               singleTest.key() == "static_CallEcrecover0_0input_d6g0v0_Istanbul" ||
-               singleTest.key() == "static_CallEcrecover0_0input_d7g0v0_Istanbul" ||
-               singleTest.key() == "static_CallEcrecover0_0input_d8g0v0_Istanbul" ||
+               // Only hash provided in test, cannot verify (no state merkle tree for EOSIO)
+               singleTest.key() == "recursiveCreateReturnValue_d0g0v0_Istanbul" ||
+               singleTest.key() == "Create2Recursive_d0g0v0_Istanbul" ||
+               singleTest.key() == "Create2Recursive_d0g1v0_Istanbul" ||
 
                // Long running Quadratic Complexity tests, all go out of memory in EOSIO 32MB limit
                singleTest.key() == "Call1024PreCalls_d0g0v0_Istanbul" ||
@@ -571,8 +509,6 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
                singleTest.key() == "static_Call50000_identity_d1g0v0_Istanbul" ||
                singleTest.key() == "static_Call50000_identity2_d0g0v0_Istanbul" ||
                singleTest.key() == "static_Call50000_identity2_d1g0v0_Istanbul" ||
-               singleTest.key() == "static_Call50000bytesContract50_1_d0g0v0_Istanbul" ||
-               singleTest.key() == "static_Call50000bytesContract50_1_d1g0v0_Istanbul" ||
                singleTest.key() == "static_Call50000bytesContract50_2_d0g0v0_Istanbul" ||
                singleTest.key() == "static_Call50000bytesContract50_2_d1g0v0_Istanbul" ||
                singleTest.key() == "static_Call50000bytesContract50_3_d0g0v0_Istanbul" ||
@@ -583,9 +519,9 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             }
 
             // (use for single test testing)
-            if (singleTest.key() != "pointAdd_d0g0v0_Istanbul") {
-               continue;
-            }
+            // if (singleTest.key() != "static_Call50000bytesContract50_1_d0g0v0_Istanbul") {
+            //    continue;
+            // }
 
             auto testObject = singleTest.value().get_object();
 

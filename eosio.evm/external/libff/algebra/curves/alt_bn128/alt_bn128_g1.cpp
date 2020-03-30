@@ -67,13 +67,7 @@ void alt_bn128_G1::to_affine_coordinates()
     }
     else
     {
-        for (auto i = 0; i < (sizeof(Z.mont_repr.data) / sizeof(mp_limb_t)); i++) {
-            eosio::print("\nTAC ", Z.mont_repr.data[i]);
-        }
         alt_bn128_Fq Z_inv = Z.inverse();
-        for (auto i = 0; i < (sizeof(Z_inv.mont_repr.data) / sizeof(mp_limb_t)); i++) {
-            eosio::print("\nTAC Z_inv ", Z_inv.mont_repr.data[i]);
-        }
         alt_bn128_Fq Z2_inv = Z_inv.squared();
         alt_bn128_Fq Z3_inv = Z2_inv * Z_inv;
         this->X = this->X * Z2_inv;
@@ -155,16 +149,6 @@ alt_bn128_G1 alt_bn128_G1::operator+(const alt_bn128_G1 &other) const
         return *this;
     }
 
-    for (auto i = 0; i < 8; i++) {
-        eosio::print("\nADD: X: ", this->X.mont_repr.data[i]);
-    }
-
-    for (auto i = 0; i < 8; i++) {
-        eosio::print("\nADD: Y: ", this->Y.mont_repr.data[i]);
-    }
-        for (auto i = 0; i < 8; i++) {
-        eosio::print("\nADD: Z: ", this->Z.mont_repr.data[i]);
-    }
     // no need to handle points of order 2,4
     // (they cannot exist in a prime-order subgroup)
 

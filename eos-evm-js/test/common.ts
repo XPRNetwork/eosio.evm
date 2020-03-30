@@ -6,7 +6,7 @@ const compiled = require('../src/eth-contracts/compiled.json')
 export const contractDir = '/Users/jafri/eosio.evm/eosio.evm'
 
 export const ethContractAddress = '0xb3e48339798967507eeda1773e824255ac7c6258'
-export const contract = 'wuffwuffwuff'
+export const contract = 'zkpzkpzkpzkp'
 export const account = 'vestvestvest'
 export const sender = '0xf79b834a37f3143f4a73fc3934edac67fd3a01cd'
 export const allowanceAddress = '0xab21f17d0c3e30be30e115508643817b297ae8d6'

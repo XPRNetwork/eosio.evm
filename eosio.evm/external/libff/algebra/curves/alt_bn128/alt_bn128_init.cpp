@@ -33,8 +33,6 @@ void init_alt_bn128_params()
     typedef bigint<alt_bn128_r_limbs> bigint_r;
     typedef bigint<alt_bn128_q_limbs> bigint_q;
 
-    eosio::print("SIZE:",sizeof(mp_limb_t) );
-
     assert(sizeof(mp_limb_t) == 8 || sizeof(mp_limb_t) == 4); // Montgomery assumes this
 
     /* parameters for scalar field Fr */

@@ -484,7 +484,7 @@ export class EosApi {
         }
       ])
     } catch (e) {
-      console.log('Same code already exists.')
+      console.log(e)
     }
 
     // 4. Set ABI

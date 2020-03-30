@@ -11,7 +11,7 @@
 #include <libff/algebra/curves/alt_bn128/alt_bn128_g2.hpp>
 #include <libff/algebra/curves/alt_bn128/alt_bn128_init.hpp>
 #include <libff/algebra/curves/alt_bn128/alt_bn128_pairing.hpp>
-#include <libff/common/profiling.hpp>
+// #include <libff/common/profiling.hpp>
 
 namespace libff {
 
@@ -139,6 +139,7 @@ alt_bn128_Fq12 alt_bn128_exp_by_neg_z(const alt_bn128_Fq12 &elt)
     // enter_block("Call to alt_bn128_exp_by_neg_z");
 
     alt_bn128_Fq12 result = elt.cyclotomic_exp(alt_bn128_final_exponent_z);
+
     if (!alt_bn128_final_exponent_is_z_neg)
     {
         result = result.unitary_inverse();
@@ -222,6 +223,8 @@ alt_bn128_Fq12 alt_bn128_final_exponentiation_last_chunk(const alt_bn128_Fq12 &e
 
     return result;
 }
+
+
 
 alt_bn128_GT alt_bn128_final_exponentiation(const alt_bn128_Fq12 &elt)
 {

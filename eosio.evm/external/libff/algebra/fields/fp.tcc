@@ -196,7 +196,6 @@ Fp_model<n,modulus>::Fp_model(const bigint<n> &b)
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus>::Fp_model(const long x, const bool is_unsigned)
 {
-    eosio::print("\nB");
     static_assert(std::numeric_limits<mp_limb_t>::max() >= static_cast<unsigned long>(std::numeric_limits<long>::max()), "long won't fit in mp_limb_t");
     if (is_unsigned || x >= 0)
     {
@@ -214,7 +213,6 @@ Fp_model<n,modulus>::Fp_model(const long x, const bool is_unsigned)
 template<mp_size_t n, const bigint<n>& modulus>
 void Fp_model<n,modulus>::set_ulong(const unsigned long x)
 {
-    eosio::print("\nC");
     this->mont_repr.clear();
     this->mont_repr.data[0] = x;
     mul_reduce(Rsquared);
@@ -223,7 +221,6 @@ void Fp_model<n,modulus>::set_ulong(const unsigned long x)
 template<mp_size_t n, const bigint<n>& modulus>
 void Fp_model<n,modulus>::clear()
 {
-    eosio::print("\nD");
     this->mont_repr.clear();
 }
 
@@ -249,14 +246,12 @@ unsigned long Fp_model<n,modulus>::as_ulong() const
 template<mp_size_t n, const bigint<n>& modulus>
 bool Fp_model<n,modulus>::operator==(const Fp_model& other) const
 {
-    eosio::print("\nF");
     return (this->mont_repr == other.mont_repr);
 }
 
 template<mp_size_t n, const bigint<n>& modulus>
 bool Fp_model<n,modulus>::operator!=(const Fp_model& other) const
 {
-    eosio::print("\nG");
     return (this->mont_repr != other.mont_repr);
 }
 
@@ -279,7 +274,6 @@ void Fp_model<n,modulus>::print() const
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus> Fp_model<n,modulus>::zero()
 {
-    eosio::print("\nJ");
     Fp_model<n,modulus> res;
     res.mont_repr.clear();
     return res;
@@ -288,7 +282,6 @@ Fp_model<n,modulus> Fp_model<n,modulus>::zero()
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus> Fp_model<n,modulus>::one()
 {
-    eosio::print("\nK");
     Fp_model<n,modulus> res;
     res.mont_repr.data[0] = 1;
     res.mul_reduce(Rsquared);
@@ -298,7 +291,6 @@ Fp_model<n,modulus> Fp_model<n,modulus>::one()
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus> Fp_model<n,modulus>::geometric_generator()
 {
-    eosio::print("\nL");
     Fp_model<n,modulus> res;
     res.mont_repr.data[0] = 2;
     res.mul_reduce(Rsquared);
@@ -308,7 +300,6 @@ Fp_model<n,modulus> Fp_model<n,modulus>::geometric_generator()
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus> Fp_model<n,modulus>::arithmetic_generator()
 {
-    eosio::print("\nM");
     Fp_model<n,modulus> res;
     res.mont_repr.data[0] = 1;
     res.mul_reduce(Rsquared);
@@ -318,7 +309,6 @@ Fp_model<n,modulus> Fp_model<n,modulus>::arithmetic_generator()
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus>& Fp_model<n,modulus>::operator+=(const Fp_model<n,modulus>& other)
 {
-    eosio::print("\nN");
 #ifdef PROFILE_OP_COUNTS
     this->add_cnt++;
 #endif
@@ -432,7 +422,6 @@ Fp_model<n,modulus>& Fp_model<n,modulus>::operator+=(const Fp_model<n,modulus>& 
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus>& Fp_model<n,modulus>::operator-=(const Fp_model<n,modulus>& other)
 {
-    eosio::print("\nO");
 #ifdef PROFILE_OP_COUNTS
     this->sub_cnt++;
 #endif
@@ -523,7 +512,6 @@ Fp_model<n,modulus>& Fp_model<n,modulus>::operator-=(const Fp_model<n,modulus>& 
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus>& Fp_model<n,modulus>::operator*=(const Fp_model<n,modulus>& other)
 {
-    eosio::print("\nP");
 #ifdef PROFILE_OP_COUNTS
     this->mul_cnt++;
 #endif
@@ -653,96 +641,41 @@ Fp_model<n,modulus> Fp_model<n,modulus>::squared() const
 template<mp_size_t n, const bigint<n>& modulus>
 Fp_model<n,modulus>& Fp_model<n,modulus>::invert()
 {
-#ifdef PROFILE_OP_COUNTS
-    this->inv_cnt++;
-#endif
-
     assert(!this->is_zero());
 
-    bigint<n> g; /* gp should have room for vn = n limbs */
+    mpz_t g, s, u, v;
 
-    // mp_limb_t s[n+1]; /* sp should have room for vn+1 limbs */
-    // mp_size_t sn;
+    mpz_roinit_n(u, this->mont_repr.data, n);
+    mpz_roinit_n(v, modulus.data, n);
+    mpz_init (g);
+    mpz_init (s);
 
-    bigint<n> v = modulus; // both source operands are destroyed by mpn_gcdext
+    // GCD
+    mpz_gcdext(g, s, NULL, u, v);
+    assert(g->_mp_size == 1 && g->_mp_d[0] == 1); /* inverse exists */
 
-    /* computes gcd(u, v) = g = u*s + v*t, so s*u will be 1 (mod v) */
-    // TODO
-    // Original
-    // const mp_size_t gn = mpn_gcdext(g.data, s, &sn, this->mont_repr.data, n, v.data, n);
-    // assert(gn == 1 && g.data[0] == 1); /* inverse exists */
-
-    // New
-    mpz_t gg, ss, u, vv;
-
-    mp_limb_t a_u[4] = {5544790254283102953, 13698472384431417117, 4628036095437277618, 2762764518496934255};
-    mp_limb_t a_vv[4] = {4332616871279656263, 10917124144477883021, 13281191951274694749, 3486998266802970665};
-    mpz_roinit_n(u, a_u, 4);
-    mpz_roinit_n(vv, a_vv, 4);
-
-    mpz_init (gg);
-    mpz_init (ss);
-
-    /**
-     * GCD
-     */
-    mpz_gcdext(gg, ss, 0, u, vv);
-
-    assert(gg->_mp_size == 1 && gg->_mp_d[0] == 1); /* inverse exists */
-
-  for (auto i = 0; i < std::abs(gg->_mp_size); i++) {
-        eosio::print("\ng ", gg->_mp_d[i]);
-    }
-  for (auto i = 0; i < std::abs(ss->_mp_size); i++) {
-        eosio::print("\ns ", ss->_mp_d[i]);
-    }
-
-    // Copy result
-    // mpn_copyi(g.data, gg->_mp_d, n);
-    // mpn_copyi(s, ss->_mp_d, n);
-
-    // const mp_size_t gn = mpn_gcdext(g.data, s, &sn, this->mont_repr.data, n, v.data, n);
-
-    // mp_limb_t q; /* division result fits into q, as sn <= n+1 */
-    /* sn < 0 indicates negative sn; will fix up later */
-
-    if (std::abs(ss->_mp_size) >= n)
+    if (std::abs(s->_mp_size) >= n)
     {
-        /* if sn could require modulus reduction, do it here */
-        // TODO
-        // Original
-        // mpn_tdiv_qr(&q, this->mont_repr.data, 0, s, std::abs(sn), modulus.data, n);
-
-        // Replace with?
-        mpz_t q;
+        mpz_t q, d;
         mpz_init (q);
-        mpz_tdiv_qr (q, u, ss, vv);
-        mpn_copyi(this->mont_repr.data, u->_mp_d, u->_mp_size);
+        mpz_init (d);
 
-        // mpz_tdiv_qr (&q, mpz_t r, const mpz_t n, const mpz_t d)
+        mpz_tdiv_qr (q, d, s, v);
+
+        mpn_copyi(this->mont_repr.data, d->_mp_d, std::abs(d->_mp_size));
     }
     else
     {
-        eosio::print("\nBB ABS");
-
         /* otherwise just copy it over */
         mpn_zero(this->mont_repr.data, n);
-        mpn_copyi(this->mont_repr.data, ss->_mp_d, std::abs(ss->_mp_size));
-    }
-
-    for (auto i = 0; i < n; i++) {
-        eosio::print("\nmont_repr2 ", u->_mp_d[i]);
+        mpn_copyi(this->mont_repr.data, s->_mp_d, std::abs(s->_mp_size));
     }
 
     /* fix up the negative sn */
-    if (ss->_mp_size < 0)
+    if (s->_mp_size < 0)
     {
         const mp_limb_t borrow = mpn_sub_n(this->mont_repr.data, modulus.data, this->mont_repr.data, n);
         assert(borrow == 0);
-    }
-
-    for (auto i = 0; i < n; i++) {
-        eosio::print("\nmont_repr3 ", u->_mp_d[i]);
     }
 
     mul_reduce(Rcubed);
@@ -774,7 +707,7 @@ Fp_model<n, modulus> Fp_model<n,modulus>::random_element() /// returns random el
             const std::size_t part = bitno/GMP_NUMB_BITS;
             const std::size_t bit = bitno - (GMP_NUMB_BITS*part);
 
-            r.mont_repr.data[part] &= ~(1ul<<bit);
+            r.mont_repr.data[part] &= ~(1ull<<bit);
 
             bitno--;
         }

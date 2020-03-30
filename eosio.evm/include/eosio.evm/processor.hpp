@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Copyright (c) 2020 Syed Jafri. All rights reserved.
-// Licensed under the MIT License.
+// Licensed under the MIT License
 
 #pragma once
 
 #include "tables.hpp"
 #include "context.hpp"
 #include "stack.hpp"
-#include "eosio.evm.hpp"
 
 namespace eosio_evm {
   // Forward Declarations
@@ -90,17 +89,22 @@ namespace eosio_evm {
     void precompile_return(const std::vector<uint8_t>& output);
     void precompile_not_implemented();
     void precompile_ecrecover();
+
     void precompile_sha256();
     void precompile_ripemd160();
     void precompile_identity();
     void precompile_blake2b();
+
+    // Exponential mod
     void precompile_expmod();
-    void precompile_bnadd();
     uint256_t adjusted_exponent_length(uint256_t exponent_length, uint256_t base_length);
     uint256_t mult_complexity(const uint256_t& len);
     uint256_t read_input(uint64_t offset, uint64_t length);
-    // BigInt modpow(BigInt b, BigInt e, BigInt m);
-    // BigInt read_input_large(uint64_t offset, uint64_t length);
+
+    // BN Curve
+    void precompile_bnpairing();
+    void precompile_bnmul();
+    void precompile_bnadd();
 
     // Instructions
     void stop();

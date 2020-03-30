@@ -61,12 +61,10 @@ No special instructions needed for manual deployment, simply deploy the WASM and
   - include/eosio.evm: all headerfiles
   - external: external libraries
 - eos-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
-- js-tests: scripts for encoding/decoding transactions for testing
 - tests: full Ethereum/EOS tests
   - jsontests: submodule of https://github.com/ethereum/tests
   - system_wasms: eosio.system and eosio.token ABIs/WASMS
   - eosio.evm_tests.cpp: testing suite
-- truffle: ERC20 and ERC721 contracts
 
 
 ### Contract Public Actions

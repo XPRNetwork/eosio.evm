@@ -1,10 +1,9 @@
 # Contract
 Configure eosio.evm/include/eosio.evm/constants.hpp as needed with constants such as token symbol.
 
-Please note that setting the JS-SDK will not currently work if OPTRACE or PRINT_STATE or set to true as it will print more information to EOSIO console.
+Please note that setting the JS-SDK will not currently work if OPTRACE or PRINT_STATE are set to true as it will print more information to EOSIO console.
 
 ### EVM Notes
-- We assume that maximum "value" of a transaction is within the limits of a int64_t. Any transaction with a "value" greater than 2^62 - 1 will be considered invalid.
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)

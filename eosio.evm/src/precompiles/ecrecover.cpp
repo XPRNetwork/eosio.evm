@@ -31,10 +31,27 @@ namespace eosio_evm
     // Validation
     auto max = intx::from_string<uint256_t>("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
     bool invalid_v = v != PRE_155_V_START && v != (PRE_155_V_START + 1);
-    bool invalid_s = s < 1 || s <= 0 || s >= max;
-    bool invalid_r = r <= 0 || r >= max;
+    bool invalid_s = s < 1 || s <= 0 || s > max;
+    bool invalid_r = r <= 0 || r > max;
 
     if (invalid_v || invalid_r || invalid_s) {
+      precompile_return({});
+      return;
+    }
+
+    // Convert R from bytes to big int
+    std::vector<uint8_t> r_bytes_vec(32);
+    std::copy(std::begin(r_bytes), std::begin(r_bytes) + 32, r_bytes_vec.begin());
+    BN x = bytes_to_bmi(r_bytes_vec);
+
+    // y^2 = x^3 + 7 (mod p)
+    BN p("0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f");
+    BN ysquared = ((x * x * x + 7) % p);
+    BN y = boost::multiprecision::powm(ysquared, (p + 1) / 4, p);
+    BN squared2 = (y * y) % p;
+    bool valid = ysquared == squared2;
+
+    if (!valid) {
       precompile_return({});
       return;
     }

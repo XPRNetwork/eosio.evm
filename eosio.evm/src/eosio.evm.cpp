@@ -28,7 +28,7 @@ void evm::create (
     a.address = address_160;
     a.nonce   = 1;
     a.account = account;
-    a.balance = eosio::asset(0, TOKEN_SYMBOL);
+    a.balance = 0;
   });
 
   // Print out the address
@@ -87,9 +87,9 @@ void evm::raw(
   #if (CHARGE_SENDER_FOR_GAS == true)
   auto gas_cost = transaction.gas_price * transaction.gas_limit;
   eosio::check(gas_cost <= caller->get_balance(), "Invalid Transaction: Sender balance too low to pay for gas");
-  eosio::check(gas_cost <= eosio::asset::max_amount, "Invalid Transaction: Gas cost too high for EOSIO");
+  eosio::check(gas_cost >= 0, "Invalid Transaction: Gas cannot be negative");
   accounts_byaddress.modify(caller, eosio::same_payer, [&](auto& a) {
-    a.balance.amount -= static_cast<uint64_t>(gas_cost);
+    a.balance -= gas_cost;
   });
   #endif
 
@@ -109,7 +109,7 @@ void evm::raw(
     auto gas_unused = transaction.gas_limit - gas_used;
     auto gas_unused_cost = gas_unused * transaction.gas_price;
     accounts_byaddress.modify(caller, eosio::same_payer, [&](auto& a) {
-      a.balance.amount += static_cast<uint64_t>(gas_unused_cost);
+      a.balance += gas_unused_cost;
     });
   #endif
 }

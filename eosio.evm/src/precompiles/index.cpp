@@ -14,44 +14,21 @@ namespace eosio_evm
     success_cb(output, gas_used);
   }
 
-  void Processor::precompile_not_implemented()
-  {
-    throw_error(Exception(ET::notImplemented, "This precompiled contract is not implemented."), {});
-  }
-
   void Processor::precompile_execute(uint256_t address)
   {
-    // 1.ECDSARECOVER
-    if (address == 1)
-    {
-      return precompile_ecrecover();
-    }
-    // 2. SHA256
-    else if (address == 2)
-    {
-      return precompile_sha256();
-    }
-    // 3. RIPEMD160
-    else if (address == 3)
-    {
-      return precompile_ripemd160();
-    }
-    // 4. IDENTITY
-    else if (address == 4)
-    {
-      return precompile_identity();
-    }
-    // 5. EXPMOD
-    // 6. SNARKV
-    // 7. BNADD
-    // 8. BNMUL
-    else if (address >= 5 && address <= 8)
-    {
-      return precompile_not_implemented();
-    }
-    else
-    {
-      return stop();
+    switch (static_cast<uint64_t>(address)) {
+      case 1: return precompile_ecrecover();
+      case 2: return precompile_sha256();
+      case 3: return precompile_ripemd160();
+      case 4: return precompile_identity();
+      case 5: return precompile_expmod();
+      #if (BN_CURVE == true)
+      case 6: return precompile_bnadd();
+      case 7: return precompile_bnmul();
+      case 8: return precompile_bnpairing();
+      #endif
+      case 9: return precompile_blake2b();
+      default: return;
     }
   }
 } // namespace eosio_evm

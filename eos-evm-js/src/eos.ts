@@ -6,9 +6,11 @@ import { readFileSync } from 'fs'
 import { getDeployableFilesFromDir } from './deploy'
 import { EOSIO_TOKEN, EOSIO_SYSTEM } from './constants'
 import { Account } from './interfaces'
+const BN = require('bn.js')
 
 const transformEthAccount = (account: Account) => {
   account.address = `0x${account.address}`
+  account.balance = new BN(account.balance)
   return account
 }
 
@@ -238,6 +240,33 @@ export class EosApi {
       }
     ])
   }
+  /**
+   * Testing: Creates account for eth tests
+   *
+   * @returns {Promise<any>} EOS TX response
+   */
+  async devNewAccount(
+    address: string,
+    balance: string,
+    code: string,
+    nonce: number,
+    account: string = ''
+  ) {
+    return await this.transact([
+      {
+        account: this.eosContract,
+        name: 'devnewacct',
+        data: {
+          address,
+          balance,
+          code: Uint8Array.from(Buffer.from(code, 'hex')),
+          nonce,
+          account
+        },
+        authorization: [{ actor: this.eosContract, permission: 'active' }]
+      }
+    ])
+  }
 
   /**
    * Fetches tables based on data
@@ -455,7 +484,7 @@ export class EosApi {
         }
       ])
     } catch (e) {
-      console.log('Same code already exists.')
+      console.log(e)
     }
 
     // 4. Set ABI

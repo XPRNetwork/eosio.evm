@@ -15,25 +15,37 @@
 - 100% Success on Ethereum RLP Tests
 - REVERT support (challenging on EOS as it requires no use of eosio::check after nonce increment)
 - Istanbul support
-- Full gas cost calculations (not billed to sender)
+- Full gas cost calculations (not billed to sender unless flag enabled)
 - Web3-similar call support (query view functions with no state modifications)
-- Total size of ~200KB (With OPTRACE and TESTING set to false)
-- ecrecover, sha256, ripdemd160 and identity precompiles supported
+- All precompiles supported
 
-NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly.
+NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly. Tests that exceed the 32MB RAM limit on EOSIO were disabled as EOSIO does not have ability to reclaim memory once allocated yet..
 
-For testing, tests with balance/value over 2^62-1 (max EOSIO asset) were excluded. Full Pre-compile support is being worked on, some precompiles like ec_mul and ec_add are due to be added as intrinsics to EOSIO soon.
+NOTE: If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false and it will reduce WASM size by 210KB (~2MB onchain).
+
+### Precompile support
+eosio.evm supports 9 precompiles
+1. ec_recover
+2. sha256
+3. ripemd160
+4. identity
+5. expmod
+6. bn_add
+7. bn_mul
+8. bn_pairing
+9. blake2b
 
 ### Usage instructions
 Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
 
 Basic usage: [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
 
-
 ### Build/Manual Deployment instructions
-Requires latest eosio.cdt with latest eosio 2 with EOSVM
+Requires latest eosio.cdt with latest eosio 2 with EOSVM (need to build eosio from source for tests`!)
 
 Change the token symbol in eosio.evm/include/eosio.evm/constants.hpp to reflect your chain
+
+Please ensure BOOST_ROOT is set.
 
 ```
 cmake .
@@ -47,7 +59,7 @@ No special instructions needed for manual deployment, simply deploy the WASM and
 - eosio.evm: contains all contract code
   - src: all sourcefiles
   - include/eosio.evm: all headerfiles
-  - external: external code for ecc, intx (bigint), keccak256 and rlp
+  - external: external libraries
 - eos-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
 - js-tests: scripts for encoding/decoding transactions for testing
 - tests: full Ethereum/EOS tests
@@ -131,13 +143,11 @@ struct AccountState {
 
 
 ### EVM Notes
-- We assume that maximum "value" of a transaction is within the limits of a int64_t. Any transaction with a "value" greater than 2^62 - 1 will be considered invalid.
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
-- Precompiled contracts are not currently supported, many like ec_mul and ec_add are due to be added to EOSIO soon
 
 
 ### Special Mentions

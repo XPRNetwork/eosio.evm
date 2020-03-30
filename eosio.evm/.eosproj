@@ -1,0 +1,21 @@
+{
+  "main": "",
+  "contract": "",
+  "include": "",
+  "resource": "",
+  "cdt": "cmd",
+  "output": "",
+  "scripts": {
+    "build": "eosio-cpp -abigen -I ./include -I ./external -contract eosio.evm -o eosio.evm.wasm ./src/*"
+  },
+  "deploy": {
+    "target": "both",
+    "mainnet": "",
+    "kylin": "",
+    "jungle": "",
+    "local": ""
+  },
+  "test": {
+    "npmClient": ""
+  }
+}

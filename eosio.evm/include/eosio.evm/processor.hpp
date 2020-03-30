@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Copyright (c) 2020 Syed Jafri. All rights reserved.
-// Licensed under the MIT License.
+// Licensed under the MIT License
 
 #pragma once
 
 #include "tables.hpp"
 #include "context.hpp"
 #include "stack.hpp"
-#include "eosio.evm.hpp"
+#include <boost/multiprecision/cpp_int.hpp>
 
 namespace eosio_evm {
+  using BN = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
+
   // Forward Declarations
   class evm;
 
-  class Processor
-  {
+  class Processor {
   private:
     EthereumTransaction& transaction;           // the transaction object
     evm* contract;                              // pointer to parent contract (to call EOSIO actions)
@@ -43,7 +44,7 @@ namespace eosio_evm {
       const Account& callee,
       uint256_t gas_left,
       const bool is_static,
-      const int64_t call_value,
+      const uint256_t call_value,
       std::vector<uint8_t>&& input,
       Program&& prog,
       SuccessHandler&& success_cb,
@@ -73,7 +74,7 @@ namespace eosio_evm {
     void set_code(const Address& address, const std::vector<uint8_t>& code);
     void selfdestruct(const Address& addr);
     void kill_storage(const uint64_t& address_index);
-    bool transfer_internal(const Address& from, const Address& to, const int64_t amount);
+    bool transfer_internal(const Address& from, const Address& to, const uint256_t& amount);
     void throw_stack();
 
     // Reverting
@@ -90,9 +91,27 @@ namespace eosio_evm {
     void precompile_return(const std::vector<uint8_t>& output);
     void precompile_not_implemented();
     void precompile_ecrecover();
+
     void precompile_sha256();
     void precompile_ripemd160();
     void precompile_identity();
+    void precompile_blake2b();
+
+    // Exponential mod
+    void precompile_expmod();
+    uint256_t adjusted_exponent_length(uint256_t exponent_length, uint256_t base_length);
+    uint256_t mult_complexity(const uint256_t& len);
+    uint256_t read_input(uint64_t offset, uint64_t length);
+
+    // Boost BMI (Multiprecision)
+    inline void bmi_to_bytes(BN bigi, std::vector<uint8_t>& bytes) { auto byte_length = bytes.size(); while (byte_length != 0) { bytes[byte_length - 1] = static_cast<uint8_t>(0xff & bigi); bigi >>= 8; byte_length--; } }
+    inline BN bytes_to_bmi(const std::vector<uint8_t>& bytes) { BN num = 0; for (auto byte: bytes) { num = num << 8 | byte; } return num; }
+    BN read_input_large(uint256_t off, uint256_t len, Context* ctx);
+
+    // BN Curve
+    void precompile_bnpairing();
+    void precompile_bnmul();
+    void precompile_bnadd();
 
     // Instructions
     void stop();
@@ -163,7 +182,7 @@ namespace eosio_evm {
     void swap();
     void log();
     void create();
-    int64_t value_by_call_type(const unsigned char call_type);
+    uint256_t value_by_call_type(const unsigned char call_type);
     void call();
     void return_();
     void revert();

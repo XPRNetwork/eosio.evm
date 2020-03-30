@@ -11,6 +11,7 @@ import {
   allowanceAddress,
   contractDir
 } from './common'
+const BN = require('bn.js')
 
 describe('Full ERC20 Test', () => {
   describe('Setup', () => {
@@ -38,7 +39,7 @@ describe('Full ERC20 Test', () => {
       const quantity = '0.0002 EOS'
       await api.eos.deposit({ from: account, quantity })
       const rows = await api.eos.getAllAddresses()
-      expect(rows).toEqual([{ ...initialAccount, balance: quantity }])
+      expect(rows).toEqual([{ ...initialAccount, balance: new BN(2) }])
     })
 
     it('transfer in EVM from new address to other addresses', async () => {
@@ -59,7 +60,7 @@ describe('Full ERC20 Test', () => {
         {
           account,
           address: initialAccount.address,
-          balance: '0.0000 EOS',
+          balance: new BN(0),
           code: [],
           index: 0,
           nonce: 3
@@ -67,7 +68,7 @@ describe('Full ERC20 Test', () => {
         {
           account: '',
           address: sender,
-          balance: '0.0001 EOS',
+          balance: new BN(1),
           code: [],
           index: 1,
           nonce: 0
@@ -75,7 +76,7 @@ describe('Full ERC20 Test', () => {
         {
           account: '',
           address: allowanceAddress,
-          balance: '0.0001 EOS',
+          balance: new BN(1),
           code: [],
           index: 2,
           nonce: 0

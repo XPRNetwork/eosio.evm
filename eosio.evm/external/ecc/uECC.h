@@ -1,5 +1,7 @@
 /* Copyright 2014, Kenneth MacKay. Licensed under the BSD 2-clause license. */
 
+#pragma once
+
 #ifndef _UECC_H_
 #define _UECC_H_
 

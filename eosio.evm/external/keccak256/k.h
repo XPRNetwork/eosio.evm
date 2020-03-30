@@ -17,6 +17,8 @@
  * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
  */
 
+#pragma once
+
 #ifndef __KECCAK256_H_
 #define __KECCAK256_H_
 

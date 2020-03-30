@@ -102,7 +102,7 @@ namespace eosio_evm
     uint64_t index;
     uint256_t key;
     uint256_t oldvalue;
-    int64_t amount;
+    uint256_t amount;
     uint256_t newvalue;
 
     #if (TESTING == true)
@@ -118,7 +118,7 @@ namespace eosio_evm
         { SMT::SELF_DESTRUCT, "SELF_DESTRUCT"    }
       };
 
-      eosio::print("\nType: ", reverseState[type], ", Index: ", index, ", Key: ", intx::to_string(key), " OldValue: ", intx::to_string(oldvalue), " NewValue: ", intx::to_string(newvalue), " Amount: ", amount);
+      eosio::print("\nType: ", reverseState[type], ", Index: ", index, ", Key: ", intx::to_string(key), " OldValue: ", intx::to_string(oldvalue), " NewValue: ", intx::to_string(newvalue), " Amount: ", intx::to_string(amount));
     }
     #endif /** Testing **/
   };
@@ -182,7 +182,7 @@ namespace eosio_evm
       }
 
       // Validate Value
-      eosio::check(value >= 0 && value <= eosio::asset::max_amount, "Invalid Transaction: Max Value in EOS EVM TX is 2^62 - 1, and it must be positive.");
+      eosio::check(value >= 0, "Invalid Transaction: Value cannot be negative.");
 
       // Hash
       hash = keccak_256(encode());
@@ -192,7 +192,6 @@ namespace eosio_evm
     }
     ~EthereumTransaction() = default;
 
-    int64_t get_value() { return static_cast<int64_t>(value); }
     bool is_zero() { return !r && !s; }
     bool is_create() const { return !to_address.has_value(); }
     uint256_t gas_left() const { return gas_limit - gas_used; }

@@ -61,17 +61,17 @@ struct Account {
   uint64_t index;
   eosio::checksum160 address;
   eosio::name account;
-  eosio::asset balance;
   uint64_t nonce;
   std::vector<uint8_t> code;
+  bigint::checksum256 balance;
 }
 ```
 - `index` - auto-incremented counter for accounts, also used as scope index for AccountStates
 - `address` - Ethereum 160 bit address
 - `account` - EOSIO account associated with Ethereum account
-- `balance` - EOSIO asset balance associated with Ethereum account
 - `nonce` - Current nonce of the account
 - `code` - Contract code for Ethereum account if present
+- `balance` - 256 bit balance stored as a bigint (shows as big endian when printed)
 
 ```c++
 struct AccountState {

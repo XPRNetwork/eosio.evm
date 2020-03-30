@@ -7,13 +7,15 @@
 #include "tables.hpp"
 #include "context.hpp"
 #include "stack.hpp"
+#include <boost/multiprecision/cpp_int.hpp>
 
 namespace eosio_evm {
+  using BN = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
+
   // Forward Declarations
   class evm;
 
-  class Processor
-  {
+  class Processor {
   private:
     EthereumTransaction& transaction;           // the transaction object
     evm* contract;                              // pointer to parent contract (to call EOSIO actions)
@@ -100,6 +102,11 @@ namespace eosio_evm {
     uint256_t adjusted_exponent_length(uint256_t exponent_length, uint256_t base_length);
     uint256_t mult_complexity(const uint256_t& len);
     uint256_t read_input(uint64_t offset, uint64_t length);
+
+    // Boost BMI (Multiprecision)
+    inline void bmi_to_bytes(BN bigi, std::vector<uint8_t>& bytes) { auto byte_length = bytes.size(); while (byte_length != 0) { bytes[byte_length - 1] = static_cast<uint8_t>(0xff & bigi); bigi >>= 8; byte_length--; } }
+    inline BN bytes_to_bmi(const std::vector<uint8_t>& bytes) { BN num = 0; for (auto byte: bytes) { num = num << 8 | byte; } return num; }
+    BN read_input_large(uint256_t off, uint256_t len, Context* ctx);
 
     // BN Curve
     void precompile_bnpairing();

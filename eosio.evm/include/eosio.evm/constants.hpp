@@ -11,7 +11,7 @@
 #define BN_CURVE true
 
 // Only turn this on when doing ethereum/tests (otherwise balances won't match)
-#define CHARGE_SENDER_FOR_GAS true
+#define CHARGE_SENDER_FOR_GAS false
 
 // Keep all of these off unless testing/debugging
 #define PRINT_LOGS false // not really helpful on EOSIO, but kept for completeness.

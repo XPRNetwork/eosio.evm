@@ -73,19 +73,19 @@ T user_indeterminate_result_error(const char* function, const char* message, con
 namespace detail
 {
 
-template <class T>
-std::string prec_format(const T& val)
-{
-   typedef typename boost::math::policies::precision<T, boost::math::policies::policy<> >::type prec_type;
-   std::stringstream ss;
-   if(prec_type::value)
-   {
-      int prec = 2 + (prec_type::value * 30103UL) / 100000UL;
-      ss << std::setprecision(prec);
-   }
-   ss << val;
-   return ss.str();
-}
+// template <class T>
+// std::string prec_format(const T& val)
+// {
+//    typedef typename boost::math::policies::precision<T, boost::math::policies::policy<> >::type prec_type;
+//    std::stringstream ss;
+//    if(prec_type::value)
+//    {
+//       int prec = 2 + (prec_type::value * 30103UL) / 100000UL;
+//       ss << std::setprecision(prec);
+//    }
+//    ss << val;
+//    return ss.str();
+// }
 
 inline void replace_all_in_string(std::string& result, const char* what, const char* with)
 {

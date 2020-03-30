@@ -1,6 +1,6 @@
 #pragma once
 
-// Standard
+// Standard.
 #include <optional>
 #include <vector>
 

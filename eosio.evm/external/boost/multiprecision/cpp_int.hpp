@@ -1809,206 +1809,206 @@ struct cpp_int_backend
    }
 
  private:
-   std::string do_get_trivial_string(std::ios_base::fmtflags f, const mpl::false_&) const
-   {
-      typedef typename mpl::if_c<sizeof(typename base_type::local_limb_type) == 1, unsigned, typename base_type::local_limb_type>::type io_type;
-      if (this->sign() && (((f & std::ios_base::hex) == std::ios_base::hex) || ((f & std::ios_base::oct) == std::ios_base::oct)))
-         BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
-      std::stringstream ss;
-      ss.flags(f & ~std::ios_base::showpos);
-      ss << static_cast<io_type>(*this->limbs());
-      std::string result;
-      if (this->sign())
-         result += '-';
-      else if (f & std::ios_base::showpos)
-         result += '+';
-      result += ss.str();
-      return result;
-   }
-   std::string do_get_trivial_string(std::ios_base::fmtflags f, const mpl::true_&) const
-   {
-      // Even though we have only one limb, we can't do IO on it :-(
-      int base = 10;
-      if ((f & std::ios_base::oct) == std::ios_base::oct)
-         base = 8;
-      else if ((f & std::ios_base::hex) == std::ios_base::hex)
-         base = 16;
-      std::string result;
+//    std::string do_get_trivial_string(std::ios_base::fmtflags f, const mpl::false_&) const
+//    {
+//       typedef typename mpl::if_c<sizeof(typename base_type::local_limb_type) == 1, unsigned, typename base_type::local_limb_type>::type io_type;
+//       if (this->sign() && (((f & std::ios_base::hex) == std::ios_base::hex) || ((f & std::ios_base::oct) == std::ios_base::oct)))
+//          BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
+//       std::stringstream ss;
+//       ss.flags(f & ~std::ios_base::showpos);
+//       ss << static_cast<io_type>(*this->limbs());
+//       std::string result;
+//       if (this->sign())
+//          result += '-';
+//       else if (f & std::ios_base::showpos)
+//          result += '+';
+//       result += ss.str();
+//       return result;
+//    }
+//    std::string do_get_trivial_string(std::ios_base::fmtflags f, const mpl::true_&) const
+//    {
+//       // Even though we have only one limb, we can't do IO on it :-(
+//       int base = 10;
+//       if ((f & std::ios_base::oct) == std::ios_base::oct)
+//          base = 8;
+//       else if ((f & std::ios_base::hex) == std::ios_base::hex)
+//          base = 16;
+//       std::string result;
 
-      unsigned Bits = sizeof(typename base_type::local_limb_type) * CHAR_BIT;
+//       unsigned Bits = sizeof(typename base_type::local_limb_type) * CHAR_BIT;
 
-      if (base == 8 || base == 16)
-      {
-         if (this->sign())
-            BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
-         limb_type                           shift = base == 8 ? 3 : 4;
-         limb_type                           mask  = static_cast<limb_type>((1u << shift) - 1);
-         typename base_type::local_limb_type v     = *this->limbs();
-         result.assign(Bits / shift + (Bits % shift ? 1 : 0), '0');
-         std::string::difference_type pos      = result.size() - 1;
-         char                         letter_a = f & std::ios_base::uppercase ? 'A' : 'a';
-         for (unsigned i = 0; i < Bits / shift; ++i)
-         {
-            char c = '0' + static_cast<char>(v & mask);
-            if (c > '9')
-               c += letter_a - '9' - 1;
-            result[pos--] = c;
-            v >>= shift;
-         }
-         if (Bits % shift)
-         {
-            mask   = static_cast<limb_type>((1u << (Bits % shift)) - 1);
-            char c = '0' + static_cast<char>(v & mask);
-            if (c > '9')
-               c += letter_a - '9';
-            result[pos] = c;
-         }
-         //
-         // Get rid of leading zeros:
-         //
-         std::string::size_type n = result.find_first_not_of('0');
-         if (!result.empty() && (n == std::string::npos))
-            n = result.size() - 1;
-         result.erase(0, n);
-         if (f & std::ios_base::showbase)
-         {
-            const char* pp = base == 8 ? "0" : (f & std::ios_base::uppercase) ? "0X" : "0x";
-            result.insert(static_cast<std::string::size_type>(0), pp);
-         }
-      }
-      else
-      {
-         result.assign(Bits / 3 + 1, '0');
-         std::string::difference_type        pos = result.size() - 1;
-         typename base_type::local_limb_type v(*this->limbs());
-         bool                                neg = false;
-         if (this->sign())
-         {
-            neg = true;
-         }
-         while (v)
-         {
-            result[pos] = (v % 10) + '0';
-            --pos;
-            v /= 10;
-         }
-         std::string::size_type n = result.find_first_not_of('0');
-         result.erase(0, n);
-         if (result.empty())
-            result = "0";
-         if (neg)
-            result.insert(static_cast<std::string::size_type>(0), 1, '-');
-         else if (f & std::ios_base::showpos)
-            result.insert(static_cast<std::string::size_type>(0), 1, '+');
-      }
-      return result;
-   }
-   std::string do_get_string(std::ios_base::fmtflags f, const mpl::true_&) const
-   {
-#ifdef BOOST_MP_NO_DOUBLE_LIMB_TYPE_IO
-      return do_get_trivial_string(f, mpl::bool_<is_same<typename base_type::local_limb_type, double_limb_type>::value>());
-#else
-      return do_get_trivial_string(f, mpl::bool_<false>());
-#endif
-   }
-   std::string do_get_string(std::ios_base::fmtflags f, const mpl::false_&) const
-   {
-      using default_ops::eval_get_sign;
-      int base = 10;
-      if ((f & std::ios_base::oct) == std::ios_base::oct)
-         base = 8;
-      else if ((f & std::ios_base::hex) == std::ios_base::hex)
-         base = 16;
-      std::string result;
+//       if (base == 8 || base == 16)
+//       {
+//          if (this->sign())
+//             BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
+//          limb_type                           shift = base == 8 ? 3 : 4;
+//          limb_type                           mask  = static_cast<limb_type>((1u << shift) - 1);
+//          typename base_type::local_limb_type v     = *this->limbs();
+//          result.assign(Bits / shift + (Bits % shift ? 1 : 0), '0');
+//          std::string::difference_type pos      = result.size() - 1;
+//          char                         letter_a = f & std::ios_base::uppercase ? 'A' : 'a';
+//          for (unsigned i = 0; i < Bits / shift; ++i)
+//          {
+//             char c = '0' + static_cast<char>(v & mask);
+//             if (c > '9')
+//                c += letter_a - '9' - 1;
+//             result[pos--] = c;
+//             v >>= shift;
+//          }
+//          if (Bits % shift)
+//          {
+//             mask   = static_cast<limb_type>((1u << (Bits % shift)) - 1);
+//             char c = '0' + static_cast<char>(v & mask);
+//             if (c > '9')
+//                c += letter_a - '9';
+//             result[pos] = c;
+//          }
+//          //
+//          // Get rid of leading zeros:
+//          //
+//          std::string::size_type n = result.find_first_not_of('0');
+//          if (!result.empty() && (n == std::string::npos))
+//             n = result.size() - 1;
+//          result.erase(0, n);
+//          if (f & std::ios_base::showbase)
+//          {
+//             const char* pp = base == 8 ? "0" : (f & std::ios_base::uppercase) ? "0X" : "0x";
+//             result.insert(static_cast<std::string::size_type>(0), pp);
+//          }
+//       }
+//       else
+//       {
+//          result.assign(Bits / 3 + 1, '0');
+//          std::string::difference_type        pos = result.size() - 1;
+//          typename base_type::local_limb_type v(*this->limbs());
+//          bool                                neg = false;
+//          if (this->sign())
+//          {
+//             neg = true;
+//          }
+//          while (v)
+//          {
+//             result[pos] = (v % 10) + '0';
+//             --pos;
+//             v /= 10;
+//          }
+//          std::string::size_type n = result.find_first_not_of('0');
+//          result.erase(0, n);
+//          if (result.empty())
+//             result = "0";
+//          if (neg)
+//             result.insert(static_cast<std::string::size_type>(0), 1, '-');
+//          else if (f & std::ios_base::showpos)
+//             result.insert(static_cast<std::string::size_type>(0), 1, '+');
+//       }
+//       return result;
+//    }
+//    std::string do_get_string(std::ios_base::fmtflags f, const mpl::true_&) const
+//    {
+// #ifdef BOOST_MP_NO_DOUBLE_LIMB_TYPE_IO
+//       return do_get_trivial_string(f, mpl::bool_<is_same<typename base_type::local_limb_type, double_limb_type>::value>());
+// #else
+//       return do_get_trivial_string(f, mpl::bool_<false>());
+// #endif
+//    }
+//    std::string do_get_string(std::ios_base::fmtflags f, const mpl::false_&) const
+//    {
+//       using default_ops::eval_get_sign;
+//       int base = 10;
+//       if ((f & std::ios_base::oct) == std::ios_base::oct)
+//          base = 8;
+//       else if ((f & std::ios_base::hex) == std::ios_base::hex)
+//          base = 16;
+//       std::string result;
 
-      unsigned Bits = this->size() * base_type::limb_bits;
+//       unsigned Bits = this->size() * base_type::limb_bits;
 
-      if (base == 8 || base == 16)
-      {
-         if (this->sign())
-            BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
-         limb_type       shift = base == 8 ? 3 : 4;
-         limb_type       mask  = static_cast<limb_type>((1u << shift) - 1);
-         cpp_int_backend t(*this);
-         result.assign(Bits / shift + ((Bits % shift) ? 1 : 0), '0');
-         std::string::difference_type pos      = result.size() - 1;
-         char                         letter_a = f & std::ios_base::uppercase ? 'A' : 'a';
-         for (unsigned i = 0; i < Bits / shift; ++i)
-         {
-            char c = '0' + static_cast<char>(t.limbs()[0] & mask);
-            if (c > '9')
-               c += letter_a - '9' - 1;
-            result[pos--] = c;
-            eval_right_shift(t, shift);
-         }
-         if (Bits % shift)
-         {
-            mask   = static_cast<limb_type>((1u << (Bits % shift)) - 1);
-            char c = '0' + static_cast<char>(t.limbs()[0] & mask);
-            if (c > '9')
-               c += letter_a - '9';
-            result[pos] = c;
-         }
-         //
-         // Get rid of leading zeros:
-         //
-         std::string::size_type n = result.find_first_not_of('0');
-         if (!result.empty() && (n == std::string::npos))
-            n = result.size() - 1;
-         result.erase(0, n);
-         if (f & std::ios_base::showbase)
-         {
-            const char* pp = base == 8 ? "0" : (f & std::ios_base::uppercase) ? "0X" : "0x";
-            result.insert(static_cast<std::string::size_type>(0), pp);
-         }
-      }
-      else
-      {
-         result.assign(Bits / 3 + 1, '0');
-         std::string::difference_type pos = result.size() - 1;
-         cpp_int_backend              t(*this);
-         cpp_int_backend              r;
-         bool                         neg = false;
-         if (t.sign())
-         {
-            t.negate();
-            neg = true;
-         }
-         if (this->size() == 1)
-         {
-            result = boost::lexical_cast<std::string>(t.limbs()[0]);
-         }
-         else
-         {
-            cpp_int_backend block10;
-            block10 = max_block_10;
-            while (eval_get_sign(t) != 0)
-            {
-               cpp_int_backend t2;
-               divide_unsigned_helper(&t2, t, block10, r);
-               t           = t2;
-               limb_type v = r.limbs()[0];
-               for (unsigned i = 0; i < digits_per_block_10; ++i)
-               {
-                  char c = '0' + v % 10;
-                  v /= 10;
-                  result[pos] = c;
-                  if (pos-- == 0)
-                     break;
-               }
-            }
-         }
-         std::string::size_type n = result.find_first_not_of('0');
-         result.erase(0, n);
-         if (result.empty())
-            result = "0";
-         if (neg)
-            result.insert(static_cast<std::string::size_type>(0), 1, '-');
-         else if (f & std::ios_base::showpos)
-            result.insert(static_cast<std::string::size_type>(0), 1, '+');
-      }
-      return result;
-   }
+//       if (base == 8 || base == 16)
+//       {
+//          if (this->sign())
+//             BOOST_THROW_EXCEPTION(std::runtime_error("Base 8 or 16 printing of negative numbers is not supported."));
+//          limb_type       shift = base == 8 ? 3 : 4;
+//          limb_type       mask  = static_cast<limb_type>((1u << shift) - 1);
+//          cpp_int_backend t(*this);
+//          result.assign(Bits / shift + ((Bits % shift) ? 1 : 0), '0');
+//          std::string::difference_type pos      = result.size() - 1;
+//          char                         letter_a = f & std::ios_base::uppercase ? 'A' : 'a';
+//          for (unsigned i = 0; i < Bits / shift; ++i)
+//          {
+//             char c = '0' + static_cast<char>(t.limbs()[0] & mask);
+//             if (c > '9')
+//                c += letter_a - '9' - 1;
+//             result[pos--] = c;
+//             eval_right_shift(t, shift);
+//          }
+//          if (Bits % shift)
+//          {
+//             mask   = static_cast<limb_type>((1u << (Bits % shift)) - 1);
+//             char c = '0' + static_cast<char>(t.limbs()[0] & mask);
+//             if (c > '9')
+//                c += letter_a - '9';
+//             result[pos] = c;
+//          }
+//          //
+//          // Get rid of leading zeros:
+//          //
+//          std::string::size_type n = result.find_first_not_of('0');
+//          if (!result.empty() && (n == std::string::npos))
+//             n = result.size() - 1;
+//          result.erase(0, n);
+//          if (f & std::ios_base::showbase)
+//          {
+//             const char* pp = base == 8 ? "0" : (f & std::ios_base::uppercase) ? "0X" : "0x";
+//             result.insert(static_cast<std::string::size_type>(0), pp);
+//          }
+//       }
+//       else
+//       {
+//          result.assign(Bits / 3 + 1, '0');
+//          std::string::difference_type pos = result.size() - 1;
+//          cpp_int_backend              t(*this);
+//          cpp_int_backend              r;
+//          bool                         neg = false;
+//          if (t.sign())
+//          {
+//             t.negate();
+//             neg = true;
+//          }
+//          if (this->size() == 1)
+//          {
+//             result = boost::lexical_cast<std::string>(t.limbs()[0]);
+//          }
+//          else
+//          {
+//             cpp_int_backend block10;
+//             block10 = max_block_10;
+//             while (eval_get_sign(t) != 0)
+//             {
+//                cpp_int_backend t2;
+//                divide_unsigned_helper(&t2, t, block10, r);
+//                t           = t2;
+//                limb_type v = r.limbs()[0];
+//                for (unsigned i = 0; i < digits_per_block_10; ++i)
+//                {
+//                   char c = '0' + v % 10;
+//                   v /= 10;
+//                   result[pos] = c;
+//                   if (pos-- == 0)
+//                      break;
+//                }
+//             }
+//          }
+//          std::string::size_type n = result.find_first_not_of('0');
+//          result.erase(0, n);
+//          if (result.empty())
+//             result = "0";
+//          if (neg)
+//             result.insert(static_cast<std::string::size_type>(0), 1, '-');
+//          else if (f & std::ios_base::showpos)
+//             result.insert(static_cast<std::string::size_type>(0), 1, '+');
+//       }
+//       return result;
+//    }
 
  public:
    std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const

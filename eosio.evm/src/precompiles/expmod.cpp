@@ -7,12 +7,7 @@
 // Licensed under the Apache License, Version 2.0.
 // https://github.com/ewasm/ewasm-precompiles/blob/master/modexp/src/lib.rs
 
-#define BOOST_NO_STRINGSTREAM
-#define BOOST_EXCEPTION_DISABLE 1
-
 #include <eosio.evm/eosio.evm.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
-
 namespace eosio_evm
 {
   uint256_t Processor::mult_complexity(const uint256_t& len) {
@@ -50,10 +45,7 @@ namespace eosio_evm
     return result;
   }
 
-  using bmi = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
-  inline void bmi_to_bytes(bmi bigi, std::vector<uint8_t>& bytes) { auto byte_length = bytes.size(); while (byte_length != 0) { bytes[byte_length - 1] = static_cast<uint8_t>(0xff & bigi); bigi >>= 8; byte_length--; } }
-  inline bmi bytes_to_bmi(const std::vector<uint8_t>& bytes) { bmi num = 0; for (auto byte: bytes) { num = num << 8 | byte; } return num; }
-  bmi read_input_large(uint256_t off, uint256_t len, Context* ctx) {
+  BN Processor::read_input_large(uint256_t off, uint256_t len, Context* ctx) {
     // Read past end
     if (off >= ctx->input.size()) {
       return {};
@@ -73,7 +65,7 @@ namespace eosio_evm
 
     // Create result
     auto padding = (length - (end - offset)) * 8;
-    bmi num = bmi(bytes_to_bmi(data)) << padding;
+    BN num = BN(bytes_to_bmi(data)) << padding;
 
     return num;
   }
@@ -85,7 +77,7 @@ namespace eosio_evm
     auto adjust_el = oversize ? (8 * el) - 256 : 0;
 
     // Read input
-    bmi e = read_input_large(bl, input_el, ctx);
+    BN e = read_input_large(bl, input_el, ctx);
 
     // MSB
     auto i = e ? -1 : 0;

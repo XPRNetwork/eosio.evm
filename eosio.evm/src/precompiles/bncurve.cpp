@@ -22,7 +22,7 @@ using G1   = libff::alt_bn128_G1;
 using G2   = libff::alt_bn128_G2;
 using GT   = libff::alt_bn128_GT;
 using PP   = libff::alt_bn128_pp;
-using BN   = libff::bigint<libff::alt_bn128_q_limbs>;
+using LBN  = libff::bigint<libff::alt_bn128_q_limbs>;
 
 namespace eosio_evm
 {
@@ -54,8 +54,8 @@ namespace eosio_evm
 		}
 
 		// First point
-		Fq x1 = BN(x1_bytes);
-		Fq y1 = BN(y1_bytes);
+		Fq x1 = LBN(x1_bytes);
+		Fq y1 = LBN(y1_bytes);
 		bool is_zero1 = x1 == Fq::zero() && y1 == Fq::zero();
 		G1 point1 = is_zero1 ? G1::zero() : G1(x1, y1, Fq::one());
 		if (!point1.is_well_formed()) {
@@ -64,8 +64,8 @@ namespace eosio_evm
 		}
 
 		// Second point
-		Fq x2 = BN(x2_bytes);
-		Fq y2 = BN(y2_bytes);
+		Fq x2 = LBN(x2_bytes);
+		Fq y2 = LBN(y2_bytes);
 		bool is_zero2 = x2 == Fq::zero() && y2 == Fq::zero();
 		G1 point2 = is_zero2 ? G1::zero() : G1(x2, y2, Fq::one());
 		if (!point2.is_well_formed()) {
@@ -125,8 +125,8 @@ namespace eosio_evm
 		}
 
 		// Point
-		Fq x1 = BN(x1_bytes);
-		Fq y1 = BN(y1_bytes);
+		Fq x1 = LBN(x1_bytes);
+		Fq y1 = LBN(y1_bytes);
 		bool is_zero1 = x1 == Fq::zero() && y1 == Fq::zero();
 		G1 point1 = is_zero1 ? G1::zero() : G1(x1, y1, Fq::one());
 		if (!point1.is_well_formed()) {
@@ -135,7 +135,7 @@ namespace eosio_evm
 		}
 
 		// Mul
-		auto mul = BN(mul_bytes);
+		auto mul = LBN(mul_bytes);
 
 		// Empty result
 		std::vector<uint8_t> result(64);
@@ -217,12 +217,12 @@ namespace eosio_evm
 			std::copy(input.begin() + (offset + 160), input.begin() + (offset + 192), std::begin(y3_bytes));
 
 			// Initialize bigints
-			auto x1_bigint = BN(x1_bytes);
-			auto y1_bigint = BN(y1_bytes);
-			auto x2_bigint = BN(x2_bytes);
-			auto y2_bigint = BN(y2_bytes);
-			auto x3_bigint = BN(x3_bytes);
-			auto y3_bigint = BN(y3_bytes);
+			auto x1_bigint = LBN(x1_bytes);
+			auto y1_bigint = LBN(y1_bytes);
+			auto x2_bigint = LBN(x2_bytes);
+			auto y2_bigint = LBN(y2_bytes);
+			auto x3_bigint = LBN(x3_bytes);
+			auto y3_bigint = LBN(y3_bytes);
 
 			// Check modmax
 			auto modmax = Fq::mod;
@@ -282,4 +282,4 @@ namespace eosio_evm
   }
 } // namespace eosio_evm
 
-#endif
+#endif /** BN_CURVE == true **/

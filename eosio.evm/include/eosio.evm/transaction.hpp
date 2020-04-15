@@ -45,7 +45,10 @@ namespace eosio_evm
     std::string topics_as_json_string() const {
       std::string output = "[";
       for (auto i = 0; i < topics.size(); i++) {
-        output += "\"" + intx::hex(topics[i]) + "\"";
+        std::string topic_string = intx::hex(topics[i]);
+        std::string topic_string_final = std::string(64 - topic_string.size(), '0').append(topic_string);
+
+        output += "\"" + topic_string_final + "\"";
         if (i < topics.size() - 1) {
           output += ",";
         }
@@ -67,7 +70,10 @@ namespace eosio_evm
       std::string output = "[";
 
       for (auto i = 0; i < logs.size(); i++) {
-        output += R"({"address": ")" + intx::hex(logs[i].address)     + "\"," +
+        std::string address_string = intx::hex(logs[i].address);
+        std::string address_string_final = std::string(40 - address_string.size(), '0').append(address_string);
+
+        output += R"({"address": ")" + address_string_final     + "\"," +
                   R"("data": ")"    + bin2hex(logs[i].data)           + "\"," +
                   R"("topics": )"   + logs[i].topics_as_json_string() + "}";
 
@@ -122,11 +128,6 @@ namespace eosio_evm
     }
     #endif /** Testing **/
   };
-
-  // enum class TransactionType {
-  //   TRANSACTION,
-  //   CALL
-  // }
 
   struct EthereumTransaction {
     uint256_t nonce;           // A scalar value equal to the number of transactions sent by the sender;
@@ -327,7 +328,7 @@ namespace eosio_evm
 
     void print_receipt(const ExecResult& result) const
     {
-      auto status = result.er == ExitReason::returned ? "success" : "fail";
+      auto status = result.er == ExitReason::returned ? "1" : "0";
 
       eosio::print(
         "{",

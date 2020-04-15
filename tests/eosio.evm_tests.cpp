@@ -6,10 +6,15 @@
 #include <eosio/chain/exceptions.hpp>
 
 #include "Runtime/Runtime.h"
+#include "external/div.cpp"
+#include "external/rlp.hpp"
 
 #include <fc/variant_object.hpp>
 #include <iostream>
 #include <filesystem>
+#include <iostream>
+#include <array>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -23,6 +28,13 @@ using namespace std;
 using mvo = fc::mutable_variant_object;
 
 constexpr auto FORK = "Istanbul";
+
+const bool base_enabled              = false;
+const bool erc20_enabled             = false;
+const bool erc721_enabled            = false;
+const bool transaction_tests_enabled = false;
+const bool state_tests_enabled       = true;
+const bool debugging_enabled         = false;
 
 class eosio_evm_tester : public tester {
 public:
@@ -181,12 +193,38 @@ public:
    abi_serializer abi_ser;
 };
 
-const bool base_enabled              = false;
-const bool erc20_enabled             = false;
-const bool erc721_enabled            = false;
-const bool transaction_tests_enabled = false;
-const bool state_tests_enabled       = true;
-const bool debugging_enabled         = false;
+std::vector<uint8_t> to_bin(std::string binstr)
+{
+   std::vector<uint8_t> out;
+   for (auto i = 0; i < binstr.size(); i++) {
+      out.push_back((uint8_t) binstr[i]);
+   }
+   return out;
+}
+std::vector<uint8_t> hex2bin(std::string hexstr)
+{
+    size_t len = hexstr.size();
+    if(len % 2 != 0) return {}; // ERROR
+
+    size_t final_len = len / 2;
+    std::vector<uint8_t> chrs (final_len);
+    for (size_t i=0, j=0; j<final_len; i+=2, j++) {
+      chrs[j] = (std::toupper(hexstr[i]) % 32 + 9) % 25 * 16 + (std::toupper(hexstr[i+1]) % 32 + 9) % 25;
+    }
+    return chrs;
+}
+std::string bin2hex(const std::vector<uint8_t>& bin)
+{
+   std::string res;
+   const char hex[] = "0123456789abcdef";
+   for(auto byte : bin) {
+   res += hex[byte >> 4];
+   res += hex[byte & 0xf];
+   }
+
+   return res;
+}
+
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled>())
 
@@ -236,7 +274,6 @@ BOOST_AUTO_TEST_SUITE(eosio_evm_base, * boost::unit_test::enable_if<base_enabled
       );
    } FC_LOG_AND_RETHROW()
 BOOST_AUTO_TEST_SUITE_END()
-
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_erc20, * boost::unit_test::enable_if<erc20_enabled>())
    BOOST_FIXTURE_TEST_CASE( erc_20, eosio_evm_tester ) try {
@@ -406,7 +443,7 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
    std::cout << "***********************************************************************************************************" << std::endl;
    std::cout << "***********************************************************************************************************" << std::endl << std::endl;
 
-   auto testDirectory = "jsontests/BlockchainTests/GeneralStateTestsEOS";
+   auto testDirectory = "jsontests/BlockchainTests/GeneralStateTests";
 
    // For each folder in GeneralStateTestsEOS
    auto totalTests = 0;
@@ -438,10 +475,11 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          // if (testCategory != "stPreCompiledContracts2") {
          //    continue;
          // }
-         // Execute only this file
-         if (testName != "Call50000_identity2" ) {
-            continue;
-         }
+
+         // // Execute only this file
+         // if (testName != "sloadGasCost" ) {
+         //    continue;
+         // }
 
          // SKIP file
          if (
@@ -455,6 +493,7 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             testName == "CALLBlake2f_MaxRounds" || // Takes an hour to complete
 
             // Out of memory due to 1000s of calls (No way in EOSIO to reclaim memory once allocated)
+            testName == "randomStatetest36" ||
             testName == "randomStatetest177" ||
             testName == "QuadraticComplexitySolidity_CallDataCopy" ||
             testName == "static_LoopCallsThenRevert" ||
@@ -472,12 +511,26 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
          for (const auto& singleTest: json.get_object()) {
             std::cout << singleTest.key() << std::endl;
 
-            // SKIP specific tests
+            // // Execute only this test
+            // if (singleTest.key() != "randomStatetest36_d0g0v0_Istanbul") {
+            //    continue;
+            // }
+
+            // Skip these specific tests
             if (
                // Only hash provided in test, cannot verify (no state merkle tree for EOSIO)
                singleTest.key() == "recursiveCreateReturnValue_d0g0v0_Istanbul" ||
                singleTest.key() == "Create2Recursive_d0g0v0_Istanbul" ||
                singleTest.key() == "Create2Recursive_d0g1v0_Istanbul" ||
+
+               // Not Istanbul (old eth forks)
+               singleTest.key() == "sloadGasCost_d0g0v0_Byzantium" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_Constantinople" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_ConstantinopleFix" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_EIP150" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_EIP158" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_Frontier" ||
+               singleTest.key() == "sloadGasCost_d0g0v0_Homestead" ||
 
                // Long running Quadratic Complexity tests, all go out of memory in EOSIO 32MB limit
                singleTest.key() == "Call1024PreCalls_d0g0v0_Istanbul" ||
@@ -518,11 +571,6 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
                continue;
             }
 
-            // (use for single test testing)
-            // if (singleTest.key() != "static_Call50000bytesContract50_1_d0g0v0_Istanbul") {
-            //    continue;
-            // }
-
             auto testObject = singleTest.value().get_object();
 
             // For every pre object
@@ -561,17 +609,42 @@ BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
             // For Every block
             for (const auto& singleBlock: testObject["blocks"].get_array()) {
                auto blockObject = singleBlock.get_object();
-               auto blockEnv = blockObject["env"].get_object();
-               miners.emplace_back(blockEnv["currentCoinbase"].get_string());
+               auto blockEnv = blockObject["blockHeader"].get_object();
+               miners.emplace_back(blockEnv["coinbase"].get_string());
 
-               // For every transaction
-               for (const auto& singleTransaction: blockObject["transactionRlps"].get_array()) {
-                  // std::cout << "<Transaction> " << singleTransaction << std::endl;
+               // Encode RLP for each TX
+               auto transactions = blockObject["transactions"].get_array();
 
-                  // Execute transaction
+               for (auto i = 0; i < transactions.size(); i++) {
+                  // Encode TX
+                  auto t = transactions[i];
+                  auto to_i = t["to"].get_string();
+                  auto data_i = t["data"].get_string();
+                  to_i.erase(0, 2);
+                  data_i.erase(0, 2);
+                  auto encoded_rlp = rlp::encode(
+                     intx::from_string<intx::uint256>(t["nonce"].get_string()),
+                     intx::from_string<intx::uint256>(t["gasPrice"].get_string()),
+                     intx::from_string<intx::uint256>(t["gasLimit"].get_string()),
+                     hex2bin(to_i),
+                     intx::from_string<intx::uint256>(t["value"].get_string()),
+                     hex2bin(data_i),
+                     static_cast<uint8_t>(intx::from_string<intx::uint256>(t["v"].get_string())),
+                     intx::from_string<intx::uint256>(t["r"].get_string()),
+                     intx::from_string<intx::uint256>(t["s"].get_string())
+                  );
+
+                  // Execute TX
                   base_tester::push_action( N(eosio.evm), N(teststatetx), N(eosio.evm), mvo()
-                     ( "tx", singleTransaction.get_string())
-                     ( "env", blockEnv)
+                     ( "tx", bin2hex(to_bin(encoded_rlp)))
+                     ( "env", mvo()
+                        ("currentCoinbase", blockEnv["coinbase"].get_string())
+                        ("currentDifficulty", blockEnv["difficulty"].get_string())
+                        ("currentGasLimit", blockEnv["gasLimit"].get_string())
+                        ("currentNumber", blockEnv["number"].get_string())
+                        ("currentTimestamp", blockEnv["timestamp"].get_string())
+                        ("previousHash", blockEnv["parentHash"].get_string())
+                     )
                   );
                   produce_blocks(1);
                }

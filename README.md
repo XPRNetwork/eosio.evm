@@ -19,12 +19,12 @@
 - Web3-similar call support (query view functions with no state modifications)
 - All precompiles supported
 
-NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file eosio.evm/include/eosio.evm/constants.hpp for ethereum/tests testing to pass successfuly. Tests that exceed the 32MB RAM limit on EOSIO were disabled as EOSIO does not have ability to reclaim memory once allocated yet..
+NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp) for ethereum/tests testing to pass successfuly. Tests that exceed the 32MB RAM limit on EOSIO were disabled as EOSIO does not have ability to reclaim memory once allocated yet..
 
 NOTE: If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false and it will reduce WASM size by 210KB (~2MB onchain).
 
 ### Precompile support
-eosio.evm supports 9 precompiles
+eosio.evm supports all 9 precompiles
 1. ec_recover
 2. sha256
 3. ripemd160
@@ -36,24 +36,45 @@ eosio.evm supports 9 precompiles
 9. blake2b
 
 ### Usage instructions
-Recommended: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+Change the token symbol in [eosio.evm/include/eosio.evm/constants.hpp](eosio.evm/include/eosio.evm/constants.hpp)
+ and build again to reflect your chain.
 
-Basic usage: [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
+Simply deploy the WASM and ABI at [eosio.evm/eosio.evm/eosio.evm.wasm](eosio.evm/eosio.evm/eosio.evm.wasm) and [eosio.evm/eosio.evm/eosio.evm.abi](eosio.evm/eosio.evm/eosio.evm.abi)
 
-### Build/Manual Deployment instructions
-Requires latest eosio.cdt with latest eosio 2 with EOSVM (need to build eosio from source for tests`!)
+Deployment steps are laid out step-by-step in both the JS and cleos guides:
 
-Change the token symbol in eosio.evm/include/eosio.evm/constants.hpp to reflect your chain
+JS Guide: [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
 
-Please ensure BOOST_ROOT is set.
+Cleos Guide: [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
 
+### Ubuntu Build Instructions
+#### 1. Install Pre-Requisites
 ```
+sudo apt install make
+sudo snap install cmake --classic
+sudo apt install build-essential
+```
+
+#### 2. Install eosio and eosio-cdt
+```
+wget https://github.com/eosio/eos/releases/download/v2.0.4/eosio_2.0.4-1-ubuntu-18.04_amd64.deb
+sudo apt install ./eosio_2.0.4-1-ubuntu-18.04_amd64.deb
+
+wget https://github.com/eosio/eosio.cdt/releases/download/v1.7.0/eosio.cdt_1.7.0-1-ubuntu-18.04_amd64.deb
+sudo apt install ./eosio.cdt_1.7.0-1-ubuntu-18.04_amd64.deb
+```
+
+#### 3. Clone eosio.evm and build contract
+```
+git clone https://github.com/jafri/eosio.evm
+cd eosio.evm
 cmake .
 make -j4
 ```
 
-No special instructions needed for manual deployment, simply deploy the WASM and ABI from eosio.evm/eosio.evm/ directory
+If you wish to build tests, use `cmake . -DBUILD_TESTS=true`
 
+If not set automatically, you may need to manually set BOOST_ROOT to the directory of your boost installation.
 
 ### Directory structure
 - eosio.evm: contains all contract code
@@ -62,7 +83,7 @@ No special instructions needed for manual deployment, simply deploy the WASM and
   - external: external libraries
 - eos-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
 - tests: full Ethereum/EOS tests
-  - jsontests: submodule of https://github.com/ethereum/tests
+  - jsontests: copy of https://github.com/ethereum/tests
   - system_wasms: eosio.system and eosio.token ABIs/WASMS
   - eosio.evm_tests.cpp: testing suite
 

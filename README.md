@@ -19,9 +19,9 @@
 - Web3-similar call support (query view functions with no state modifications)
 - All precompiles supported
 
-NOTE: (TESTING, CHARGE_SENDER_FOR_GAS) must be enabled, and (OPTRACE, PRINT_LOGS) must be disabled in the file [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp) for ethereum/tests testing to pass successfuly. Tests that exceed the 32MB RAM limit on EOSIO were disabled as EOSIO does not have ability to reclaim memory once allocated yet..
+**NOTE:** [TESTING, CHARGE_SENDER_FOR_GAS] must be enabled, and [OPTRACE, PRINT_LOGS] must be disabled in the file [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp) for ethereum/tests testing to pass successfuly.
 
-NOTE: If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false and it will reduce WASM size by 210KB (~2MB onchain).
+**NOTE:** If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false to reduce WASM size by 210KB (~2MB onchain).
 
 ### Precompile support
 eosio.evm supports all 9 precompiles

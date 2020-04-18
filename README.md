@@ -61,7 +61,7 @@ Deployment steps are laid out step-by-step in both the JS and cleos guides:
 
 **Basic Guide:** Simply deploy the WASM and ABI at [eosio.evm/eosio.evm/eosio.evm.wasm](eosio.evm/eosio.evm/eosio.evm.wasm) and [eosio.evm/eosio.evm/eosio.evm.abi](eosio.evm/eosio.evm/eosio.evm.abi)
 
-### Ubuntu Build Instructions
+### Ubuntu 18.04 Build Instructions
 #### 1. Install Pre-Requisites
 ```
 sudo apt install make
@@ -77,6 +77,10 @@ sudo apt install ./eosio_2.0.4-1-ubuntu-18.04_amd64.deb
 wget https://github.com/eosio/eosio.cdt/releases/download/v1.7.0/eosio.cdt_1.7.0-1-ubuntu-18.04_amd64.deb
 sudo apt install ./eosio.cdt_1.7.0-1-ubuntu-18.04_amd64.deb
 ```
+
+For other platforms than Ubuntu 18.04, check [eos](https://github.com/EOSIO/eos) and [eosio.cdt](https://github.com/EOSIO/eosio.cdt)
+
+**Note:** You must build eos from source if you wish to manually build the unit tests in eosio.evm
 
 #### 3. Clone eosio.evm and build contract
 ```

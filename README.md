@@ -1,6 +1,6 @@
 [![eosio.evm](./evm.png)](#)
 
-### Benchmarks
+## Benchmarks
 | Action         | CPU Cost      |
 | -------------  |:-------------:|
 | ERC20 Transfer | 504µs [(TX)](https://jungle.bloks.io/transaction/eb2d83e1ed04b98d1c7767acae5df174de56ee51a2bf6d1c06a8a863f9b98ca0)|
@@ -9,7 +9,7 @@
 | EVM New Address| 553µs [(TX)](https://jungle.bloks.io/transaction/876ce02ccdc7fd7338fcf9e9fea6ea9e4575211209fe29c88ec33eb63584be84)     |
 
 
-### Achievements
+## Achievements
 - Full Javascript SDK for deploying, executing and querying contracts
 - 100% Success on Ethereum Transaction Tests
 - 100% Success on Ethereum RLP Tests
@@ -19,7 +19,7 @@
 - Web3-similar call support (query view functions with no state modifications)
 - All precompiles supported
 
-### Precompile support
+## Precompile support
 eosio.evm supports all 9 precompiles
 1. ec_recover
 2. sha256
@@ -31,7 +31,7 @@ eosio.evm supports all 9 precompiles
 8. bn_pairing
 9. blake2b
 
-### Constants
+## Constants
 All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp)
 
 1. **TESTING** - adds functionality for executing tests, and resetting the contract; default true, remove in production
@@ -48,7 +48,7 @@ All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants
 
 **NOTE:** If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false to reduce WASM size by 210KB (~2MB onchain).
 
-### Usage instructions
+## Usage instructions
 Deployment steps are laid out step-by-step in both the JS and cleos guides:
 
 **JS Guide:** [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
@@ -57,7 +57,9 @@ Deployment steps are laid out step-by-step in both the JS and cleos guides:
 
 **Basic Guide:** Simply deploy the WASM and ABI at [eosio.evm/eosio.evm/eosio.evm.wasm](eosio.evm/eosio.evm/eosio.evm.wasm) and [eosio.evm/eosio.evm/eosio.evm.abi](eosio.evm/eosio.evm/eosio.evm.abi)
 
-### Ubuntu 18.04 Build Instructions
+It is important that any node that you deploy the contract to is running EOSVM OC through the `--eos-vm-oc-enable` option
+
+## Ubuntu 18.04 Build Instructions
 #### 1. Install Pre-Requisites
 ```
 sudo apt install make
@@ -90,7 +92,7 @@ If you wish to build tests, use `cmake . -DBUILD_TESTS=true`
 
 If not set automatically, you may need to manually set BOOST_ROOT to the directory of your boost installation.
 
-### Directory structure
+## Directory structure
 - eosio.evm: contains all contract code
   - src: all sourcefiles
   - include/eosio.evm: all headerfiles
@@ -102,7 +104,7 @@ If not set automatically, you may need to manually set BOOST_ROOT to the directo
   - eosio.evm_tests.cpp: testing suite
 
 
-### Contract Public Actions
+## Contract Public Actions
 ```c++
 ACTION raw ( const std::vector<int8_t>& tx,
              const std::optional<eosio::checksum160>& sender);
@@ -145,7 +147,7 @@ ACTION call( const std::vector<int8_t>& tx,
 &nbsp;
 
 
-### Contract Tables
+## Contract Tables
 ```c++
 struct Account {
   uint64_t index;
@@ -175,7 +177,7 @@ struct AccountState {
 - `value` - big-endian encoded value for storage
 
 
-### EVM Notes
+## EVM Notes
 - Account and code tables were merged to match the specification in the Ethereum Yellow Paper
 - Account States are scoped by the index of the account. The index of an account never changes, thus this is guaranteed to be unique.
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
@@ -183,7 +185,7 @@ struct AccountState {
 - No patricia merkle tree is used
 - A value of 1 represents 0.0001 SYS
 
-### Special Mentions
+## Special Mentions
 - Eddy Ashton for his work on [enclave-ready EVM (eEVM)](https://github.com/microsoft/eEVM)
 - Pawel Bylica for his work on pushing the speed limits of EVMs with [evmone](https://github.com/ethereum/evmone)
 - winsvega for his continous work maintaining [Ethereum Tests](https://github.com/ethereum/tests)

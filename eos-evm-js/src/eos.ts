@@ -10,7 +10,7 @@ const BN = require('bn.js')
 
 const transformEthAccount = (account: Account) => {
   account.address = `0x${account.address}`
-  account.balance = new BN(account.balance)
+  account.balance = new BN(account.balance, 16)._strip()
   return account
 }
 
@@ -360,16 +360,13 @@ export class EosApi {
   async getNonce(address: any) {
     if (!address) return '0x0'
 
-    let nonce = ''
-    const account = await this.getEthAccount(address)
-
-    if (account) {
-      nonce = `0x${account.nonce}`
-    } else {
-      nonce = '0x0'
+    try {
+      const account = await this.getEthAccount(address)
+      return `0x${account.nonce.toString(16)}`
+    } catch (e) {
+      console.log(e)
+      return '0x0'
     }
-
-    return nonce
   }
 
   /**
@@ -400,9 +397,9 @@ export class EosApi {
     })
 
     if (rows.length && rows[0].key === key) {
-      return rows[0]
+      return '0x' + rows[0].value
     } else {
-      throw new Error(`No storage for address ${address} with key ${key}`)
+      return '0x0'
     }
   }
 

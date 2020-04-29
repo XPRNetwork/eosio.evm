@@ -32,14 +32,24 @@ describe('Full ERC20 Test', () => {
     it('creates new address based on RLP(eosaccount, arbitrary)', async () => {
       await api.eos.create({ account, data: 'test' })
       const rows = await api.eos.getAllAddresses()
-      expect(rows).toEqual([initialAccount])
+      expect(
+        rows.map((x: any) => {
+          x.balance = x.balance.toString('hex')
+          return x
+        })
+      ).toEqual([{ ...initialAccount, balance: initialAccount.balance.toString('hex') }])
     })
 
     it('transfer EOS to contract to deposit to address', async () => {
       const quantity = '0.0002 EOS'
       await api.eos.deposit({ from: account, quantity })
       const rows = await api.eos.getAllAddresses()
-      expect(rows).toEqual([{ ...initialAccount, balance: new BN(2) }])
+      expect(
+        rows.map((x: any) => {
+          x.balance = x.balance.toString('hex')
+          return x
+        })
+      ).toEqual([{ ...initialAccount, balance: new BN(0.0002 * Math.pow(10, 18)).toString('hex') }])
     })
 
     it('transfer in EVM from new address to other addresses', async () => {
@@ -56,11 +66,16 @@ describe('Full ERC20 Test', () => {
         quantity: '0.0001 EOS'
       })
       const rows = await api.eos.getAllAddresses()
-      expect(rows).toEqual([
+      expect(
+        rows.map((x: any) => {
+          x.balance = x.balance.toString('hex')
+          return x
+        })
+      ).toEqual([
         {
           account,
           address: initialAccount.address,
-          balance: new BN(0),
+          balance: new BN(0).toString('hex'),
           code: [],
           index: 0,
           nonce: 3
@@ -68,7 +83,7 @@ describe('Full ERC20 Test', () => {
         {
           account: '',
           address: sender,
-          balance: new BN(1),
+          balance: new BN(0.0001 * Math.pow(10, 18)).toString('hex'),
           code: [],
           index: 1,
           nonce: 0
@@ -76,7 +91,7 @@ describe('Full ERC20 Test', () => {
         {
           account: '',
           address: allowanceAddress,
-          balance: new BN(1),
+          balance: new BN(0.0001 * Math.pow(10, 18)).toString('hex'),
           code: [],
           index: 2,
           nonce: 0

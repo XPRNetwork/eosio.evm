@@ -31,10 +31,10 @@ constexpr auto FORK = "Istanbul";
 
 const bool base_enabled              = false;
 const bool erc20_enabled             = false;
-const bool erc721_enabled            = false;
-const bool transaction_tests_enabled = false;
-const bool state_tests_enabled       = true;
-const bool debugging_enabled         = false;
+const bool erc721_enabled            = true;
+const bool transaction_tests_enabled = true;
+const bool state_tests_enabled       = false;
+const bool debugging_enabled         = true;
 
 class eosio_evm_tester : public tester {
 public:

@@ -98,6 +98,7 @@ If not set automatically, you may need to manually set BOOST_ROOT to the directo
   - include/eosio.evm: all headerfiles
   - external: external libraries
 - eos-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
+- evm-mock-rpc: Mock Ethereum RPC server to enable interoperability with Metamask, Remix, etc.
 - tests: full Ethereum/EOS tests
   - jsontests: copy of https://github.com/ethereum/tests
   - system_wasms: eosio.system and eosio.token ABIs/WASMS

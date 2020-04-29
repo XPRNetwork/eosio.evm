@@ -3,7 +3,7 @@ Note that all these actions provide already RLP encoded TXs, thus they must be d
 
 #### CONSTANTS (Change as needed)
 ```bash
-export EVM_CONTRACT="evmcontract1"
+export EVM_CONTRACT="evmcontract2"
 export EOSIO_ACCOUNT="evmaccount11"
 export ENDPOINT="https://jungle.eosdac.io"
 export CONTRACT_DIR="/Users/jafri/eosio.evm/eosio.evm"

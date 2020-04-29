@@ -37,15 +37,18 @@ namespace eosio_evm {
     const eosio::name& user,
     const eosio::asset& quantity
   ) {
-    if (quantity.amount == 0) return;
+    // 1 EOS = 1 ETH
+    // 0.0001 EOS = 1 EOS UNIT = 100000000000000 wei
+    auto adjusted_amount = uint256_t{quantity.amount} * uint256_t{100000000000000};
+    if (adjusted_amount == 0) return;
 
     auto accounts_byaccount = _accounts.get_index<eosio::name("byaccount")>();
     auto account = accounts_byaccount.find(user.value);
     eosio::check(account != accounts_byaccount.end(), "There are no ETH accounts associated with " + user.to_string());
-    eosio::check(quantity.amount >= 0, "amount must not be negative");
+    eosio::check(adjusted_amount >= 0, "amount must not be negative");
 
     accounts_byaccount.modify(account, eosio::same_payer, [&](auto& a) {
-      a.balance += quantity.amount;
+      a.balance += adjusted_amount;
     });
   }
 
@@ -53,16 +56,19 @@ namespace eosio_evm {
     const eosio::name& user,
     const eosio::asset& quantity
   ) {
-    if (quantity.amount == 0) return;
+    // 1 EOS = 1 ETH
+    // 0.0001 EOS = 1 EOS UNIT = 100000000000000 wei
+    auto adjusted_amount = uint256_t{quantity.amount} * uint256_t{100000000000000};
+    if (adjusted_amount == 0) return;
 
     auto accounts_byaccount = _accounts.get_index<eosio::name("byaccount")>();
     auto account = accounts_byaccount.find(user.value);
     eosio::check(account != accounts_byaccount.end(), "account does not have a balance (sub_balance)..");
-    eosio::check(quantity.amount >= 0, "amount must not be negative");
-    eosio::check(account->balance >= quantity.amount, "account balance too low.");
+    eosio::check(adjusted_amount >= 0, "amount must not be negative");
+    eosio::check(account->balance >= adjusted_amount, "account balance too low.");
 
     accounts_byaccount.modify(account, eosio::same_payer, [&](auto& a) {
-      a.balance -= quantity.amount;
+      a.balance -= adjusted_amount;
     });
   }
 }

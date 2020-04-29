@@ -5,7 +5,7 @@ import { EosApi } from './eos'
 import {
   ETH_CHAIN,
   FORK,
-  EOSIO_TOKEN_PRECISION,
+  EOS_TO_WEI_CONVERSION,
   DEFAULT_GAS_PRICE,
   DEFAULT_GAS_LIMIT,
   DEFAULT_CHAIN_ID,
@@ -225,7 +225,7 @@ export class EosEvmApi {
       {
         sender,
         to,
-        value: +amount * Math.pow(10, EOSIO_TOKEN_PRECISION),
+        value: +amount * Math.pow(10, EOS_TO_WEI_CONVERSION),
         rawSign
       },
       overrides

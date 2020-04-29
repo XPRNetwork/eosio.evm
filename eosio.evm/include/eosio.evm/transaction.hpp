@@ -336,20 +336,22 @@ namespace eosio_evm
           "\"from\": \"", *sender, "\",",
           "\"to\": \"", bin2hex(to), "\",",
           "\"value\": ", intx::to_string(value), ",",
-          "\"nonce\": ", intx::hex(nonce), ",",
+          "\"nonce\": \"", intx::hex(nonce), "\",",
           "\"v\": \"", v, "\",",
           "\"r\": \"", intx::hex(r), "\",",
           "\"s\": \"", intx::hex(s), "\",",
           "\"createdAddress\": \"", created_address ? intx::hex(*created_address) : "", "\",",
-          "\"gasUsed\": ", intx::to_string(gas_used), ",",
-          "\"gasLimit\": ", intx::to_string(gas_limit), ",",
-          "\"gasPrice\": ", static_cast<int128_t>(gas_price), ",",
+          "\"cumulativeGasUsed\": \"", intx::hex(gas_used), "\",",
+          "\"gasUsed\": \"", intx::hex(gas_used), "\",",
+          "\"gasLimit\": \"", intx::hex(gas_limit), "\",",
+          "\"gasPrice\": \"", intx::hex(gas_price), "\",",
           #if(PRINT_LOGS == true)
           "\"logs\": ", logs.as_json_string(), ",",
           #endif
           "\"output\": \"", bin2hex(result.output), "\","
           "\"errors\": ", errors_as_json_string(), ","
-          "\"transactionHash\": \"", hash, "\""
+          "\"transactionHash\": \"", hash, "\"", ","
+          "\"transactionIndex\": \"0\""
         "}"
       );
     }
@@ -361,7 +363,7 @@ namespace eosio_evm
         // "data ",      bin2hex(data),        "\n",
         "gasLimit ",  intx::hex(gas_limit), "\n",
         "gasPrice ",  intx::hex(gas_price), "\n",
-        "data ",     bin2hex(data),     "\n",
+        "data ",      bin2hex(data),        "\n",
         "nonce ",     intx::hex(nonce),     "\n",
         "to ",        bin2hex(to),          "\n",
         "value ",     intx::hex(value),     "\n",

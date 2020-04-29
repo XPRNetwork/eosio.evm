@@ -1,6 +1,6 @@
 const { EosEvmApi } = require('eos-evm-js')
 
-const evmContractAccount = 'evmcontract1'
+const evmContractAccount = 'evmcontract2'
 const evmNormalAccount = 'evmaccount11'
 const SYSTEM_SYMBOL = 'EOS'
 
@@ -22,7 +22,7 @@ const api = new EosEvmApi({
 
   // Enter your own private keys (examples provided)
   eosPrivateKeys: [
-    // evmcontract1 (EOS7DJzWuEr1Zu36ZX8GXwGsvNNqdGqx8QRs7KPkqCMTxG6MBT1Eu)
+    // evmcontract2 (EOS7DJzWuEr1Zu36ZX8GXwGsvNNqdGqx8QRs7KPkqCMTxG6MBT1Eu)
     '5JACk8gJ98x3AkypbicNQviXzkqAM2wbbE3FtA79icT2Ks4bWws',
     // evmaccount11 (EOS8Z9y2b1GfAkFUQxBTsiu9DJSLebVoU8cpwLAfXcgWDRWg9aM2Q)
     '5JhwbcHTVk16Pv7fCgitNSHgwGwjAPEgEJbiaCcXaza1PKrbCns'

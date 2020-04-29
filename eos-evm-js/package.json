@@ -1,13 +1,14 @@
 {
   "name": "eos-evm-js",
-  "version": "0.1.0",
+  "version": "0.2.31",
   "description": "EOSIO EVM JS SDK",
   "keywords": [],
   "main": "dist/eos-evm-js.umd.js",
   "module": "dist/eos-evm-js.es5.js",
   "typings": "dist/types/eos-evm-js.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "postinstall.js"
   ],
   "author": "jafri <syed.jafri2@ucalgary.ca>",
   "repository": {
@@ -35,7 +36,8 @@
     "semantic-release": "semantic-release",
     "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
     "precommit": "lint-staged",
-    "travis-deploy-once": "travis-deploy-once"
+    "travis-deploy-once": "travis-deploy-once",
+    "postinstall": "node postinstall.js"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [
@@ -93,7 +95,7 @@
     "@types/node": "^10.11.0",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "0.0.35",
-    "colors": "^1.3.2",
+    "colors": "^1.4.0",
     "commitizen": "^3.0.0",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",
@@ -129,6 +131,7 @@
   },
   "dependencies": {
     "@jafri/eosjs2": "^21.0.0-rc.14",
+    "bn.js": "^5.1.1",
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-common": "^1.5.0",
     "ethereumjs-tx": "^2.1.2",

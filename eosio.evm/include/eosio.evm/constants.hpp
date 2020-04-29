@@ -8,7 +8,7 @@
 #define TESTING true
 
 // Adds bnadd, bnmul, and bnpair precompiles and mini-gmp
-#define BN_CURVE true
+#define BN_CURVE false
 
 // Only turn this on when doing ethereum/tests (otherwise balances won't match)
 #define CHARGE_SENDER_FOR_GAS false

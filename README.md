@@ -35,7 +35,7 @@ eosio.evm supports all 9 precompiles
 All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp)
 
 1. **TESTING** - adds functionality for executing tests, and resetting the contract; default true, remove in production
-2. **BN_CURVE** - adds bnadd, bnmul, and bnpair precompiles; default true
+2. **BN_CURVE** - adds bnadd, bnmul, and bnpair precompiles; default false
 3. **CHARGE_SENDER_FOR_GAS** - toggle charging sender for gas; default false, required for ethereum tests
 4. **PRINT_LOGS** - prints logs as part of execution receipt; default false
 5. **OPTRACE** - prints the opcode trace for the execution; default false
@@ -46,7 +46,7 @@ All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants
 
 **NOTE:** [TESTING, CHARGE_SENDER_FOR_GAS] must be enabled, and [OPTRACE, PRINT_LOGS] must be disabled for ethereum/tests testing to pass successfuly.
 
-**NOTE:** If ec_add, ec_mul and ec_pairing precompiles are not required, set BN_CURVE to false to reduce WASM size by 210KB (~2MB onchain).
+**NOTE:** If ec_add, ec_mul and ec_pairing precompiles are required, set BN_CURVE to true (will increase WASM size by 210KB, or ~2MB onchain).
 
 ## Usage instructions
 Deployment steps are laid out step-by-step in both the JS and cleos guides:

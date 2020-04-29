@@ -164,7 +164,7 @@ struct Account {
 - `account` - EOSIO account associated with Ethereum account
 - `nonce` - Current nonce of the account
 - `code` - Contract code for Ethereum account if present
-- `balance` - 256 bit balance stored as a bigint (shows as big endian when printed)
+- `balance` - 256 bit balance stored as a bigint (shows as big endian when printed). The precision is 10^18 as specified in Ethereum whitepaper. Therefore, 1 EOS is represented as 1000000000000000000, which is de0b6b3a7640000 in big-endian hex.
 
 ```c++
 struct AccountState {
@@ -184,7 +184,7 @@ struct AccountState {
 - NUMBER opcode returns tapos_block_num, as that is the only EOSIO block number available to contracts
 - The RLP encoding in "create" uses RLP (uint64_t eos_account, uint64_t nonce)
 - No patricia merkle tree is used
-- A value of 1 represents 0.0001 SYS
+- The balance value is printed in explorers, etc as a big-endian hex value with a precision of 10^18, as specified in Ethereum yellow paper. Therefore, 1 EOS is represented as 1000000000000000000, which is de0b6b3a7640000 in big-endian hex.
 
 ## Special Mentions
 - Eddy Ashton for his work on [enclave-ready EVM (eEVM)](https://github.com/microsoft/eEVM)

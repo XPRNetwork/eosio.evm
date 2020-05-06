@@ -92,6 +92,29 @@ If you wish to build tests, use `cmake . -DBUILD_TESTS=true`
 
 If not set automatically, you may need to manually set BOOST_ROOT to the directory of your boost installation.
 
+#### 4. Run tests (optional, take long time)
+[tests/eosio.evm_tests.cpp](tests/eosio.evm_tests.cpp) has five types of tests, which can each be turned on or off individually:
+
+```cpp
+const bool base_enabled              = false;  // Base testing of linking EOS account
+const bool erc20_enabled             = false;  // Test ERC20 contract deployments
+const bool erc721_enabled            = false;  // Test ERC721 contract deployments
+const bool transaction_tests_enabled = false;  // Test ethereum/tests TransactionTests
+const bool state_tests_enabled       = true;   // Test ethereum/tests GeneralStateTests
+```
+
+In [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp), TESTING must be enabled to seed initial state of accounts and CHARGE_SENDER_FOR_GAS must be enabled if using unmodified ethereum/tests since tests will only match post-state balances if gas is charged.
+
+If using modified tests to account for no gas being charged, simply ensure CHARGE_SENDER_FOR_GAS is set to false (default), and replace the default path `jsontests/BlockchainTests/GeneralStateTests` in [eosio.evm_tests.cpp](tests/eosio.evm_tests.cpp) with the path to the modified tests.
+
+
+**Running tests:**
+```
+cd tests
+make -j4
+./unit_test
+```
+
 ## Directory structure
 - eosio.evm: contains all contract code
   - src: all sourcefiles

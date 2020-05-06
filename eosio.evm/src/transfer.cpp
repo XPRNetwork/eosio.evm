@@ -39,7 +39,7 @@ namespace eosio_evm {
   ) {
     // 1 EOS = 1 ETH
     // 0.0001 EOS = 1 EOS UNIT = 100000000000000 wei
-    auto adjusted_amount = uint256_t{quantity.amount} * uint256_t{100000000000000};
+    auto adjusted_amount = uint256_t{quantity.amount} * TOKEN_ADJUSTMENT;
     if (adjusted_amount == 0) return;
 
     auto accounts_byaccount = _accounts.get_index<eosio::name("byaccount")>();
@@ -58,7 +58,7 @@ namespace eosio_evm {
   ) {
     // 1 EOS = 1 ETH
     // 0.0001 EOS = 1 EOS UNIT = 100000000000000 wei
-    auto adjusted_amount = uint256_t{quantity.amount} * uint256_t{100000000000000};
+    auto adjusted_amount = uint256_t{quantity.amount} * TOKEN_ADJUSTMENT;
     if (adjusted_amount == 0) return;
 
     auto accounts_byaccount = _accounts.get_index<eosio::name("byaccount")>();

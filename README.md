@@ -35,7 +35,7 @@ eosio.evm supports all 9 precompiles
 All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants.hpp)
 
 1. **TESTING** - adds functionality for executing tests, and resetting the contract; default true, remove in production
-2. **BN_CURVE** - adds bnadd, bnmul, and bnpair precompiles; default false
+2. **BN_CURVE** - adds bnadd, bnmul, and bnpair precompiles; default true
 3. **CHARGE_SENDER_FOR_GAS** - toggle charging sender for gas; default false, required for ethereum tests
 4. **PRINT_LOGS** - prints logs as part of execution receipt; default false
 5. **OPTRACE** - prints the opcode trace for the execution; default false

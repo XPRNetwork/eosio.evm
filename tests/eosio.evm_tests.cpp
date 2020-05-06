@@ -31,10 +31,10 @@ constexpr auto FORK = "Istanbul";
 
 const bool base_enabled              = false;
 const bool erc20_enabled             = false;
-const bool erc721_enabled            = true;
-const bool transaction_tests_enabled = true;
-const bool state_tests_enabled       = false;
-const bool debugging_enabled         = true;
+const bool erc721_enabled            = false;
+const bool transaction_tests_enabled = false;
+const bool state_tests_enabled       = true;
+const bool debugging_enabled         = false;
 
 class eosio_evm_tester : public tester {
 public:
@@ -437,11 +437,11 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(eosio_evm_st, * boost::unit_test::enable_if<state_tests_enabled>())
 BOOST_FIXTURE_TEST_CASE( general_state_tests, eosio_evm_tester ) try {
-   std::cout << "***********************************************************************************************************" << std::endl;
+   std::cout << "\033[93m***********************************************************************************************************" << std::endl;
    std::cout << "***********************************************************************************************************" << std::endl << std::endl;
    std::cout << "ENSURE (TESTING, CHARGE_SENDER_FOR_GAS) IS ENABLED AND (OPTRACE, PRINT_LOGS) IS DISABLED FOR ETH TESTS!" << std::endl << std::endl;
    std::cout << "***********************************************************************************************************" << std::endl;
-   std::cout << "***********************************************************************************************************" << std::endl << std::endl;
+   std::cout << "***********************************************************************************************************\033[0m" << std::endl << std::endl;
 
    auto testDirectory = "jsontests/BlockchainTests/GeneralStateTests";
 

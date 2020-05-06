@@ -8,7 +8,7 @@
 #define TESTING true
 
 // Adds bnadd, bnmul, and bnpair precompiles and mini-gmp
-#define BN_CURVE false
+#define BN_CURVE true
 
 // Only turn this on when doing ethereum/tests (otherwise balances won't match)
 #define CHARGE_SENDER_FOR_GAS false
@@ -22,6 +22,7 @@
 #define TOKEN_SYMBOL_CODE_RAW "EOS"
 #define TOKEN_CONTRACT_RAW "eosio.token"
 #define TOKEN_PRECISION 4
+#define TOKEN_ADJUSTMENT uint256_t{pow(10, 18 - TOKEN_PRECISION)}
 
 #define TOKEN_SYMBOL_CODE eosio::symbol_code(TOKEN_SYMBOL_CODE_RAW)
 #define TOKEN_CONTRACT eosio::name(TOKEN_CONTRACT_RAW)

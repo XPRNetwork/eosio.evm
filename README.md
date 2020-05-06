@@ -109,10 +109,11 @@ If using modified tests to account for no gas being charged, simply ensure CHARG
 
 
 **Running tests:**
-```
+```sh
 cd tests
 make -j4
-./unit_test
+./unit_test # Non-verbose
+./unit_test -- --verbose # Expanded logging
 ```
 
 ## Directory structure

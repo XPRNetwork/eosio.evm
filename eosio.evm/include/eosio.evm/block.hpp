@@ -10,7 +10,7 @@ namespace eosio_evm
     uint64_t  number     = eosio::tapos_block_num();
     uint64_t  difficulty = 0;
     uint64_t  gas_limit  = 10000000;  // Average on ethereum mainnet
-    uint64_t  timestamp  = eosio::time_point().sec_since_epoch();
+    uint64_t  timestamp  = eosio::current_time_point().sec_since_epoch();
     uint256_t coinbase   = 0;
   };
 

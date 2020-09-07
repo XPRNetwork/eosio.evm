@@ -18,9 +18,9 @@ const transformEthAccount = (account: Account) => {
  * EOS API used as a subset of EosEvmApi
  *
  * @param {object} args Arguments
- * @param {Array<string>} args.eosPrivateKeysEOSIO private keys
- * @param {Array<string>} args.endpointEOSIO rpc endpoint
- * @param {Array<string>} args.eosContractEOSIO contract name with EVM
+ * @param {Array<string>} args.eosPrivateKeys EOSIO private keys
+ * @param {Array<string>} args.endpoint EOSIO rpc endpoint
+ * @param {Array<string>} args.eosContract EOSIO contract name with EVM
  */
 export class EosApi {
   eosPrivateKeys: Array<string>
@@ -84,9 +84,9 @@ export class EosApi {
    * Sends a ETH TX to EVM
    *
    * @param {object} args Arguments
-   * @param {string} args.accountEOSIO account to interact with EVM
-   * @param {string} args.txRaw RLP encoded hex string
-   * @param {string} args.senderThe ETH address of an account if tx is not signed
+   * @param {string} args.account EOSIO account to interact with EVM
+   * @param {string} args.tx Raw RLP encoded hex string
+   * @param {string} args.sender The ETH address of an account if tx is not signed
    * @returns {Promise<EvmResponse>} EVM receipt and EOS receipt
    */
   async raw({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
@@ -124,9 +124,9 @@ export class EosApi {
    * Sends a non state modifying call to EVM
    *
    * @param {object} args Arguments
-   * @param {string} args.accountEOSIO account to interact with EVM
-   * @param {string} args.txRaw RLP encoded hex string
-   * @param {string} args.senderThe ETH address of an account if tx is not signed
+   * @param {string} args.account EOSIO account to interact with EVM
+   * @param {string} args.tx Raw RLP encoded hex string
+   * @param {string} args.sender The ETH address of an account if tx is not signed
    * @returns {Promise<string>} Hex encoded output
    */
   async call({ account, tx, sender }: { account: string; tx: string; sender?: string }) {
@@ -160,7 +160,7 @@ export class EosApi {
    * Creates EVM address from EOS account
    *
    * @param {object} args Arguments
-   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.account EOSIO account to interact with EVM
    * @param {string} args.data Arbitrary string used as salt to generate new address
    * @returns {Promise<any>} EOSIO TX Response
    */
@@ -182,7 +182,7 @@ export class EosApi {
    * Withdraws token from EVM
    *
    * @param {object} args Arguments
-   * @param {string} args.accountEOSIO account to interact with EVM
+   * @param {string} args.account EOSIO account to interact with EVM
    * @param {string} args.quantity EOSIO asset type quantity to withdraw (0.0001 EOS)
    * @returns {Promise<any>} EOSIO TX Response
    */
@@ -204,7 +204,7 @@ export class EosApi {
    * Deposits token into EVM
    *
    * @param {object} args Arguments
-   * @param {string} args.fromEOSIO account to interact with EVM
+   * @param {string} args.from EOSIO account to interact with EVM
    * @param {string} args.quantity EOSIO asset type quantity to deposit (0.0001 EOS)
    * @param {string} args.memo Memo to transfer
    * @returns {Promise<any>} EOSIO TX Response

@@ -74,4 +74,4 @@ cleos -u $ENDPOINT get table $EVM_CONTRACT 1 accountstate
 cleos -u $ENDPOINT push action $EVM_CONTRACT withdraw '["evmaccount11", "0.0001 EOS"]' -p $EOSIO_ACCOUNT@active
 ```
 
-For full encoding data, decoding data, automatic nonce management and more features, check out the [JS SDK](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+For full encoding data, decoding data, automatic nonce management and more features, check out the [JS SDK](https://github.com/jafri/eosio.evm/tree/master/eosio-evm-js)

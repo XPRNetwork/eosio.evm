@@ -1,4 +1,4 @@
-const { EosEvmApi } = require('eos-evm-js')
+const { EosEvmApi } = require('eosio-evm-js')
 
 module.exports = {
   api: new EosEvmApi({

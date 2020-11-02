@@ -51,7 +51,7 @@ All constants are found at [constants.hpp](eosio.evm/include/eosio.evm/constants
 ## Usage instructions
 Deployment steps are laid out step-by-step in both the JS and cleos guides:
 
-**JS Guide:** [eos-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eos-evm-js)
+**JS Guide:** [eosio-evm-js guide](https://github.com/jafri/eosio.evm/tree/master/eosio-evm-js)
 
 **Cleos Guide:** [cleos guide](https://github.com/jafri/eosio.evm/tree/master/CLEOS-GUIDE.md)
 
@@ -121,7 +121,7 @@ make -j4
   - src: all sourcefiles
   - include/eosio.evm: all headerfiles
   - external: external libraries
-- eos-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
+- eosio-evm-js: Full JS SDK for deploying both EVM and Ethereum accounts, contracts, fetching state, etc.
 - evm-mock-rpc: Mock Ethereum RPC server to enable interoperability with Metamask, Remix, etc.
 - tests: full Ethereum/EOS tests
   - jsontests: copy of https://github.com/ethereum/tests

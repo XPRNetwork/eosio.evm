@@ -1,0 +1,324 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [],
+    "structs": [
+        {
+            "name": "Account",
+            "base": "",
+            "fields": [
+                {
+                    "name": "index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                },
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint64"
+                },
+                {
+                    "name": "code",
+                    "type": "uint8[]"
+                },
+                {
+                    "name": "balance",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "AccountState",
+            "base": "",
+            "fields": [
+                {
+                    "name": "index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "key",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "value",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "Env",
+            "base": "",
+            "fields": [
+                {
+                    "name": "currentCoinbase",
+                    "type": "string"
+                },
+                {
+                    "name": "currentDifficulty",
+                    "type": "string"
+                },
+                {
+                    "name": "currentGasLimit",
+                    "type": "string"
+                },
+                {
+                    "name": "currentNumber",
+                    "type": "string"
+                },
+                {
+                    "name": "currentTimestamp",
+                    "type": "string"
+                },
+                {
+                    "name": "previousHash",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "call",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                },
+                {
+                    "name": "sender",
+                    "type": "checksum160?"
+                }
+            ]
+        },
+        {
+            "name": "clearall",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "data",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "devnewacct",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                },
+                {
+                    "name": "balance",
+                    "type": "string"
+                },
+                {
+                    "name": "code",
+                    "type": "uint8[]"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint64"
+                },
+                {
+                    "name": "account",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "devnewstore",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "printaccount",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                }
+            ]
+        },
+        {
+            "name": "printstate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "checksum160"
+                }
+            ]
+        },
+        {
+            "name": "printtx",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "raw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                },
+                {
+                    "name": "sender",
+                    "type": "checksum160?"
+                }
+            ]
+        },
+        {
+            "name": "teststatetx",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                },
+                {
+                    "name": "env",
+                    "type": "Env"
+                }
+            ]
+        },
+        {
+            "name": "testtx",
+            "base": "",
+            "fields": [
+                {
+                    "name": "tx",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "call",
+            "type": "call",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CALL\nsummary: 'call'\nicon:\n---"
+        },
+        {
+            "name": "clearall",
+            "type": "clearall",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CLEARALL\nsummary: 'clearall'\nicon:\n---"
+        },
+        {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: CREATE\nsummary: 'Create'\nicon:\n---"
+        },
+        {
+            "name": "devnewacct",
+            "type": "devnewacct",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: DEVNEWACCT\nsummary: 'devnewacct'\nicon:\n---"
+        },
+        {
+            "name": "devnewstore",
+            "type": "devnewstore",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: DEVNEWSTORE\nsummary: 'devnewstore'\nicon:\n---"
+        },
+        {
+            "name": "printaccount",
+            "type": "printaccount",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTACCOUNT\nsummary: 'printaccount'\nicon:\n---"
+        },
+        {
+            "name": "printstate",
+            "type": "printstate",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTSTATE\nsummary: 'printstate'\nicon:\n---"
+        },
+        {
+            "name": "printtx",
+            "type": "printtx",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: PRINTTX\nsummary: 'printtx'\nicon:\n---"
+        },
+        {
+            "name": "raw",
+            "type": "raw",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: RAW\nsummary: 'Raw'\nicon:\n---"
+        },
+        {
+            "name": "teststatetx",
+            "type": "teststatetx",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: TESTSTATETX\nsummary: 'teststatetx'\nicon:\n---"
+        },
+        {
+            "name": "testtx",
+            "type": "testtx",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: TESTTX\nsummary: 'testtx'\nicon:\n---"
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: WITHDRAW\nsummary: 'Withdraw'\nicon:\n---"
+        }
+    ],
+    "tables": [
+        {
+            "name": "account",
+            "type": "Account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "accountstate",
+            "type": "AccountState",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}

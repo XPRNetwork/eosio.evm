@@ -1,6 +1,6 @@
 {
-  "name": "eosio-evm-js",
-  "version": "0.2.32",
+  "name": "eosio-evm",
+  "version": "0.3.0",
   "description": "EOSIO EVM JS SDK",
   "keywords": [],
   "main": "dist/eosio-evm-js.umd.js",
@@ -11,9 +11,12 @@
     "postinstall.js"
   ],
   "author": "jafri <syed.jafri2@ucalgary.ca>",
+  "contributors": [
+    "eugene <eugene@eostribe.io> (https://eostribe.io/)"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jafri/eosio.evm"
+    "url": "git+https://github.com/EOSTribe/eosio.evm"
   },
   "license": "MIT",
   "engines": {
@@ -138,5 +141,14 @@
     "ethereumjs-util": "^6.2.0",
     "node-fetch": "^2.6.0",
     "text-encoding": "^0.7.0"
+  },
+  "bugs": {
+    "url": "https://github.com/EOSTribe/eosio.evm/issues"
+  },
+  "homepage": "https://github.com/EOSTribe/eosio.evm#readme",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
   }
 }

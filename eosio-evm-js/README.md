@@ -5,7 +5,7 @@
 Requires nodejs and npm installed
 
 ```bash
-npm install eosio-evm
+npm install eosio-evm-js
 ```
 
 ### How to setup EVM and deploy ERC-20 Token on EOSIO in 5 minutes

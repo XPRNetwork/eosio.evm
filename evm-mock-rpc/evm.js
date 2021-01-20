@@ -3,10 +3,10 @@ const { EosEvmApi } = require('eosio-evm-js')
 module.exports = {
   api: new EosEvmApi({
     // Ensure the API has console printing enabled
-    endpoint: 'https://jungle.eosdac.io',
+    endpoint: 'http://api.telos-test.eostribe.io',
 
     // Must match the chain ID the contract is compiled with (1 by default)
-    chainId: 1,
+    chainId: '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11',
 
     // Enter your own private keys if you wish to sign transaction (examples provided)
     ethPrivateKeys: [
@@ -15,12 +15,12 @@ module.exports = {
     ],
 
     // Enter EOS account that EVM is at / will be deployed to
-    eosContract: 'evmcontract2',
+    eosContract: 'eosio.evm',
 
     // Enter your own private keys (examples provided)
     eosPrivateKeys: [
       // evmcontract2 (EOS7DJzWuEr1Zu36ZX8GXwGsvNNqdGqx8QRs7KPkqCMTxG6MBT1Eu)
-      '5JACk8gJ98x3AkypbicNQviXzkqAM2wbbE3FtA79icT2Ks4bWws',
+      '5JD8vs9sYQiijEkD29cZgV6QNwWb6rgVkaW7J9z8uKy6VqkJ7XF',
     ]
   })
 }

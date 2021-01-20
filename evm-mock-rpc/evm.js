@@ -6,7 +6,7 @@ module.exports = {
     endpoint: 'http://api.telos-test.eostribe.io',
 
     // Must match the chain ID the contract is compiled with (1 by default)
-    chainId: '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11',
+    chainId: 1,
 
     // Enter your own private keys if you wish to sign transaction (examples provided)
     ethPrivateKeys: [

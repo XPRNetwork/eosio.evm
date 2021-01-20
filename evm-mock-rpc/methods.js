@@ -12,7 +12,8 @@ abiDecoder.addABI(balance_abi);
 const methods = {
   net_listening  : () => true,
   eth_blockNumber: async () => (await api.eos.rpc.get_info()).head_block_num,
-  eth_chainId            : () => api.chainId,
+  net_version            : () => api.chainId,
+  eth_chainId            : () => '0x' + api.chainId,
   eth_accounts           : () => Object.keys(api.ethPrivateKeys),
   eth_getTransactionCount: async ([address, block]) => await api.eos.getNonce(address),
   eth_getCode            : async ([address, block]) => {

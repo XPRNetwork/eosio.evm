@@ -13,6 +13,7 @@ const methods = {
   net_listening  : () => true,
   eth_blockNumber: async () => (await api.eos.rpc.get_info()).head_block_num,
   net_version            : () => api.chainId,
+  eth_chainId            : () => '0x' + api.chainId.toString(16),
   eth_accounts           : () => Object.keys(api.ethPrivateKeys),
   eth_getTransactionCount: async ([address, block]) => await api.eos.getNonce(address),
   eth_getCode            : async ([address, block]) => {

@@ -131,9 +131,11 @@ make -j4
 
 ## Contract Public Actions
 ```c++
-ACTION raw ( const std::vector<int8_t>& tx,
+ACTION raw ( const eosio::name& ram_payer,
+             const std::vector<int8_t>& tx,
              const std::optional<eosio::checksum160>& sender);
 ```
+- `ram_payer` Name of account paying for RAM costs
 - `tx` will take a raw Ethereum transaction RLP hex encoded without the '0x' prefix
 - `sender` is an optional parameter used when the `tx` is not signed
 &nbsp;
@@ -165,7 +167,8 @@ void transfer( const eosio::name& from,
 &nbsp;
 ```c++
 
-ACTION call( const std::vector<int8_t>& tx,
+ACTION call( const eosio::name& ram_payer,
+             const std::vector<int8_t>& tx,
              const std::optional<eosio::checksum160>& sender );
 ```
 - Function to mock execute and view result (no state modifications are persisted), similiar to Web3 call()

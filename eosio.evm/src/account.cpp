@@ -67,7 +67,7 @@ namespace eosio_evm {
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, transaction.ram_payer, [&](auto& a) {
+      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.nonce += 1;
       });
 
@@ -80,7 +80,7 @@ namespace eosio_evm {
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, transaction.ram_payer, [&](auto& a) {
+      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.nonce -= 1;
       });
     }
@@ -104,7 +104,7 @@ namespace eosio_evm {
     auto accounts_byaddress = contract->_accounts.get_index<eosio::name("byaddress")>();
     auto existing_address = accounts_byaddress.find(toChecksum256(address));
     if (existing_address != accounts_byaddress.end()) {
-      accounts_byaddress.modify(existing_address, transaction.ram_payer, [&](auto& a) {
+      accounts_byaddress.modify(existing_address, eosio::same_payer, [&](auto& a) {
         a.code = {};
       });
     }
@@ -216,7 +216,7 @@ namespace eosio_evm {
   // TODO need to use table indirection instead to save for future processing.
   void Processor::kill_storage(const uint64_t& address_index)
   {
-    account_state_table accounts_states(transaction.ram_payer, address_index);
+    account_state_table accounts_states(contract->get_self(), address_index);
     auto itr = accounts_states.end();
     while (accounts_states.begin() != itr) {
       --itr;
@@ -228,7 +228,7 @@ namespace eosio_evm {
   // Returns original state
   void Processor::storekv(const uint64_t& address_index, const uint256_t& key, const uint256_t& value) {
     // Get scoped state table for account state
-    account_state_table accounts_states(transaction.ram_payer, address_index);
+    account_state_table accounts_states(contract->get_self(), address_index);
     auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
     auto checksum_key          = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);
@@ -276,7 +276,7 @@ namespace eosio_evm {
 
   uint256_t Processor::loadkv(const uint64_t& address_index, const uint256_t& key) {
     // Get scoped state table for account
-    account_state_table accounts_states(transaction.ram_payer, address_index);
+    account_state_table accounts_states(contract->get_self(), address_index);
     auto accounts_states_bykey = accounts_states.get_index<eosio::name("bykey")>();
     const auto checksum_key    = toChecksum256(key);
     auto account_state         = accounts_states_bykey.find(checksum_key);

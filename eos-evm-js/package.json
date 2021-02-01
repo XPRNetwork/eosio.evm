@@ -1,6 +1,6 @@
 {
   "name": "eos-evm-js",
-  "version": "0.2.32",
+  "version": "0.3.1",
   "description": "EOSIO EVM JS SDK",
   "keywords": [],
   "main": "dist/eos-evm-js.umd.js",

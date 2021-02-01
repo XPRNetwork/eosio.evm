@@ -37,7 +37,8 @@ namespace eosio_evm {
       : contract(receiver, code, ds),
         _accounts(receiver, receiver.value) {}
 
-    ACTION raw      ( const std::vector<int8_t>& tx,
+    ACTION raw      ( const eosio::name& ram_payer,
+                      const std::vector<int8_t>& tx,
                       const std::optional<eosio::checksum160>& sender);
     ACTION create   ( const eosio::name& account,
                       const std::string& data);
@@ -52,6 +53,7 @@ namespace eosio_evm {
 
     // Extra to match ethereum functionality (calls do not modify state and will always assert)
     ACTION call(
+      const eosio::name& ram_payer,
       const std::vector<int8_t>& tx,
       const std::optional<eosio::checksum160>& sender
     );

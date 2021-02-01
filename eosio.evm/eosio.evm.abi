@@ -86,6 +86,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "ram_payer",
+                    "type": "name"
+                },
+                {
                     "name": "tx",
                     "type": "bytes"
                 },
@@ -192,6 +196,10 @@
             "name": "raw",
             "base": "",
             "fields": [
+                {
+                    "name": "ram_payer",
+                    "type": "name"
+                },
                 {
                     "name": "tx",
                     "type": "bytes"

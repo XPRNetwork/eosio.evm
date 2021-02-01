@@ -156,8 +156,11 @@ namespace eosio_evm
     uint256_t r; // Output
     uint256_t s; // Output
 
+    // Ram Payer
+    eosio::name ram_payer;
+
     // RLP constructor
-    EthereumTransaction(const std::vector<int8_t>& encoded)
+    EthereumTransaction(const std::vector<int8_t>& encoded, eosio::name ram_payer)
     {
       // Max Transaction size
       eosio::check(encoded.size() < MAX_TX_SIZE, "Invalid Transaction: Max size of a transaction is 128 KB");
@@ -187,6 +190,10 @@ namespace eosio_evm
 
       // Hash
       hash = keccak_256(encode());
+
+      // RAM Payer
+      eosio::require_auth(ram_payer);
+      ram_payer = ram_payer;
 
       // Gas
       initialize_base_gas();

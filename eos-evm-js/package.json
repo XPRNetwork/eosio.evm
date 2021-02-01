@@ -7,8 +7,7 @@
   "module": "dist/eos-evm-js.es5.js",
   "typings": "dist/types/eos-evm-js.d.ts",
   "files": [
-    "dist",
-    "postinstall.js"
+    "dist"
   ],
   "author": "jafri <syed.jafri2@ucalgary.ca>",
   "repository": {
@@ -22,7 +21,8 @@
   "scripts": {
     "lint": "tslint  --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "prebuild": "rimraf dist",
-    "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --out docs --target es6 --theme minimal --mode file src",
+    "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --out docs --target es6 --theme minimal --mode file src && npm run copy-files",
+    "copy-files": "copyfiles -u 2 ../eosio.evm/eosio.evm.abi ../eosio.evm/eosio.evm.wasm dist/eos-contracts",
     "start": "rollup -c rollup.config.ts -w",
     "test": "jest --coverage --runInBand --testPathIgnorePatterns debugging",
     "debug": "jest --coverage --runInBand debugging",
@@ -36,8 +36,7 @@
     "semantic-release": "semantic-release",
     "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
     "precommit": "lint-staged",
-    "travis-deploy-once": "travis-deploy-once",
-    "postinstall": "node postinstall.js"
+    "travis-deploy-once": "travis-deploy-once"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [
@@ -96,6 +95,7 @@
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "0.0.35",
     "colors": "^1.4.0",
+    "copyfiles": "^2.1.1",
     "commitizen": "^3.0.0",
     "coveralls": "^3.0.2",
     "cross-env": "^5.2.0",

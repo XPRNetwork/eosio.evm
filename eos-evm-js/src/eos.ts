@@ -84,7 +84,7 @@ export class EosApi {
    * Sends a ETH TX to EVM
    *
    * @param {object} args Arguments
-   * @param {string} args.account EOSIO account to interact with EVM
+   * @param {string} args.account EOSIO account to interact with EVM and pay RAM
    * @param {string} args.tx Raw RLP encoded hex string
    * @param {string} args.sender The ETH address of an account if tx is not signed
    * @returns {Promise<EvmResponse>} EVM receipt and EOS receipt
@@ -99,6 +99,7 @@ export class EosApi {
         account: this.eosContract,
         name: 'raw',
         data: {
+          ram_payer: account,
           tx,
           sender
         },
@@ -139,6 +140,7 @@ export class EosApi {
           account: this.eosContract,
           name: 'call',
           data: {
+            ram_payer: account,
             tx,
             sender
           },

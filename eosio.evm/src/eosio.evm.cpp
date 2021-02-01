@@ -36,11 +36,12 @@ void evm::create (
 }
 
 void evm::raw(
+  const eosio::name& ram_payer,
   const std::vector<int8_t>& tx,
   const std::optional<eosio::checksum160>& sender
 ) {
   // Create transaction
-  auto transaction = EthereumTransaction(tx);
+  auto transaction = EthereumTransaction(tx, ram_payer);
 
   // Index by address
   auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();
@@ -118,10 +119,11 @@ void evm::raw(
  * Will always assert, replicates Ethereum Call functionality
  */
 void evm::call(
+  const eosio::name& ram_payer,
   const std::vector<int8_t>& tx,
   const std::optional<eosio::checksum160>& sender
 ) {
-  auto transaction = EthereumTransaction(tx);
+  auto transaction = EthereumTransaction(tx, ram_payer);
 
   // Find caller
   auto accounts_byaddress = _accounts.get_index<eosio::name("byaddress")>();

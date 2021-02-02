@@ -10,7 +10,7 @@
 
 ## Disclaimer 
 
-The code in this repository has not been audited by a professional audit firm. Please use at your own discretion and risk. The author takes no responsibility for any material or inmaterial losses from any form of invalid operation of the software within this repository.
+The code in this repository has not been audited by a professional audit firm. Please use at your own discretion and risk. The author takes no responsibility for any material or inmaterial losses from any form of operation or deployment of the software within this repository.
 
 ## Achievements
 - Full Javascript SDK for deploying, executing and querying contracts

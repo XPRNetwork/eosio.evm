@@ -1,3 +1,8 @@
+
+## Disclaimer 
+
+The code in this repository has not been audited by a professional audit firm. Please use at your own discretion and risk. The author takes no responsibility for any material or inmaterial losses from any form of operation or deployment of the software within this repository.
+
 # Contract
 Configure eosio.evm/include/eosio.evm/constants.hpp as needed with constants such as token symbol.
 

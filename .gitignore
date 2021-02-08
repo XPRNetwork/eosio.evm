@@ -32,8 +32,8 @@
 *.app
 
 build/*
-contracts_project-prefix/*
-contracts_unit_tests-prefix/*
+contracts_project-prefix
+contracts_unit_tests-prefix
 .DS_Store
 
 # Cmake
